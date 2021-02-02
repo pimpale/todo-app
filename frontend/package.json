@@ -1,0 +1,64 @@
+{
+  "name": "todo-app",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@fullcalendar/bootstrap": "^5.5.0",
+    "@fullcalendar/core": "^5.5.1",
+    "@fullcalendar/daygrid": "^5.5.0",
+    "@fullcalendar/interaction": "^5.5.0",
+    "@fullcalendar/list": "^5.5.0",
+    "@fullcalendar/react": "^5.5.0",
+    "@fullcalendar/timegrid": "^5.5.1",
+    "@material-ui/core": "^4.11.2",
+    "@material-ui/icons": "^4.11.2",
+    "@types/jquery": "^3.5.5",
+    "@types/local-storage": "^1.4.0",
+    "@types/node": "^14.14.21",
+    "@types/react": "^17.0.0",
+    "@types/react-bootstrap": "^1.0.1",
+    "@types/react-dom": "^17.0.0",
+    "@types/react-router-dom": "^5.1.7",
+    "@types/react-select": "^3.1.2",
+    "@types/webpack-env": "^1.15.2",
+    "bootstrap": "^4.5.3",
+    "date-fns": "^2.16.1",
+    "formik": "^2.2.6",
+    "jquery": "^3.5.1",
+    "popper.js": "^1.16.1",
+    "react": "^17.0.1",
+    "react-async": "^10.0.1",
+    "react-bootstrap": "^1.4.3",
+    "react-bootstrap-select": "^0.14.0",
+    "react-dom": "^17.0.1",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "4.0.1",
+    "react-select": "^3.2.0",
+    "sass": "^1.32.4",
+    "typeface-exo": "^1.1.13",
+    "typeface-ubuntu": "^1.1.13",
+    "typescript": "^4.1.3"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "proxy": "http://localhost:8080/",
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
