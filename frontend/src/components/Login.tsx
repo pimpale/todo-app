@@ -1,15 +1,13 @@
 import React from 'react';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
-import { Card, Button, Form, } from 'react-bootstrap'
+import { Button, Form, } from 'react-bootstrap'
 import { newValidApiKey, isApiErrorCode } from '../utils/utils';
 
-import SimpleLayout from '../components/SimpleLayout';
-
 interface LoginProps {
-  setApiKey: (data: ApiKey | null) => void
+  onSuccess: (apiKey: ApiKey) => void
 }
 
-function LoginForm(props: LoginProps) {
+function Login(props: LoginProps) {
 
   type LoginValue = {
     email: string,
@@ -39,10 +37,7 @@ function LoginForm(props: LoginProps) {
       duration: 5 * 60 * 60 * 1000
     });
 
-    if (!isApiErrorCode(maybeApiKey)) {
-      // on success set the api key
-      props.setApiKey(maybeApiKey);
-    } else {
+    if (isApiErrorCode(maybeApiKey)) {
       // otherwise display errors
       switch (maybeApiKey) {
         case "USER_NONEXISTENT": {
@@ -65,6 +60,9 @@ function LoginForm(props: LoginProps) {
       }
       return;
     }
+
+    // on success set the api key
+    props.onSuccess(maybeApiKey);
   }
 
   return <>
@@ -116,19 +114,6 @@ function LoginForm(props: LoginProps) {
       )}
     </Formik>
   </>
-}
-
-function Login(props: LoginProps) {
-  return <SimpleLayout>
-    <div className="h-100 w-100 d-flex">
-      <Card className="mx-auto my-auto">
-        <Card.Body>
-          <Card.Title>Login</Card.Title>
-          <LoginForm {...props} />
-        </Card.Body>
-      </Card>
-    </div>
-  </SimpleLayout>
 }
 
 export default Login;
