@@ -1,0 +1,9 @@
+.text {
+    margin: 0;
+    position: absolute;
+    top: 80px;
+    padding: 2rem;
+    width: 70%;
+    left: 15%;
+    text-align:center;
+}
