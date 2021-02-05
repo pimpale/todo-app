@@ -13,8 +13,8 @@ In JavaScript, there are two ways to submit data:
 
 `fetch` is newer, introduced in ES6, and we chose to use this in todo-app, since it has a more modern API and supports JavaScript Promises.
 However, you will never have to use fetch directly in todo-app. 
-Any time you need to make a request to the backend, call a function in (utils.ts)[src/utils/utils.ts].
-Doing it this way type checks all arguments, automatically converts results to JavaScript, and overall prevents bugs.
+Any time you need to make a request to the backend, call a function in [utils.ts](./src/utils/utils.ts).
+Doing it this way type checks all arguments, automatically converts results to JavaScript objects, and overall prevents bugs.
 
 Note that many of these functions use the keywords `await` and `async`.
 This means that they are asynchronous functions. Learn more about them [here](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Async_await).
