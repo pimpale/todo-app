@@ -184,7 +184,7 @@ async function loadApiKeys(props:AsyncProps<ApiKey[]>) => {
   return maybeApiKeys;
 }
 
-async function Foo(apiKey:ApiKey) {
+async function Foo(props:{apiKey:ApiKey}) {
   // include any extra arguments to the loading function as a prop to this function.
   return <Async promiseFn={loadApiKeys} apiKey={props.apiKey}>
     <Async.Pending>
@@ -210,7 +210,7 @@ The function is provided as the prop `promiseFn`, while the arguments are provid
 Inside the Async component, we have three sub components.
 
 First, we have `Async.Pending`. This component is displayed while the data is still being fetched.
-In todo-app, it is reccomended to use the <Loader/> element, as this displays a nice animated buffer wheel.
+In todo-app, it is reccomended to use the `<Loader/>` element, as this displays a nice animated buffer wheel.
 
 Next, we have the `Async.Rejected` component. 
 This component is rendered when the promiseFn throws an error.
