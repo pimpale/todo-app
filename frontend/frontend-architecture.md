@@ -13,7 +13,7 @@ In JavaScript, there are two ways to submit data:
 
 `fetch` is newer, introduced in ES6, and we chose to use this in todo-app, since it has a more modern API and supports JavaScript Promises.
 However, you will never have to use fetch directly in todo-app. 
-Any time you need to make a request to the backend, call a function in [src/utils/utils.ts].
+Any time you need to make a request to the backend, call a function in (utils.ts)[src/utils/utils.ts].
 Doing it this way type checks all arguments, automatically converts results to JavaScript, and overall prevents bugs.
 
 Note that many of these functions use the keywords `await` and `async`.
@@ -126,7 +126,7 @@ async function Foo(apiKey:ApiKey) {
   }
   
   // logs each key
-  maybeApiKeys.foreach(ak => console.log(ak.keys));
+  maybeApiKeys.foreach(ak => console.log(ak.key));
 }
 
 ```
@@ -145,7 +145,7 @@ async function Foo(apiKey:ApiKey) {
   if(isApiErrorCode(maybeApiKeys)) {
     return <p>Error!</p>
   } else {
-    return <ul>{maybeApiKeys.map(ak => <li>ak.key</li>)}</ul>
+    return <ul>{maybeApiKeys.map(ak => <li>{ak.key}</li>)}</ul>
   }
 }
 
@@ -158,4 +158,73 @@ React can only render a `ReactNode`, and has no idea what to do with a `Promise<
 This problem, unfortunately, has no out of the box solutions.
 We'll have to include the React-Async library ([documentation](https://github.com/async-library/react-async)).
 While React-Async has a lot of functionality, the piece we're most interested in is the <Async> Element.
-Let's look at a wor
+Let's look at an annotated working example of what we wanted to do.
+
+
+```tsx
+import { viewApiKey, isApiErrorCode } from '../utils/utils';
+import { Async, AsyncProps } from 'react-async';
+
+import Loader from '../utils/Loader';
+
+// it's necessary to put the function outside of the other function due to this 
+// issue with React-Async: https://github.com/async-library/react-async/issues/104
+async function loadApiKeys(props:AsyncProps<ApiKey[]>) => {
+  const maybeApiKeys = await viewApiKey({
+    // note: props is untyped, so we have to be careful that we don't 
+    // accidentally request something that wasn't provided
+    apiKey:props.apiKey.key
+  });
+  
+  // throwing the error means that it will display <Async.Rejected> option.
+  if(isApiErrorCode(maybeApiKeys)) {
+    throw Error;
+  }
+  // when an error is not thrown, it will display <Async.Fulfilled> option.
+  return maybeApiKeys;
+}
+
+async function Foo(apiKey:ApiKey) {
+  // include any extra arguments to the loading function as a prop to this function.
+  return <Async promiseFn={loadApiKeys} apiKey={props.apiKey}>
+    <Async.Pending>
+      Loading...
+      <Loader/>
+    </Async.Pending>
+    <Async.Rejected>
+      Error: Couldn't load resource.
+    </Async.Rejected>
+    <Async.Fulfilled<ApiKey[]>>
+      {apiKeys => 
+        <ul>
+          {maybeApiKeys.map(ak => <li>{ak.key}</li>)}
+        </ul>
+      }
+    </Async.Fulfilled>
+  </Async>
+}
+```
+
+The basic idea is that we use the `Async` component to load data from a function. 
+The function is provided as the prop `promiseFn`, while the arguments are provided as the other props on the structure.
+Inside the Async component, we have three sub components.
+
+First, we have `Async.Pending`. This component is displayed while the data is still being fetched.
+In todo-app, it is reccomended to use the <Loader/> element, as this displays a nice animated buffer wheel.
+
+Next, we have the `Async.Rejected` component. 
+This component is rendered when the promiseFn throws an error.
+You should display some text here explaining what went wrong and asking the user to reload.
+
+Finally, we have the `Async.Fulfilled` component. 
+This is a generic component, as is shown by the nested pair of angle brackets.
+The type parameter should be the same as the type parameter of the `AsyncProps` argument of the `promiseFn`.
+In this case, the the argument of the `promiseFn` is `AsyncProps<ApiKey[]>`. 
+This means that the type parameter is `ApiKey[]`.
+On the interior of the `Async.Fulfilled` component, we have a function accepting the apiKeys argument and returning a ReactNode.
+This will be rendered correctly.
+
+In general React-Async is tricky to use right due to nested functions, and signifcant care should be used when developing components that need data.
+Try to pass down data if possible rather than fetching in two places. 
+When you do need to fetch data, fetch as much data as possible at once. 
+Not only does this improve performance, it also is easier to write.
