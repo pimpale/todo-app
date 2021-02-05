@@ -2,9 +2,9 @@
  * Returns a promise that will be resolved in some milliseconds
  * use await sleep(some milliseconds)
  * @param {int} ms milliseconds to sleep for
- * @return {Promise} a promise that will resolve in ms milliseconds
+ * @return {Promise<void>} a promise that will resolve in ms milliseconds
  */
-export function sleep(ms: number) {
+export function sleep(ms: number) : Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
