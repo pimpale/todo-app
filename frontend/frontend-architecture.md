@@ -8,8 +8,8 @@ todo-app must communicate with the backend to render persisted data, or submit d
 Our app uses standard POST requests over HTTP to communicate, as we don't require any special functionality.
 
 In JavaScript, there are two ways to submit data:
-* `XMLHttpRequest` [documentation](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest)
-* `fetch` [documentation](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
+* `XMLHttpRequest` [documentation]( https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest )
+* `fetch` [documentation]( https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API )
 
 `fetch` is newer, introduced in ES6, and we chose to use this in todo-app, since it has a more modern API and supports JavaScript Promises.
 However, you will never have to use fetch directly in todo-app. 
@@ -17,9 +17,9 @@ Any time you need to make a request to the backend, call a function in [utils.ts
 Doing it this way type checks all arguments, automatically converts results to JavaScript objects, and overall prevents bugs.
 
 Note that many of these functions use the keywords `await` and `async`.
-This means that they are asynchronous functions. Learn more about them [here](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Async_await).
+This means that they are asynchronous functions ([documentation]( https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Async_await )).
 In a nutshell, the rule is that any call to an async function must have an `await` ahead of it to actually load the result.
-Any function that makes an `async` call is itself asynchronous, and so must have the word `async` ahead of it.
+Any function that makes an `await` call is itself asynchronous, and so must have the word `async` ahead of it.
 
 Examples:
 ```tsx
@@ -110,6 +110,7 @@ This example does what is intended.
 As an added bonus, we also, by satisfying the compiler, handled the error correctly and display an error message.
 
 ### Using React-Async to render asynchronous data
+
 In a pure TypeScript function, you could do this to fetch data from the backend:
 ```tsx
 import { viewApiKey, isApiErrorCode } from '../utils/utils';
@@ -157,7 +158,7 @@ React can only render a `ReactNode`, and has no idea what to do with a `Promise<
 
 This problem, unfortunately, has no out of the box solutions.
 We'll have to include the React-Async library ([documentation](https://github.com/async-library/react-async)).
-While React-Async has a lot of functionality, the piece we're most interested in is the <Async> Element.
+While React-Async has a lot of functionality, the piece we're most interested in is the `Async` component.
 Let's look at an annotated working example of what we wanted to do.
 
 
@@ -228,3 +229,172 @@ In general React-Async is tricky to use right due to nested functions, and signi
 Try to pass down data if possible rather than fetching in two places. 
 When you do need to fetch data, fetch as much data as possible at once. 
 Not only does this improve performance, it also is easier to write.
+
+### React forms with Formik and React Bootstrap
+
+Creating forms with custom functionality in React is a tedious and error prone process, especially as we add more features.
+We want all of the following features:
+* Render [controlled components]( https://reactjs.org/docs/forms.html ) 
+  * In a nutshell, controlled components are components that store all of their state in React, not in the browser.
+* Validate responses client side
+  * Security Note: All user submitted data must be filtered server side if it is to have any measure of security.
+  * Client side validation is primarily there to provide feedback to the user, and not as a security measure.
+* After recieving response, provide feedback to user
+  * If the server found any errors with a specific field, we must provide relevant feedback in the correct field.
+    * An example is telling the user that their username is taken after a registration attempt. 
+    * It's preferrable UX wise to highlight only the username field rather than the whole form.
+
+Unlike React-Async, it is possible to do this with sanely with pure React. 
+However, it can get tedious, so in order to automate out many of the repetitive aspects, we use Formik ([documentation]( https://formik.org/docs/overview )).
+We are also using React-Bootstrap's form components to help us reduce boilerplate. ([documentation]( https://react-bootstrap.github.io/components/forms/ ))
+Let's look at an annotated real example: [Login.tsx](./src/components/Login.tsx):
+
+```tsx
+import React from 'react';
+import { Formik, FormikHelpers, FormikErrors } from 'formik'
+import { Button, Form, } from 'react-bootstrap'
+import { newValidApiKey, isApiErrorCode } from '../utils/utils';
+
+
+// onSuccess is a callback that will be run once the user has successfully logged in
+// In general, the onSuccess callback should make sure to hide the form so that the user doesn't accidentally double submit.
+interface LoginProps {
+  onSuccess: (apiKey: ApiKey) => void
+}
+
+function Login(props: LoginProps) {
+
+  // This represents the state stored in the form. 
+  // Note that fields don't just have to be strings. 
+  // You could use numbers, booleans, or more complex objects if you wanted.
+  type LoginValue = {
+    email: string,
+    password: string,
+  }
+
+  // onSubmit is a callback that will be run once the user submits their form.
+  
+  // here, we're making use of JavaScript's destructuring assignment: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
+  const onSubmit = async (values: LoginValue, { setStatus, setErrors }: FormikHelpers<LoginValue>) => {
+    // Validate input
+    
+    // we start off by assuming no errors
+    let errors: FormikErrors<LoginValue> = {};
+    let hasError = false;
+    if (values.email === "") {
+      errors.email = "Please enter your email";
+      hasError = true;
+    }
+    if (values.password === "") {
+      errors.password = "Please enter your password";
+      hasError = true;
+    }
+    
+    // setErrors is a Formik function that automatically sets errors on the correct fields
+    setErrors(errors);
+    
+    // bail early if we have hit any errors
+    if (hasError) {
+      return;
+    }
+
+    // we make our request here
+    const maybeApiKey = await newValidApiKey({
+      userEmail: values.email,
+      userPassword: values.password,
+      duration: 5 * 60 * 60 * 1000
+    });
+
+    // check if the operation was successful
+    if (isApiErrorCode(maybeApiKey)) {
+      // otherwise display errors
+      switch (maybeApiKey) {
+        case "USER_NONEXISTENT": {
+          setErrors({
+            email: "No such user exists"
+          });
+          break;
+        }
+        case "PASSWORD_INCORRECT": {
+          setErrors({
+            password: "Your password is incorrect"
+          });
+          break;
+        }
+        default: {
+          // Status is like the global error field of the form. 
+          // Only use it when dealing with unknown kinds of errors, or errors that don't really fit on a single field.
+          setStatus("An unknown or network error has occured while trying to log you in");
+          break;
+        }
+      }
+      return;
+    }
+
+    // on success execute callBack
+    props.onSuccess(maybeApiKey);
+  }
+  
+  
+  // Notice how Formik is a Generic component that does type checking
+  // This helps ensure we make fewer mistakes
+  return <>
+    <Formik<LoginValue>
+      onSubmit={onSubmit}
+      initialStatus=""
+      initialValues={{
+        // these are the default values the form will start with
+        email: "",
+        password: "",
+      }}
+    >
+      {(fprops) => (
+        <Form
+          noValidate
+          onSubmit={fprops.handleSubmit /* what this means is that submitting the form will propagate the submit up to formik */} >
+          {/*Use Bootstrap's Form.Group in order to recieve a consistently styled texbox with automatic support for some formik methods. */}
+          <Form.Group>
+            <Form.Label>Email</Form.Label>
+            {/* When making a form, the `type` prop should usually be "text" unless its an email address or a password */}
+            <Form.Control
+              name="email"
+              type="email"
+              placeholder="Email"
+              value={fprops.values.email}
+              onChange={fprops.handleChange}
+              isInvalid={!!fprops.errors.email}
+            />
+            {/* This field isn't usually displayed unless we called `setError` in `onSubmit`, specifically setting the email field. */}
+            <Form.Control.Feedback type="invalid"> {fprops.errors.email} </Form.Control.Feedback>
+          </Form.Group>
+          <Form.Group >
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+              name="password"
+              type="password"
+              placeholder="Password"
+              value={fprops.values.password}
+              onChange={fprops.handleChange}
+              isInvalid={!!fprops.errors.password}
+            />
+            <Form.Control.Feedback type="invalid">{fprops.errors.password}</Form.Control.Feedback>
+          </Form.Group>
+          <br />
+          {/* Hitting this button will submit the form. Submitting the form will submit the Formik form, which will call onSubmit. */}
+          {/* From there, either props.onSuccess will be called (if it was a success), or errors will be set. */}
+          <Button type="submit">Login</Button>
+          <br />
+          {/* This is where the status text will be displayed */}
+          <Form.Text className="text-danger">{fprops.status}</Form.Text>
+          <br />
+          <Form.Text>
+            <a href="/forgot_password">Forgot Password?</a>
+          </Form.Text>
+        </Form>
+      )}
+    </Formik>
+  </>
+}
+
+export default Login;
+```
