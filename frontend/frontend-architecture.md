@@ -256,8 +256,9 @@ import { Button, Form, } from 'react-bootstrap'
 import { newValidApiKey, isApiErrorCode } from '../utils/utils';
 
 
-// onSuccess is a callback that will be run once the user has successfully logged in
-// In general, the onSuccess callback should make sure to hide the form so that the user doesn't accidentally double submit.
+// onSuccess is a callback that will be run once the user has successfully logged in.
+// In general, the onSuccess callback should make sure to hide the form so that the 
+// user doesn't accidentally double submit.
 interface LoginProps {
   onSuccess: (apiKey: ApiKey) => void
 }
@@ -274,7 +275,8 @@ function Login(props: LoginProps) {
 
   // onSubmit is a callback that will be run once the user submits their form.
   
-  // here, we're making use of JavaScript's destructuring assignment: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
+  // here, we're making use of JavaScript's destructuring assignment: 
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
   const onSubmit = async (values: LoginValue, { setStatus, setErrors }: FormikHelpers<LoginValue>) => {
     // Validate input
     
@@ -323,7 +325,8 @@ function Login(props: LoginProps) {
         }
         default: {
           // Status is like the global error field of the form. 
-          // Only use it when dealing with unknown kinds of errors, or errors that don't really fit on a single field.
+          // Only use it when dealing with unknown kinds of errors, 
+          // or errors that don't really fit on a single field.
           setStatus("An unknown or network error has occured while trying to log you in");
           break;
         }
@@ -349,13 +352,16 @@ function Login(props: LoginProps) {
       }}
     >
       {(fprops) => (
+        /* we enable noValidate so that we can delegate validation to Formik */
+        /* onSubmit={fprops.handleSubmit} means that Formik will handle form submission */
         <Form
           noValidate
-          onSubmit={fprops.handleSubmit /* what this means is that submitting the form will propagate the submit up to formik */} >
-          {/*Use Bootstrap's Form.Group in order to recieve a consistently styled texbox with automatic support for some formik methods. */}
+          onSubmit={fprops.handleSubmit}>
+          {/* Use Bootstrap's Form.Group in order to recieve a consistently styled texbox */}
           <Form.Group>
             <Form.Label>Email</Form.Label>
-            {/* When making a form, the `type` prop should usually be "text" unless its an email address or a password */}
+            {/* When making a form, the `type` prop should usually be "text" */}
+            {/* unless its an email address or a password */}
             <Form.Control
               name="email"
               type="email"
@@ -364,7 +370,7 @@ function Login(props: LoginProps) {
               onChange={fprops.handleChange}
               isInvalid={!!fprops.errors.email}
             />
-            {/* This field isn't usually displayed unless we called `setError` in `onSubmit`, specifically setting the email field. */}
+            {/* Feedback fields aren't usually displayed unless we called `setError` in `onSubmit` */}
             <Form.Control.Feedback type="invalid"> {fprops.errors.email} </Form.Control.Feedback>
           </Form.Group>
           <Form.Group >
@@ -380,8 +386,10 @@ function Login(props: LoginProps) {
             <Form.Control.Feedback type="invalid">{fprops.errors.password}</Form.Control.Feedback>
           </Form.Group>
           <br />
-          {/* Hitting this button will submit the form. Submitting the form will submit the Formik form, which will call onSubmit. */}
-          {/* From there, either props.onSuccess will be called (if it was a success), or errors will be set. */}
+          {/* Hitting this button will submit the form. */}
+          {/* Submitting the form will submit the Formik form, which will call onSubmit. */}
+          {/* If the operation was successful, props.onSuccess will be called */}
+          {/* If it wasn't successful, errors will be set. */}
           <Button type="submit">Login</Button>
           <br />
           {/* This is where the status text will be displayed */}

@@ -2,11 +2,30 @@
 
 This is a monolithic Java 11 service for the backend of todo-app. 
 This service is designed to run on posix environments. 
-To run it on Windows, please refer to the [Windows Setup Guide](#Windows)
 
 # Setup Instructions
 
-1. If you're on Windows, please refer here: [Windows Setup Guide](#Windows). Once you're done, you should have Ubuntu 18 running on WSL.
+1. If you're on Windows, you need to install WSL in order to run the server. 
+    Once you're done, you should have Ubuntu 18 running on WSL.
+    Linux and MacOS users can skip this step.
+    We're following instructions from here: https://docs.microsoft.com/en-us/windows/wsl/install-win10
+    1. Open up an administrator powershell.
+    2. Enter the following command to enable WSL:
+        ```
+        dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+        ```
+        This enables WSL.
+    3. To get better performance, you can optionally install WSL 2.
+        It requires Windows 10 and virtualization support
+        Enter the following command:
+        ```
+        dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+        ```
+    4. Install Ubuntu 18.04 from the Microsoft store. https://www.microsoft.com/en-us/p/ubuntu-1804-lts/9n9tngvndl3q?rtc=1&activetab=pivot:overviewtab
+    5. Restart your computer.
+    6. Open Ubuntu from the start menu.
+    7. Enter in a Unix username and password.
+
 2. The next few steps walk through the installation process of these dependencies:
     * JDK 11
     * Sqlite 3
@@ -17,7 +36,7 @@ To run it on Windows, please refer to the [Windows Setup Guide](#Windows)
 
 3. On Ubuntu (which you should have if you were following the Windows instructions), we can use apt to install basic dependencies. 
     1. Preemptively update the system to avoid potential dependency version conflicts.
-        Run this command in the WSL shell:
+        Run this command in the shell:
         ```
         sudo apt update && sudo apt upgrade
         ```
@@ -229,24 +248,3 @@ Congrats! You're done with setting up!
     ./gradlew bootrun
     ```
 3. To kill the server, press Ctrl-C.
-
-
-# Windows
-We need to install WSL in order to run the server. We're following instructions from here: https://docs.microsoft.com/en-us/windows/wsl/install-win10
-1. Open up an administrator powershell.
-2. Enter the following command to enable WSL:
-    ```
-    dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
-    ```
-    This enables WSL.
-3. To get better performance, you can optionally install WSL 2.
-    It requires Windows 10 and virtualization support
-    Enter the following command:
-    ```
-    dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
-    ```
-4. Install Ubuntu 18.04 from the Microsoft store. https://www.microsoft.com/en-us/p/ubuntu-1804-lts/9n9tngvndl3q?rtc=1&activetab=pivot:overviewtab
-5. Restart your computer.
-6. Open Ubuntu from the start menu.
-7. Enter in a Unix username and password.
-8. Continue with the rest of the installation.
