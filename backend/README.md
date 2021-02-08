@@ -102,7 +102,7 @@ To run it on Windows, please refer to the [Windows Setup Guide](#Windows)
         [credential]
         	helper = store
         ```
-        
+
         **Important note for Windows users**: 
         * Make sure autocrlf is set to false in your git settings. 
         * If you recieve the folowing error: `./gradlew: 68: Syntax error: word unexpected (expecting "in")`, it means that git has automatically inserted CRLF line endings.
@@ -119,7 +119,7 @@ To run it on Windows, please refer to the [Windows Setup Guide](#Windows)
         https://<your GitHub username>:<your personal access token>@github.com
         ```
     11. Replace `<your GitHub username>` with your GitHub username.
-    12. Replace `<your personal access token>` with the access token you saved in step 5.
+    12. Replace `<your personal access token>` with the access token you saved earlier.
     13. In this step, we'll check our work.
         The following examples show what my files would look like if 
         * `example@example.com` was my email
