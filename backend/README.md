@@ -9,6 +9,8 @@ This service is designed to run on posix environments.
     Once you're done, you should have Ubuntu 18 running on WSL.
     Linux and MacOS users can skip this step.
     We're following instructions from here: https://docs.microsoft.com/en-us/windows/wsl/install-win10
+
+    Instructions:
     1. Open up an administrator powershell.
     2. Enter the following command to enable WSL:
         ```
@@ -16,8 +18,8 @@ This service is designed to run on posix environments.
         ```
         This enables WSL.
     3. To get better performance, you can optionally install WSL 2.
-        It requires Windows 10 and virtualization support
-        Enter the following command:
+        It requires Windows 10 and virtualization support.
+        Enter the following command to enable WSL 2:
         ```
         dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
         ```
@@ -31,10 +33,13 @@ This service is designed to run on posix environments.
     * Sqlite 3
     * Node 14
     * Yarn
+
     If running MacOS or a Linux distro other than Ubuntu, then the following instructions won't apply to you.
     Please install your dependencies independently, and then continue directly to step 5.
 
 3. On Ubuntu (which you should have if you were following the Windows instructions), we can use apt to install basic dependencies. 
+
+    Instructions:
     1. Preemptively update the system to avoid potential dependency version conflicts.
         Run this command in the shell:
         ```
@@ -47,6 +52,8 @@ This service is designed to run on posix environments.
 
 4. On Ubuntu 18, Yarn and Node are severely out of date, and we will need to install them from another source.
     We're following instructions from https://computingforgeeks.com/install-node-js-14-on-ubuntu-debian-linux/
+
+    Instructions:
     1. Download and run install script:
         ```
         curl -sL https://deb.nodesource.com/setup_14.x | sudo bash -
@@ -77,7 +84,8 @@ This service is designed to run on posix environments.
     Recently, GitHub has decided to [stop supporting password based authentication](https://github.blog/2020-12-15-token-authentication-requirements-for-git-operations/). 
     This means you must use GitHub's personal access token system.
     You may already have set this up at a prior date, and if this is the case, you may skip to step 6.
-    Otherwise, follow these instructions:
+
+    Instructions:
     1. Go to GitHub's token creation page: https://github.com/settings/tokens/
         * You may need to log in.
     2. You should have entered a page with the title `New personal access token`.
@@ -99,6 +107,7 @@ This service is designed to run on posix environments.
         * repo_deployment
         * repo:invite
         * security_events
+
         Now, scroll down and hit `Generate token`.
     5. Copy the token generated. It will be highlighted in green.
         We'll need this token in later steps.
@@ -121,15 +130,16 @@ This service is designed to run on posix environments.
         [credential]
         	helper = store
         ```
+        Replace `<your email>` with the email you signed up for GitHub with. 
+
+        Replace `<your GitHub username>` with your GitHub username.
 
         **Important note for Windows users**: 
         * Make sure autocrlf is set to false in your git settings. 
         * If you recieve the folowing error: `./gradlew: 68: Syntax error: word unexpected (expecting "in")`, it means that git has automatically inserted CRLF line endings.
         * Please ensure autocrlf is set to false, then re clone the repository to resolve this error.
 
-    8. Replace `<your email>` with the email you signed up for GitHub with. 
-    9. Replace `<your GitHub username>` with your GitHub username.
-    10. Run the following command to add your credentials:
+    8. Run the following command to add your credentials:
         ```
         nano ~/.git-credentials
         ```
@@ -137,9 +147,10 @@ This service is designed to run on posix environments.
         ```
         https://<your GitHub username>:<your personal access token>@github.com
         ```
-    11. Replace `<your GitHub username>` with your GitHub username.
-    12. Replace `<your personal access token>` with the access token you saved earlier.
-    13. In this step, we'll check our work.
+        Replace `<your GitHub username>` with your GitHub username.
+
+        Replace `<your personal access token>` with the access token you saved earlier.
+    9. In this step, we'll check our work.
         The following examples show what my files would look like if 
         * `example@example.com` was my email
         * `pimpale` was my GitHub username 
@@ -178,6 +189,7 @@ This service is designed to run on posix environments.
     * You can access your Windows user directory from WSL without issues, just not the other way around.
       * `cd '/mnt/c/Users/<your Windows username>/'`, where `<your Windows username>` is your username on Windows.
 
+    Instructions:
     1. Windows users need to pick a directory not inside WSL. If you don't use WSL, you can skip to step 2.
         This command navigates to your user home directory.
         ```
