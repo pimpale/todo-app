@@ -86,7 +86,7 @@ This service is designed to run on posix environments.
     You may already have set this up at a prior date, and if this is the case, you may skip to step 6.
 
     Instructions:
-    1. Go to GitHub's token creation page: https://github.com/settings/tokens/
+    1. Go to GitHub's token creation page: https://github.com/settings/tokens/new
         * You may need to log in.
     2. You should have entered a page with the title `New personal access token`.
     3. There should be a small textbox with the title `Note`. 

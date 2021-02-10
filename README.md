@@ -6,7 +6,6 @@ In order to run the backend, refer to [this guide](./backend/README.md).
 Even if you are only developing the frontend, you'll still need to install the server in order to log into the app.
 
 # Big Picture
-
 The goal of the system is to maximize utils over the interval [now, death).
 The system deals with **users**, **resources**, **goals**, **tasks**, and **events**.
 
@@ -23,30 +22,30 @@ The system deals with **users**, **resources**, **goals**, **tasks**, and **even
     Goals are per user, not per resource by definition.
     However, different goals have may have differing goal affinities. See [processor affinity]( https://en.wikipedia.org/wiki/Processor_affinity ).
     Goals may depend on other goals.
+    If a goal has multiple milestones, it is advantageous to make achieving each milestone a sub goal.
+    Each subsequent milestone will have a dependency on the first.
+    
+    Goals must be converted into tasks, fixed time things on a user's calendar.
+    The process of converting goals to tasks is called task allocation.
 
     When a goal is completed, it may have a favorable outcome (which awards utils to the user), 
-    or an unfavorable outcome (which subtracts utils from the user)
-
-    If a goal has multiple milestones, it is advantageous to make achieving each milestone a sub goal.
-    Each subsequent miletone will have a dependency on the first.
-
-    Goals must be converted into tasks, fixed time things on a user's calendar.
-    The process of converting goals to tasks is called Task allocation.
+    or an unfavorable outcome (which subtracts utils from the user).
 
 * **Tasks**: Something the user can do with a resource.
     Tasks are usually generated automatically, but they can be moved by the user if necessary.
     They can also be manually created by the user.
     There is a one to one relation between Goals and Tasks.
 
-* **Event**: What the the resource actually did in the past. 
+* **Event**: Events are primarily there for compatibility when importing other programs' data. 
+    They don't carry any metadata, just a name, time and description.
+    Events can be used to record the actual usage of resource in the past.
+    Thus, events are not necessarily linked to goals.
     This is used for the user to do time tracking.
-    It's not necessarily linked to a goal, but they can be.
 
 ## Thoughts on Scheduling
-
 Here we'll discuss some critical ideas and tools we need to effectively schedule tasks.
 
-All Tasks take time to complete. 
+All tasks take time to complete. 
 However, users are usually unsure about exactly how much time will be spent.
 Even if they do have a good idea, they often can't be bothered to spend time specifying.
 The same thing applies to task reward. Users don't know how many utils a task provides, 
