@@ -102,7 +102,7 @@ const maybeApiKey = await newValidApiKey({
 if(isApiErrorCode(maybeApiKey)) {
   console.log("Error!");
 } else {
-  console.log(apiKey.key);
+  console.log(maybeApiKey.key);
 }
 
 ```
