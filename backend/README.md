@@ -197,7 +197,7 @@ This service is designed to run on posix environments.
         ```
         Replace `<your Windows username>` with your username on Windows.
     2. We're creating a workspace directory in order to reduce clutter. 
-        This is optional, but reccomended.
+        This is optional, but recommended.
         ```
         mkdir workspace
         cd workspace
@@ -218,7 +218,7 @@ This service is designed to run on posix environments.
 7. Configuring our environment variables (Backend Only):
 
     Because we integrate with other services, we have API keys, tokens, and passwords that can't be git pushed onto a public repository.
-    In order to protect the security of these keys, they are kept in a seperate file named `env-vars.sh` not included here.
+    In order to protect the security of these keys, they are kept in a separate file named `env-vars.sh` not included here.
     This file **SHOULD NOT** be committed, and is purposely included in the `.gitignore`.
     **If you push the file, let me know so that I can cancel the keys immediately.**
     We run the risk of our email being taken over by spammers otherwise.
