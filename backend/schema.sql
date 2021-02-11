@@ -73,117 +73,117 @@ create table api_key(
   duration integer not null -- only valid if api_key_kind == VALID
 );
 
--- drop table if exists goal;
--- create table goal(
---   goal_id integer not null primary key,
---   creation_time integer not null,
---   creator_user_id integer not null
--- );
--- 
--- drop table if exists util_distribution;
--- create table util_distribution(
---   util_distribution_id integer not null primary key,
---   creation_time integer not null,
---   creator_user_id integer not null,
---   goal_id integer not null
--- );
--- 
--- -- invariant: There must be at least two distribution points per util_distribution (one at 0, and other at INT_MAX)
--- drop table if exists util_distribution_point;
--- create table util_distribution_point(
---   util_distribution_point_id integer not null primary key,
---   creation_time integer not null,
---   creator_user_id integer not null;
---   util_distribution_id integer not null;
---   utiltime integer not null;
---   utils integer not null;
--- );
--- 
--- -- invariant: goal_id is valid
--- drop table if exists goal_name;
--- create table goal_name(
---   goal_name_id integer not null primary key,
---   creation_time integer not null,
---   creator_user_id integer not null,
---   goal_id integer not null,
---   name varchar(100) not null,
--- );
--- 
--- -- invariant: goal_id is valid
--- drop table if exists goal_description;
--- create table goal_description(
---   goal_description_id integer not null primary key,
---   creation_time integer not null,
---   creator_user_id integer not null,
---   goal_id integer not null,
---   description varchar(100) not null
--- );
--- 
--- 
--- -- invariant: goal_id is valid
--- -- invariant: duration > 0
--- drop table if exists goal_duration;
--- create table goal_duration(
---   goal_duration_id integer not null primary key,
---   creation_time integer not null,
---   creator_user_id integer not null,
---   goal_id integer not null,
---   duration integer not null
--- );
--- 
--- -- invariant: goal_id is valid
--- drop table if exists goal_status;
--- create table goal_status(
---   goal_status_id integer not null primary key,
---   creation_time integer not null,
---   creator_user_id integer not null,
---   goal_id integer not null,
---   status integer not null -- CANCELLED | SUCCEEDED | FAILED | UNRESOLVED
--- );
--- 
--- -- invariant: goal_id != dependent_goal_id
--- -- invariant: goal_id is valid
--- -- invariant: dependent_goal_id is valid
--- drop table if exists goal_dependency;
--- create table goal_description(
---   goal_dependency_id integer not null primary key,
---   creation_time integer not null,
---   creator_user_id integer not null,
---   goal_id integer not null,
---   dependent_goal_id integer not null
--- );
--- 
--- -- invariant: goal_id is valid
--- drop table if exists task;
--- create table task(
---   task_id integer not null primary key,
---   creation_time integer not null,
---   creator_user_id integer not null,
---   goal_id integer not null,
---   start_time integer not null,
---   duration integer not null
--- );
--- 
--- drop table if exists event;
--- create table event(
---   event_id integer not null primary key,
---   creation_time integer not null,
---   creator_user_id integer not null,
--- );
--- 
--- drop table if exists event_data;
--- create table event_data(
---   event_data_id integer not null,
---   creation_time integer not null,
---   creator_user_id integer not null,
---   event_id integer not null,
---   active integer not null, -- boolean
---   has_task_id integer not null, -- boolean
---   -- if has_task_id
---   task_id integer not null,
---   -- else
---   start_time integer not null,
---   duration integer not null,
---   name varchar(100) not null,
---   description varchar(100) not null,
--- );
+drop table if exists goal;
+create table goal(
+  goal_id integer not null primary key,
+  creation_time integer not null,
+  creator_user_id integer not null
+);
+
+drop table if exists util_distribution;
+create table util_distribution(
+  util_distribution_id integer not null primary key,
+  creation_time integer not null,
+  creator_user_id integer not null,
+  goal_id integer not null
+);
+
+-- invariant: There must be at least two distribution points per util_distribution (one at 0, and other at INT_MAX)
+drop table if exists util_distribution_point;
+create table util_distribution_point(
+  util_distribution_point_id integer not null primary key,
+  creation_time integer not null,
+  creator_user_id integer not null;
+  util_distribution_id integer not null;
+  utiltime integer not null;
+  utils integer not null;
+);
+
+-- invariant: goal_id is valid
+drop table if exists goal_name;
+create table goal_name(
+  goal_name_id integer not null primary key,
+  creation_time integer not null,
+  creator_user_id integer not null,
+  goal_id integer not null,
+  name varchar(100) not null,
+);
+
+-- invariant: goal_id is valid
+drop table if exists goal_description;
+create table goal_description(
+  goal_description_id integer not null primary key,
+  creation_time integer not null,
+  creator_user_id integer not null,
+  goal_id integer not null,
+  description varchar(100) not null
+);
+
+
+-- invariant: goal_id is valid
+-- invariant: duration > 0
+drop table if exists goal_duration;
+create table goal_duration(
+  goal_duration_id integer not null primary key,
+  creation_time integer not null,
+  creator_user_id integer not null,
+  goal_id integer not null,
+  duration integer not null
+);
+
+-- invariant: goal_id is valid
+drop table if exists goal_status;
+create table goal_status(
+  goal_status_id integer not null primary key,
+  creation_time integer not null,
+  creator_user_id integer not null,
+  goal_id integer not null,
+  status integer not null -- CANCELLED | SUCCEEDED | FAILED | UNRESOLVED
+);
+
+-- invariant: goal_id != dependent_goal_id
+-- invariant: goal_id is valid
+-- invariant: dependent_goal_id is valid
+drop table if exists goal_dependency;
+create table goal_description(
+  goal_dependency_id integer not null primary key,
+  creation_time integer not null,
+  creator_user_id integer not null,
+  goal_id integer not null,
+  dependent_goal_id integer not null
+);
+
+-- invariant: goal_id is valid
+drop table if exists task;
+create table task(
+  task_id integer not null primary key,
+  creation_time integer not null,
+  creator_user_id integer not null,
+  goal_id integer not null,
+  start_time integer not null,
+  duration integer not null
+);
+
+drop table if exists event;
+create table event(
+  event_id integer not null primary key,
+  creation_time integer not null,
+  creator_user_id integer not null,
+);
+
+drop table if exists event_data;
+create table event_data(
+  event_data_id integer not null,
+  creation_time integer not null,
+  creator_user_id integer not null,
+  event_id integer not null,
+  active integer not null, -- boolean
+  has_task_id integer not null, -- boolean
+  -- if has_task_id
+  task_id integer not null,
+  -- else
+  start_time integer not null,
+  duration integer not null,
+  name varchar(100) not null,
+  description varchar(100) not null,
+);

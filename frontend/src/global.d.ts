@@ -58,10 +58,24 @@ declare global {
     apiKeyKind: ApiKeyKind,
   }
 
-  
   interface AuthenticatedComponentProps {
     apiKey: ApiKey
     setApiKey: (data: ApiKey | null) => void
   }
+
+  type Goal = {
+      goalId: number,
+      creationTime:number,
+      creator:User
+  };
+
+  type UtilDistribution = {
+      utilDistributionId:number,
+      creationTime:number,
+      creator:User,
+      goal:Goal
+  }
+
+      
 }
 export { }

@@ -17,6 +17,9 @@ import RegisterConfirm from './pages/RegisterConfirm';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 
+// calendar
+import Calendar from './pages/Calendar';
+
 // settings
 import Settings from './pages/Settings';
 
@@ -56,6 +59,7 @@ function App() {
         <Route path="/reset_password" component={ResetPassword} />
         <Route path="/register" component={Register} />
         <Route path="/register_confirm" component={RegisterConfirm} />
+        <AuthenticatedRoute path="/calendar" {...apiKeyGetSetter} component={Settings} />
         <AuthenticatedRoute path="/settings" {...apiKeyGetSetter} component={Settings} />
         <AuthenticatedRoute path="/feed" {...apiKeyGetSetter} component={Settings} />
         <Route path="/" component={Error404} />
