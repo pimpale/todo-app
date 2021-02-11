@@ -84,8 +84,7 @@ drop table if exists util_distribution;
 create table util_distribution(
   util_distribution_id integer not null primary key,
   creation_time integer not null,
-  creator_user_id integer not null,
-  goal_id integer not null
+  creator_user_id integer not null
 );
 
 -- invariant: There must be at least two distribution points per util_distribution (one at 0, and other at INT_MAX)
@@ -93,51 +92,23 @@ drop table if exists util_distribution_point;
 create table util_distribution_point(
   util_distribution_point_id integer not null primary key,
   creation_time integer not null,
-  creator_user_id integer not null;
-  util_distribution_id integer not null;
-  utiltime integer not null;
-  utils integer not null;
+  creator_user_id integer not null,
+  util_distribution_id integer not null,
+  utiltime integer not null,
+  utils integer not null
 );
 
 -- invariant: goal_id is valid
-drop table if exists goal_name;
+drop table if exists goal_data;
 create table goal_name(
   goal_name_id integer not null primary key,
   creation_time integer not null,
   creator_user_id integer not null,
   goal_id integer not null,
   name varchar(100) not null,
-);
-
--- invariant: goal_id is valid
-drop table if exists goal_description;
-create table goal_description(
-  goal_description_id integer not null primary key,
-  creation_time integer not null,
-  creator_user_id integer not null,
-  goal_id integer not null,
-  description varchar(100) not null
-);
-
-
--- invariant: goal_id is valid
--- invariant: duration > 0
-drop table if exists goal_duration;
-create table goal_duration(
-  goal_duration_id integer not null primary key,
-  creation_time integer not null,
-  creator_user_id integer not null,
-  goal_id integer not null,
-  duration integer not null
-);
-
--- invariant: goal_id is valid
-drop table if exists goal_status;
-create table goal_status(
-  goal_status_id integer not null primary key,
-  creation_time integer not null,
-  creator_user_id integer not null,
-  goal_id integer not null,
+  description varchar(100) not null,
+  util_distribution_id integer not null,
+  duration integer not null,
   status integer not null -- CANCELLED | SUCCEEDED | FAILED | UNRESOLVED
 );
 
@@ -168,7 +139,7 @@ drop table if exists event;
 create table event(
   event_id integer not null primary key,
   creation_time integer not null,
-  creator_user_id integer not null,
+  creator_user_id integer not null
 );
 
 drop table if exists event_data;
@@ -185,5 +156,5 @@ create table event_data(
   start_time integer not null,
   duration integer not null,
   name varchar(100) not null,
-  description varchar(100) not null,
+  description varchar(100) not null
 );
