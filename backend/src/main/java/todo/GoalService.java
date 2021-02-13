@@ -54,17 +54,16 @@ public class GoalService {
       Long creatorUserId,
       long offset,
       long count) {
-    String sql =
-        "SELECT u.* FROM goal u"
-            + " WHERE 1=1 "
-            + (id                == null ? "" : " AND u.goal_id = " + id)
-            + (creationTime      == null ? "" : " AND u.creation_time = " + creationTime)
-            + (minCreationTime   == null ? "" : " AND u.creation_time > " + minCreationTime)
-            + (maxCreationTime   == null ? "" : " AND u.creation_time < " + maxCreationTime)
-	    + (creatorUserId     == null ? "" : " AND u.creator_user_id = " + creatorUserId)
-            + (" ORDER BY u.goal_id")
-            + (" LIMIT " + offset + ", " + count)
-            + ";";
+    String sql = "SELECT g.* FROM goal g"
+      + " WHERE 1=1 "
+      + (id                == null ? "" : " AND g.goal_id = " + id)
+      + (creationTime      == null ? "" : " AND g.creation_time = " + creationTime)
+      + (minCreationTime   == null ? "" : " AND g.creation_time > " + minCreationTime)
+      + (maxCreationTime   == null ? "" : " AND g.creation_time < " + maxCreationTime)
+      + (creatorUserId     == null ? "" : " AND g.creator_user_id = " + creatorUserId)
+      + (" ORDER BY g.goal_id")
+      + (" LIMIT " + offset + ", " + count)
+      + ";";
 
     RowMapper<Goal> rowMapper = new GoalRowMapper();
     return this.jdbcTemplate.query(sql, rowMapper).stream();

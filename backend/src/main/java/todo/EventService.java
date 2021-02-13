@@ -54,17 +54,16 @@ public class EventService {
       Long creatorUserId,
       long offset,
       long count) {
-    String sql =
-        "SELECT u.* FROM event u"
-            + " WHERE 1=1 "
-            + (id                == null ? "" : " AND u.event_id = " + id)
-            + (creationTime      == null ? "" : " AND u.creation_time = " + creationTime)
-            + (minCreationTime   == null ? "" : " AND u.creation_time > " + minCreationTime)
-            + (maxCreationTime   == null ? "" : " AND u.creation_time < " + maxCreationTime)
-	    + (creatorUserId     == null ? "" : " AND u.creator_user_id = " + creatorUserId)
-            + (" ORDER BY u.event_id")
-            + (" LIMIT " + offset + ", " + count)
-            + ";";
+    String sql = "SELECT g.* FROM event g"
+      + " WHERE 1=1 "
+      + (id                == null ? "" : " AND g.event_id = " + id)
+      + (creationTime      == null ? "" : " AND g.creation_time = " + creationTime)
+      + (minCreationTime   == null ? "" : " AND g.creation_time > " + minCreationTime)
+      + (maxCreationTime   == null ? "" : " AND g.creation_time < " + maxCreationTime)
+      + (creatorUserId     == null ? "" : " AND g.creator_user_id = " + creatorUserId)
+      + (" ORDER BY g.event_id")
+      + (" LIMIT " + offset + ", " + count)
+      + ";";
 
     RowMapper<Event> rowMapper = new EventRowMapper();
     return this.jdbcTemplate.query(sql, rowMapper).stream();
