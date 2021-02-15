@@ -10,13 +10,12 @@ declare global {
   type User = {
     userId: number,
     creationTime: number,
-    kind: UserKind,
     name: string,
     email: string,
   }
 
   type PasswordReset = {
-    creationTime: long;
+    creationTime: number;
   }
 
   type PasswordKind = "CHANGE" | "RESET" | "CANCEL";
@@ -47,6 +46,15 @@ declare global {
     maxUses:number
   }
 
+  type Invoice = { // Did not use yet
+    invoiceId: number,
+    creationTime: number,
+    creator: User,
+    subscriptionId: Subscription,
+    amountCents: number
+
+  }
+
   type ApiKeyKind = "VALID" | "CANCEL";
 
   type ApiKey = {
@@ -74,6 +82,71 @@ declare global {
       creationTime:number,
       creator:User,
       goal:Goal
+  }
+
+  type UtilDistributionPoint = {
+    utilDistributionPointId: number,
+    creationTime: number,
+    creator: User,
+    utilTime: number,
+    utils: number
+  }
+
+  type GoalData = {
+    goalDataId: number,
+    creationTime: number,
+    creator: User,
+    goal: Goal 
+    name: string,
+    description: string,
+    utilDistribution: UtilDistribution,
+    duration: number,
+    status: "CANCELLED" | "SUCCEEDED" | "FAILED" | "UNRESOLVED"
+
+  }
+
+  type GoalDependency = {
+    goalDependencyId: number,
+    creationTime: number,
+    creator: User,
+    goal: Goal, 
+    dependentGoal: Goal 
+  }
+
+  type Task = {
+    taskId: number,
+    creationTime: number,
+    creator: User,
+    goal: Goal, 
+    startTime: number,
+    duration: number
+  }
+
+  type event = {
+    eventId: number,
+    creationTime: number,
+    creator: User
+  }
+
+  type eventData = {
+    eventDataId: number,
+    creationTime: number,
+    creator: User,
+    event: event, 
+    active: boolean,
+    hasTaskId: true,
+    taskId: Task
+  } | {
+    eventDataId: number, 
+    creationTime: number,
+    creator: User,
+    event: event, 
+    active: boolean,
+    hasTaskId: false,
+    startTime: number,
+    duration: number,
+    name: string,
+    description: string
   }
 
       
