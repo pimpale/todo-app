@@ -14,17 +14,19 @@ The system deals with **users**, **resources**, **goals**, **tasks**, and **even
     We distinguish the user from the user's time, which is simply treated as a resource.
 
 * **Resource**: Material the user can use in order to accomplish a goal.
+    Resource utilization is exclusive.
+    If a resource is executing a task, it cannot execute another task at the same time.
     The primary resource available to the user is their time. 
-    The todo-app provides for scheduling goals to the user's time.
-    todo-app can also schedule goals on other resources, such as ovens, rice cookers, and other people.
+    todo-app can also schedule goals on other resources, such as equipment,  and other people.
 
 * **Goal**: A valuable goal to be accomplished.
     Goals are per user, not per resource by definition.
-    However, different goals have may have differing goal affinities. See [processor affinity]( https://en.wikipedia.org/wiki/Processor_affinity ).
+    However, different resources have may have differing goal affinities.
+    This permits goals to be scheduled to other resources.
     Goals may depend on other goals.
     If a goal has multiple milestones, it is advantageous to make achieving each milestone a sub goal.
     Each subsequent milestone will have a dependency on the first.
-    
+
     Goals must be converted into tasks, fixed time things on a user's calendar.
     The process of converting goals to tasks is called task allocation.
 
@@ -32,15 +34,15 @@ The system deals with **users**, **resources**, **goals**, **tasks**, and **even
     or an unfavorable outcome (which subtracts utils from the user).
 
 * **Tasks**: Something the user can do with a resource.
-    Tasks are usually generated automatically, but they can be moved by the user if necessary.
-    They can also be manually created by the user.
-    There is a one to one relation between Goals and Tasks.
+    A task is an instantiation of a goal at a time on a calendar.
+    Goals don't have a fixed time by definition, only a a time-utility distribution.
+    If a goal's execution is preempted, then there may be multiple tasks for one goal.
+    If a goal is dropped, then there may be zero tasks for that goal.
 
 * **Event**: Events are primarily there for compatibility when importing other programs' data. 
     They don't carry any metadata, just a name, time and description.
-    Events can be used to record the actual usage of resource in the past.
-    Thus, events are not necessarily linked to goals.
-    This is used for the user to do time tracking.
+    Events can be generated from tasks, once they disappear into the past.
+    However, events are not necessarily linked to goals.
 
 ## Thoughts on Scheduling
 Here we'll discuss some critical ideas and tools we need to effectively schedule tasks.
@@ -70,15 +72,16 @@ A significant problem is that it is impossible to fully schedule all goals, sinc
 Thus, we must be able to handle scenarios where no solution is perfect.
 Our solution is to generalize the idea of a deadline by instead adding the idea of time preference.
 
-* **Time Preference Distribution**: A per goal time based distribution of number of utils that 
-    will be gained if the task is active in this range.
-    Instead of a single fixed reward on completion, the reward will vary based on time.
+* **Time Preference Function**: A per goal time based distribution of number of utils that 
+    will be gained per second if the task is active in this range.
+    The reward will vary based on time.
+    You can read more on [wikipedia]( https://en.wikipedia.org/wiki/Time-utility_function ).
 
 *Todo: Task salience (how much is any one task related to any other given task?)*
 *This will help us provide tasks that are similar or different to the current task, based on the user's mood.*
 
-Solving this problem is not trivial, and there is unlikely to be an easy optimal solution. 
-Instead we'll work on providing a good heuristic function that roughly sorts out most of the important parts, 
+Solving this problem is not trivial, and in fact, finding an optimal solution is NP-Hard. 
+Instead we'll work on providing a reasonable heuristic function that roughly sorts out most of the important parts, 
 and work on providing a powerful interface for the user to correct mistakes and guide the process. 
 
 ## Thoughts on Solving Goal Dependencies

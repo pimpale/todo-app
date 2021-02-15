@@ -80,21 +80,21 @@ create table goal(
   creator_user_id integer not null
 );
 
-drop table if exists util_distribution;
-create table util_distribution(
-  util_distribution_id integer not null primary key,
+drop table if exists time_utility_function;
+create table time_utility_function(
+  time_utility_function_id integer not null primary key,
   creation_time integer not null,
   creator_user_id integer not null
 );
 
--- invariant: There must be at least two distribution points per util_distribution (one at 0, and other at INT_MAX)
-drop table if exists util_distribution_point;
-create table util_distribution_point(
-  util_distribution_point_id integer not null primary key,
+-- invariant: There must be at least two distribution points per time_utility_function (one at 0, and other at INT_MAX)
+drop table if exists time_utility_function_point;
+create table time_utility_function_point(
+  time_utility_function_point_id integer not null primary key,
   creation_time integer not null,
   creator_user_id integer not null,
-  util_distribution_id integer not null,
-  utiltime integer not null,
+  time_utility_function_id integer not null,
+  start_time integer not null,
   utils integer not null
 );
 
@@ -107,7 +107,7 @@ create table goal_name(
   goal_id integer not null,
   name varchar(100) not null,
   description varchar(100) not null,
-  util_distribution_id integer not null,
+  time_utility_function_id integer not null,
   duration integer not null,
   status integer not null -- CANCELLED | SUCCEEDED | FAILED | UNRESOLVED
 );
