@@ -107,22 +107,10 @@ create table goal_data(
   goal_id integer not null,
   name varchar(100) not null,
   description varchar(100) not null,
-  wrapper integer not null, -- boolean
+  duration integer not null,
   time_utility_function_id integer not null,
-  duration integer not null
-);
-
--- This table represents the exit result of a goal
--- grouped by goal_id
--- presence of a non-cancel element means that a task is finished
-drop table if exists goal_result;
-create table goal_result(
-  goal_result_id integer not null primary key,
-  creation_time integer not null,
-  creator_user_id integer not null,
-  goal_id integer not null,
-  notes integer not null,
-  status integer not null -- SUCCEED FAIL CANCEL
+  wrapper integer not null, -- boolean
+  status integer not null -- SUCCEED FAIL CANCEL UNRESOLVED
 );
 
 -- invariant: goal_id != dependent_goal_id

@@ -15,8 +15,8 @@ public class GoalDataRowMapper implements RowMapper<GoalData> {
     gd.goalId= row.getLong("goal_id");
     gd.name = row.getString("name");
     gd.description = row.getString("description");
-    gd.timeUtilityFunctionId = row.getLong("time_utility_function_id");
     gd.duration = row.getLong("duration");
+    gd.timeUtilityFunctionId = row.getLong("time_utility_function_id");
     return gd;
   }
 }

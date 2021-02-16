@@ -30,6 +30,9 @@ The system deals with **users**, **resources**, **goals**, **tasks**, and **even
     Goals must be converted into tasks, fixed time things on a user's calendar.
     The process of converting goals to tasks is called task allocation.
 
+
+* **Goal Result**: The outcome of a goal.
+    A Goal Result determines if other goals depending on this goal can be scheduled.
     When a goal is completed, it may have a favorable outcome (which awards utils to the user), 
     or an unfavorable outcome (which subtracts utils from the user).
 
@@ -112,11 +115,8 @@ Thus, rather than an adjacency matrix, we will have an edge table.
 Our system is algorithm neutral, and does not mandate any one specific algorithm.
 In the future we may provide multiple different options.
 
-However,  we need at least one algorithm to start out with, and we decided to choose [simulated annealing]( https://en.wikipedia.org/wiki/Simulated_annealing ).
+However, we need at least one scheduling algorithm to start out with, and we decided to choose [simulated annealing]( https://en.wikipedia.org/wiki/Simulated_annealing ).
 This is a somewhat computationally expensive heuristic, but is relatively simple to implement.
-
-
-
 
 
 

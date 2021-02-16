@@ -43,10 +43,10 @@ public class GoalDataService {
         goalData.creatorUserId,
         goalData.goalId,
         goalData.name,
-        goalData.startTime,
+        goalData.description,
         goalData.duration,
-        goalData.hidden,
-        goalData.active
+        goalData.timeUtilityFunctionId,
+        goalData.status.value
     );
   }
 
@@ -71,36 +71,31 @@ public class GoalDataService {
       Long duration,
       Long minDuration,
       Long maxDuration,
-      Boolean hidden,
-      Boolean active,
+      Long timeUtilityFunctionId,
+      GoalDataStatusKind status,
       boolean onlyRecent,
-      Long courseId,
       long offset,
       long count) {
-
-    boolean nojoingoal = courseId == null;
 
     String sql =
         "SELECT gd.* FROM goal_data gd"
             + (!onlyRecent ? "" : " INNER JOIN (SELECT max(goal_data_id) id FROM goal_data GROUP BY goal_id) maxids ON maxids.id = gd.goal_data_id")
-            + (nojoingoal ? "" : " INNER JOIN goal ses ON ses.goal_id = gd.goal_id")
             + " WHERE 1=1 "
-            + (goalDataId   == null ? "" : " AND gd.goal_data_id = " + goalDataId)
-            + (creationTime    == null ? "" : " AND gd.creation_time = " + creationTime)
-            + (minCreationTime == null ? "" : " AND gd.creation_time > " + minCreationTime)
-            + (maxCreationTime == null ? "" : " AND gd.creation_time < " + maxCreationTime)
-            + (creatorUserId   == null ? "" : " AND gd.creator_id = " + creatorUserId)
-            + (goalId       == null ? "" : " AND gd.goal_id = " + goalId)
-            + (name            == null ? "" : " AND gd.name = " + Utils.escape(name))
-            + (partialName     == null ? "" : " AND gd.name LIKE " + Utils.escape("%"+partialName+"%"))
-            + (description            == null ? "" : " AND gd.description = " + Utils.escape(description))
-            + (partialDescription     == null ? "" : " AND gd.description LIKE " + Utils.escape("%"+partialDescription+"%"))
-            + (duration        == null ? "" : " AND gd.duration = " + duration)
-            + (minDuration     == null ? "" : " AND gd.duration > " + minDuration)
-            + (maxDuration     == null ? "" : " AND gd.duration < " + maxDuration)
-            + (hidden          == null ? "" : " AND gd.hidden = " + hidden)
-            + (active          == null ? "" : " AND gd.active = " + active)
-            + (courseId        == null ? "" : " AND ses.course_id = " + courseId)
+            + (goalDataId            == null ? "" : " AND gd.goal_data_id = " + goalDataId)
+            + (creationTime          == null ? "" : " AND gd.creation_time = " + creationTime)
+            + (minCreationTime       == null ? "" : " AND gd.creation_time > " + minCreationTime)
+            + (maxCreationTime       == null ? "" : " AND gd.creation_time < " + maxCreationTime)
+            + (creatorUserId         == null ? "" : " AND gd.creator_id = " + creatorUserId)
+            + (goalId                == null ? "" : " AND gd.goal_id = " + goalId)
+            + (name                  == null ? "" : " AND gd.name = " + Utils.escape(name))
+            + (partialName           == null ? "" : " AND gd.name LIKE " + Utils.escape("%"+partialName+"%"))
+            + (description           == null ? "" : " AND gd.description = " + Utils.escape(description))
+            + (partialDescription    == null ? "" : " AND gd.description LIKE " + Utils.escape("%"+partialDescription+"%"))
+            + (duration              == null ? "" : " AND gd.duration = " + duration)
+            + (minDuration           == null ? "" : " AND gd.duration > " + minDuration)
+            + (maxDuration           == null ? "" : " AND gd.duration < " + maxDuration)
+            + (timeUtilityFunctionId == null ? "" : " AND gd.time_utility_function_id= " + timeUtilityFunctionId)
+            + (status                == null ? "" : " AND gd.status = " + status.value)
             + (" ORDER BY gd.goal_data_id")
             + (" LIMIT " + offset + ", " + count)
             + ";";
