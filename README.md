@@ -39,6 +39,15 @@ The system deals with **users**, **resources**, **goals**, **tasks**, and **even
     If a goal's execution is preempted, then there may be multiple tasks for one goal.
     If a goal is dropped, then there may be zero tasks for that goal.
 
+* **Solution**: A group of tasks that satisfy all goal constraints.
+    There are many ways to allocate tasks to goals.
+    The primary rules are:
+    * No dependency cycles
+    * Dependency order must be respected.
+    * All tasks are scheduled for the future.
+    However, not all solutions that obey these rules are optimal.
+    It is a client side task to find the best solution and send it to the server.
+
 * **Event**: Events are primarily there for compatibility when importing other programs' data. 
     They don't carry any metadata, just a name, time and description.
     Events can be generated from tasks, once they disappear into the past.
@@ -73,14 +82,15 @@ Thus, we must be able to handle scenarios where no solution is perfect.
 Our solution is to generalize the idea of a deadline by instead adding the idea of time preference.
 
 * **Time Preference Function**: A per goal time based distribution of number of utils that 
-    will be gained per second if the task is active in this range.
+    will be gained per minute if the task is active in this range.
     The reward will vary based on time.
     You can read more on [wikipedia]( https://en.wikipedia.org/wiki/Time-utility_function ).
 
 *Todo: Task salience (how much is any one task related to any other given task?)*
 *This will help us provide tasks that are similar or different to the current task, based on the user's mood.*
 
-Solving this problem is not trivial, and in fact, finding an optimal solution is NP-Hard. 
+Solving this problem is not trivial. 
+In fact, finding an optimal solution has been proven to be NP-Hard.
 Instead we'll work on providing a reasonable heuristic function that roughly sorts out most of the important parts, 
 and work on providing a powerful interface for the user to correct mistakes and guide the process. 
 
@@ -96,3 +106,28 @@ However, it introduces a constraint that we must obey during task creation:
 Since most goals will have 0 or 1 dependencies, this dependency graph is sparse.
 Dependency graphs are also directed.
 Thus, rather than an adjacency matrix, we will have an edge table.
+
+## Our Algorithm
+
+Our system is algorithm neutral, and does not mandate any one specific algorithm.
+In the future we may provide multiple different options.
+
+However,  we need at least one algorithm to start out with, and we decided to choose [simulated annealing]( https://en.wikipedia.org/wiki/Simulated_annealing ).
+This is a somewhat computationally expensive heuristic, but is relatively simple to implement.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

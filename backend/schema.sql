@@ -100,16 +100,29 @@ create table time_utility_function_point(
 
 -- invariant: goal_id is valid
 drop table if exists goal_data;
-create table goal_name(
-  goal_name_id integer not null primary key,
+create table goal_data(
+  goal_data_id integer not null primary key,
   creation_time integer not null,
   creator_user_id integer not null,
   goal_id integer not null,
   name varchar(100) not null,
   description varchar(100) not null,
+  wrapper integer not null, -- boolean
   time_utility_function_id integer not null,
-  duration integer not null,
-  status integer not null -- CANCELLED | SUCCEEDED | FAILED | UNRESOLVED
+  duration integer not null
+);
+
+-- This table represents the exit result of a goal
+-- grouped by goal_id
+-- presence of a non-cancel element means that a task is finished
+drop table if exists goal_result;
+create table goal_result(
+  goal_result_id integer not null primary key,
+  creation_time integer not null,
+  creator_user_id integer not null,
+  goal_id integer not null,
+  notes integer not null,
+  status integer not null -- SUCCEED FAIL CANCEL
 );
 
 -- invariant: goal_id != dependent_goal_id
@@ -132,29 +145,25 @@ create table task(
   creator_user_id integer not null,
   goal_id integer not null,
   start_time integer not null,
-  duration integer not null
 );
 
-drop table if exists event;
-create table event(
+drop table if exists past_event;
+create table past_event(
   event_id integer not null primary key,
   creation_time integer not null,
   creator_user_id integer not null
 );
 
-drop table if exists event_data;
+drop table if exists past_event_data;
 create table event_data(
   event_data_id integer not null,
   creation_time integer not null,
   creator_user_id integer not null,
   event_id integer not null,
-  active integer not null, -- boolean
   has_task_id integer not null, -- boolean
-  -- if has_task_id
-  task_id integer not null,
-  -- else
   start_time integer not null,
   duration integer not null,
   name varchar(100) not null,
-  description varchar(100) not null
+  description varchar(100) not null,
+  active integer not null -- boolean
 );

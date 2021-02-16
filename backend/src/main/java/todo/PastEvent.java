@@ -1,7 +1,7 @@
 package todo;
 
-public class Event {
-  public long eventId;
+public class PastEvent {
+  public long pastEventId;
   public long creationTime;
   long creatorUserId;
 
