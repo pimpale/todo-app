@@ -95,7 +95,8 @@ create table time_utility_function_point(
   creator_user_id integer not null,
   time_utility_function_id integer not null,
   start_time integer not null,
-  utils integer not null
+  utils integer not null,
+  active integer not null
 );
 
 -- invariant: goal_id is valid

@@ -33,6 +33,20 @@ public class ApiController {
   PasswordService passwordService;
   @Autowired
   PasswordResetService passwordResetService;
+  @Autowired
+  GoalService goalService;
+  @Autowired
+  GoalDataService goalDataService;
+  @Autowired
+  TaskService taskService;
+  @Autowired
+  PastEventService pastEventService;
+  @Autowired
+  PastEventDataService pastEventDataService;
+  @Autowired
+  TimeUtilityFunctionService timeUtilityFunctionService;
+  @Autowired
+  TimeUtilityFunctionPointService timeUtilityFunctionPointService;
 
   // The website where this application is hosted
   @Value("${WEBSITE_URL}")
@@ -79,7 +93,6 @@ public class ApiController {
     return subscription;
   }
 
-
   /**
    * Fills in jackson objects for PasswordReset
    *
@@ -114,7 +127,66 @@ public class ApiController {
     return verificationChallenge;
   }
 
- 
+  /**
+   * Fills in jackson objects for Goal
+   *
+   * @param goal - Goal object
+   * @return Goal object with filled jackson objects
+   */
+  Goal fillGoal(Goal goal) {
+    goal.creator = fillUser(userService.getByUserId(goal.creatorUserId));
+    return goal;
+  }
+
+  /**
+   * Fills in jackson objects for GoalData
+   *
+   * @param goalData - GoalData object
+   * @return GoalData object with filled jackson objects
+   */
+  GoalData fillGoalData(GoalData goalData) {
+    goalData.creator = fillUser(userService.getByUserId(goalData.creatorUserId));
+    goalData.goal = fillGoal(goalService.getByGoalId(goalData.creatorUserId));
+    return goalData;
+  }
+
+  /**
+   * Fills in jackson objects for PastEvent
+   *
+   * @param pastEvent - PastEvent object
+   * @return PastEvent object with filled jackson objects
+   */
+  PastEvent fillPastEvent(PastEvent pastEvent) {
+    pastEvent.creator = fillUser(userService.getByUserId(pastEvent.creatorUserId));
+    return pastEvent;
+  }
+
+  /**
+   * Fills in jackson objects for PastEventData
+   *
+   * @param pastEventData - PastEventData object
+   * @return PastEventData object with filled jackson objects
+   */
+  PastEventData fillPastEventData(PastEventData pastEventData) {
+    pastEventData.creator = fillUser(userService.getByUserId(pastEventData.creatorUserId));
+    pastEventData.pastEvent = fillPastEvent(pastEventService.getByPastEventId(pastEventData.pastEventId));
+    return pastEventData;
+  }
+
+
+  /**
+   * Fills in jackson objects for Task
+   *
+   * @param task - Task object
+   * @return Task object with filled jackson objects
+   */
+  Task fillTask(Task task) {
+    task.creator = fillUser(userService.getByUserId(task.creatorUserId));
+    task.goal = fillGoal(goalService.getByGoalId(task.creatorUserId));
+    return task;
+  }
+
+
   /**
    * Returns an apiKey if valid
    *
@@ -464,7 +536,141 @@ public class ApiController {
     return new ResponseEntity<>(fillSubscription(subscription), HttpStatus.OK);
   }
 
- 
+
+  @RequestMapping("/goal/new/")
+  public ResponseEntity<?> newGoal( //
+      @RequestParam String name, //
+      @RequestParam String description, //
+      @RequestParam long duration, //
+      @RequestParam long timeUtilityFunctionId, //
+      @RequestParam String apiKey) {
+    ApiKey key = getApiKeyIfValid(apiKey);
+    if (key == null) {
+      return Errors.API_KEY_NONEXISTENT.getResponse();
+    }
+
+    Goal goal = new Goal();
+    goal.creationTime = System.currentTimeMillis();
+    goal.creatorUserId = key.creatorUserId;
+    goalService.add(goal);
+
+    GoalData goalData = new GoalData();
+    goalData.goalId = goal.goalId;
+    goalData.creationTime = System.currentTimeMillis();
+    goalData.creatorUserId = key.creatorUserId;
+    goalData.name = name;
+    goalData.description = description;
+    goalData.duration = duration;
+    goalData.timeUtilityFunctionId = timeUtilityFunctionId;
+    goalData.status = GoalDataStatusKind.PENDING;
+
+    return new ResponseEntity<>(fillGoalData(goalData), HttpStatus.OK);
+  }
+
+  @RequestMapping("/goalData/new/")
+  public ResponseEntity<?> newGoalData( //
+      @RequestParam long goalId, //
+      @RequestParam String name, //
+      @RequestParam String description, //
+      @RequestParam long duration, //
+      @RequestParam long timeUtilityFunctionId, //
+      @RequestParam GoalDataStatusKind goalDataStatusKind, //
+      @RequestParam String apiKey) {
+    ApiKey key = getApiKeyIfValid(apiKey);
+    if (key == null) {
+      return Errors.API_KEY_NONEXISTENT.getResponse();
+    }
+
+    Goal goal = goalService.getByGoalId(goalId);
+    if(goal == null ) {
+      return Errors.GOAL_NONEXISTENT.getResponse();
+    }
+
+    if(goal.creatorUserId != key.creatorUserId) {
+      return Errors.API_KEY_UNAUTHORIZED.getResponse();
+    }
+
+    GoalData goalData = new GoalData();
+    goalData.goalId = goal.goalId;
+    goalData.creationTime = System.currentTimeMillis();
+    goalData.creatorUserId = key.creatorUserId;
+    goalData.name = name;
+    goalData.description = description;
+    goalData.duration = duration;
+    goalData.timeUtilityFunctionId = timeUtilityFunctionId;
+    goalData.status = goalDataStatusKind;
+
+    return new ResponseEntity<>(fillGoalData(goalData), HttpStatus.OK);
+  }
+
+
+  @RequestMapping("/pastEvent/new/")
+  public ResponseEntity<?> newPastEvent( //
+      @RequestParam String name, //
+      @RequestParam long startTime, //
+      @RequestParam long duration, //
+      @RequestParam long timeUtilityFunctionId, //
+      @RequestParam String apiKey) {
+    ApiKey key = getApiKeyIfValid(apiKey);
+    if (key == null) {
+      return Errors.API_KEY_NONEXISTENT.getResponse();
+    }
+
+    PastEvent pastEvent = new PastEvent();
+    pastEvent.creationTime = System.currentTimeMillis();
+    pastEvent.creatorUserId = key.creatorUserId;
+    pastEventService.add(pastEvent);
+
+    PastEventData pastEventData = new PastEventData();
+    pastEventData.pastEventId = pastEvent.pastEventId;
+    pastEventData.creationTime = System.currentTimeMillis();
+    pastEventData.creatorUserId = key.creatorUserId;
+    pastEventData.name = name;
+    pastEventData.startTime = startTime;
+    pastEventData.duration = duration;
+    pastEventData.active = true;
+
+    return new ResponseEntity<>(fillPastEventData(pastEventData), HttpStatus.OK);
+  }
+
+
+  @RequestMapping("/pastEventData/new/")
+  public ResponseEntity<?> newPastEventData( //
+      @RequestParam long pastEventId, //
+      @RequestParam String name, //
+      @RequestParam long startTime, //
+      @RequestParam long duration, //
+      @RequestParam boolean active, //
+      @RequestParam String apiKey) {
+    ApiKey key = getApiKeyIfValid(apiKey);
+    if (key == null) {
+      return Errors.API_KEY_NONEXISTENT.getResponse();
+    }
+
+    PastEvent pastEvent = pastEventService.getByPastEventId(pastEventId);
+    if(pastEvent == null ) {
+      return Errors.PAST_EVENT_NONEXISTENT.getResponse();
+    }
+
+    if(pastEvent.creatorUserId != key.creatorUserId) {
+      return Errors.API_KEY_UNAUTHORIZED.getResponse();
+    }
+
+    PastEventData pastEventData = new PastEventData();
+    pastEventData.pastEventId = pastEvent.pastEventId;
+    pastEventData.creationTime = System.currentTimeMillis();
+    pastEventData.creatorUserId = key.creatorUserId;
+    pastEventData.name = name;
+    pastEventData.startTime = startTime;
+    pastEventData.duration = duration;
+    pastEventData.active = active;
+
+    return new ResponseEntity<>(fillPastEventData(pastEventData), HttpStatus.OK);
+  }
+
+
+
+
   @RequestMapping("/password/")
   public ResponseEntity<?> viewPassword( //
       @RequestParam(required = false) Long passwordId, //
