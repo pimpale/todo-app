@@ -43,7 +43,7 @@ public class TimeUtilityFunctionService {
         sql,
         timeUtilityFunction.timeUtilityFunctionId,
         timeUtilityFunction.creationTime,
-	timeUtilityFunction.creatorUserId);
+        timeUtilityFunction.creatorUserId);
   }
 
   public Stream<TimeUtilityFunction> query(

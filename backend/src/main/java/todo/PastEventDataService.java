@@ -35,7 +35,7 @@ public class PastEventDataService {
     pastEventData.pastEventDataId = nextId();
     // Add pastEventData
     String sql =
-        "INSERT INTO past_event_data values (?, ?, ?, ?, ?, ?, ?, ?)";
+        "INSERT INTO past_event_data values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     jdbcTemplate.update(
         sql,
         pastEventData.pastEventDataId,
@@ -43,6 +43,7 @@ public class PastEventDataService {
         pastEventData.creatorUserId,
         pastEventData.pastEventId,
         pastEventData.name,
+        pastEventData.description,
         pastEventData.startTime,
         pastEventData.duration,
         pastEventData.active
@@ -65,6 +66,8 @@ public class PastEventDataService {
       Long pastEventId,
       String name,
       String partialName,
+      String description,
+      String partialDescription,
       Long startTime,
       Long minStartTime,
       Long maxStartTime,
@@ -80,21 +83,23 @@ public class PastEventDataService {
         "SELECT ped.* FROM past_event_data ped"
             + (!onlyRecent ? "" : " INNER JOIN (SELECT max(past_event_data_id) id FROM past_event_data GROUP BY past_event_id) maxids ON maxids.id = ped.past_event_data_id")
             + " WHERE 1=1 "
-            + (pastEventDataId            == null ? "" : " AND ped.past_event_data_id = " + pastEventDataId)
-            + (creationTime          == null ? "" : " AND ped.creation_time = " + creationTime)
-            + (minCreationTime       == null ? "" : " AND ped.creation_time > " + minCreationTime)
-            + (maxCreationTime       == null ? "" : " AND ped.creation_time < " + maxCreationTime)
-            + (creatorUserId         == null ? "" : " AND ped.creator_id = " + creatorUserId)
-            + (pastEventId                == null ? "" : " AND ped.past_event_id = " + pastEventId)
-            + (name                  == null ? "" : " AND ped.name = " + Utils.escape(name))
-            + (partialName           == null ? "" : " AND ped.name LIKE " + Utils.escape("%"+partialName+"%"))
-            + (startTime              == null ? "" : " AND ped.start_time= " + startTime)
-            + (minStartTime           == null ? "" : " AND ped.duration > " + minStartTime)
-            + (maxStartTime           == null ? "" : " AND ped.duration < " + maxStartTime)
-            + (duration              == null ? "" : " AND ped.duration = " + duration)
-            + (minDuration           == null ? "" : " AND ped.duration > " + minDuration)
-            + (maxDuration           == null ? "" : " AND ped.duration < " + maxDuration)
-            + (active                == null ? "" : " AND ped.active = " + active)
+            + (pastEventDataId      == null ? "" : " AND ped.past_event_data_id = " + pastEventDataId)
+            + (creationTime         == null ? "" : " AND ped.creation_time = " + creationTime)
+            + (minCreationTime      == null ? "" : " AND ped.creation_time > " + minCreationTime)
+            + (maxCreationTime      == null ? "" : " AND ped.creation_time < " + maxCreationTime)
+            + (creatorUserId        == null ? "" : " AND ped.creator_id = " + creatorUserId)
+            + (pastEventId          == null ? "" : " AND ped.past_event_id = " + pastEventId)
+            + (name                 == null ? "" : " AND ped.name = " + Utils.escape(name))
+            + (partialName          == null ? "" : " AND ped.name LIKE " + Utils.escape("%"+partialName+"%"))
+            + (description          == null ? "" : " AND ped.description = " + Utils.escape(description))
+            + (partialDescription   == null ? "" : " AND ped.description LIKE " + Utils.escape("%"+partialDescription+"%"))
+            + (startTime            == null ? "" : " AND ped.start_time = " + startTime)
+            + (minStartTime         == null ? "" : " AND ped.start_time > " + minStartTime)
+            + (maxStartTime         == null ? "" : " AND ped.start_time < " + maxStartTime)
+            + (duration             == null ? "" : " AND ped.duration = " + duration)
+            + (minDuration          == null ? "" : " AND ped.duration > " + minDuration)
+            + (maxDuration          == null ? "" : " AND ped.duration < " + maxDuration)
+            + (active               == null ? "" : " AND ped.active = " + active)
             + (" ORDER BY ped.past_event_data_id")
             + (" LIMIT " + offset + ", " + count)
             + ";";

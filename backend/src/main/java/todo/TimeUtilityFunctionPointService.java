@@ -62,6 +62,8 @@ public class TimeUtilityFunctionPointService {
       Long minStartTime,
       Long maxStartTime,
       Long utils,
+      Long minUtils,
+      Long maxUtils,
       Boolean active,
       long offset,
       long count) {
@@ -77,6 +79,8 @@ public class TimeUtilityFunctionPointService {
       + (minStartTime          == null ? "" : " AND tufp.start_time > " + minStartTime)
       + (maxStartTime          == null ? "" : " AND tufp.start_time < " + maxStartTime)
       + (utils                 == null ? "" : " AND tufp.utils = " + utils)
+      + (minUtils              == null ? "" : " AND tufp.utils > " + minUtils)
+      + (maxUtils              == null ? "" : " AND tufp.utils < " + maxUtils)
       + (active                == null ? "" : " AND tufp.active = " + active)
       + (" ORDER BY tufp.time_utility_function_point_id")
       + (" LIMIT " + offset + ", " + count)

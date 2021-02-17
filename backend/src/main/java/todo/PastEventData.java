@@ -6,6 +6,7 @@ public class PastEventData {
   long creatorUserId;
   long pastEventId;
   public String name;
+  public String description;
   public long startTime;
   public long duration;
   public boolean active;

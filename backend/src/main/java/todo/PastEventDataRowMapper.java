@@ -13,6 +13,7 @@ public class PastEventDataRowMapper implements RowMapper<PastEventData> {
     ped.creatorUserId = row.getLong("creator_user_id");
     ped.pastEventId = row.getLong("past_event_id");
     ped.name = row.getString("name");
+    ped.description = row.getString("description");
     ped.startTime = row.getLong("start_time");
     ped.duration = row.getLong("duration");
     ped.active = row.getBoolean("active");

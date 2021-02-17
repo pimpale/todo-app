@@ -830,4 +830,288 @@ public class ApiController {
     return new ResponseEntity<>(list, HttpStatus.OK);
   }
 
+
+  @RequestMapping("/goal/")
+  public ResponseEntity<?> viewGoal( //
+      @RequestParam(required = false) Long goalId, //
+      @RequestParam(required = false) Long creationTime, //
+      @RequestParam(required = false) Long minCreationTime, //
+      @RequestParam(required = false) Long maxCreationTime, //
+      @RequestParam(required = false) Long creatorUserId, //
+      @RequestParam(defaultValue = "0") long offset, //
+      @RequestParam(defaultValue = "100") long count, //
+      @RequestParam String apiKey //
+  ) {
+
+    ApiKey key = getApiKeyIfValid(apiKey);
+    if (key == null) {
+      return Errors.API_KEY_UNAUTHORIZED.getResponse();
+    }
+
+    Stream<Goal> list = goalService.query( //
+        goalId, //
+        creationTime, //
+        minCreationTime, //
+        maxCreationTime, //
+        creatorUserId, //
+        offset, //
+        count //
+    ).map(x -> fillGoal(x));
+    return new ResponseEntity<>(list, HttpStatus.OK);
+  }
+
+  public ResponseEntity<?> viewGoalData( //
+      @RequestParam(required = false) Long goalDataId, //
+      @RequestParam(required = false) Long creationTime, //
+      @RequestParam(required = false) Long minCreationTime, //
+      @RequestParam(required = false) Long maxCreationTime, //
+      @RequestParam(required = false) Long creatorUserId, //
+      @RequestParam(required = false) Long goalId, //
+      @RequestParam(required = false) String name, //
+      @RequestParam(required = false) String partialName, //
+      @RequestParam(required = false) String description, //
+      @RequestParam(required = false) String partialDescription, //
+      @RequestParam(required = false) Long duration, //
+      @RequestParam(required = false) Long minDuration, //
+      @RequestParam(required = false) Long maxDuration, //
+      @RequestParam(required = false) Long timeUtilityFunctionId, //
+      @RequestParam(required = false) GoalDataStatusKind status, //
+      @RequestParam(defaultValue = "false") boolean onlyRecent, //
+      @RequestParam(defaultValue = "0") long offset, //
+      @RequestParam(defaultValue = "100") long count, //
+      @RequestParam String apiKey //
+  ) {
+
+    ApiKey key = getApiKeyIfValid(apiKey);
+    if (key == null) {
+      return Errors.API_KEY_UNAUTHORIZED.getResponse();
+    }
+
+    Stream<GoalData> list = goalDataService.query( //
+        goalDataId, //
+        creationTime, //
+        minCreationTime, //
+        maxCreationTime, //
+        creatorUserId, //
+        goalId, //
+        name, //
+        partialName, //
+        description, //
+        partialDescription, //
+        duration, //
+        minDuration, //
+        maxDuration, //
+        timeUtilityFunctionId, //
+        status, //
+        onlyRecent, //
+        offset, //
+        count //
+    ).map(x -> fillGoalData(x));
+    return new ResponseEntity<>(list, HttpStatus.OK);
+  }
+
+  @RequestMapping("/pastEvent/")
+  public ResponseEntity<?> viewPastEvent( //
+      @RequestParam(required = false) Long pastEventId, //
+      @RequestParam(required = false) Long creationTime, //
+      @RequestParam(required = false) Long minCreationTime, //
+      @RequestParam(required = false) Long maxCreationTime, //
+      @RequestParam(required = false) Long creatorUserId, //
+      @RequestParam(defaultValue = "0") long offset, //
+      @RequestParam(defaultValue = "100") long count, //
+      @RequestParam String apiKey //
+  ) {
+
+    ApiKey key = getApiKeyIfValid(apiKey);
+    if (key == null) {
+      return Errors.API_KEY_UNAUTHORIZED.getResponse();
+    }
+
+    Stream<PastEvent> list = pastEventService.query( //
+        pastEventId, //
+        creationTime, //
+        minCreationTime, //
+        maxCreationTime, //
+        creatorUserId, //
+        offset, //
+        count //
+    ).map(x -> fillPastEvent(x));
+    return new ResponseEntity<>(list, HttpStatus.OK);
+  }
+
+  public ResponseEntity<?> viewPastEventData( //
+      @RequestParam(required = false) Long pastEventDataId, //
+      @RequestParam(required = false) Long creationTime, //
+      @RequestParam(required = false) Long minCreationTime, //
+      @RequestParam(required = false) Long maxCreationTime, //
+      @RequestParam(required = false) Long creatorUserId, //
+      @RequestParam(required = false) Long pastEventId, //
+      @RequestParam(required = false) String name, //
+      @RequestParam(required = false) String partialName, //
+      @RequestParam(required = false) String description, //
+      @RequestParam(required = false) String partialDescription, //
+      @RequestParam(required = false) Long startTime, //
+      @RequestParam(required = false) Long minStartTime, //
+      @RequestParam(required = false) Long maxStartTime, //
+      @RequestParam(required = false) Long duration, //
+      @RequestParam(required = false) Long minDuration, //
+      @RequestParam(required = false) Long maxDuration, //
+      @RequestParam(required = false) Boolean active, //
+      @RequestParam(defaultValue = "false") boolean onlyRecent, //
+      @RequestParam(defaultValue = "0") long offset, //
+      @RequestParam(defaultValue = "100") long count, //
+      @RequestParam String apiKey //
+  ) {
+    ApiKey key = getApiKeyIfValid(apiKey);
+    if (key == null) {
+      return Errors.API_KEY_UNAUTHORIZED.getResponse();
+    }
+
+    Stream<PastEventData> list = pastEventDataService.query( //
+        pastEventDataId, //
+        creationTime, //
+        minCreationTime, //
+        maxCreationTime, //
+        creatorUserId, //
+        pastEventId, //
+        name, //
+        partialName, //
+        description, //
+        partialDescription, //
+        startTime, //
+        minStartTime, //
+        maxStartTime, //
+        duration, //
+        minDuration, //
+        maxDuration, //
+        active, //
+        onlyRecent, //
+        offset, //
+        count //
+    ).map(x -> fillPastEventData(x));
+    return new ResponseEntity<>(list, HttpStatus.OK);
+  }
+
+  public ResponseEntity<?> viewTask( //
+      @RequestParam(required = false) Long taskId, //
+      @RequestParam(required = false) Long creationTime, //
+      @RequestParam(required = false) Long minCreationTime, //
+      @RequestParam(required = false) Long maxCreationTime, //
+      @RequestParam(required = false) Long creatorUserId, //
+      @RequestParam(required = false) Long goalId, //
+      @RequestParam(required = false) String name, //
+      @RequestParam(required = false) String partialName, //
+      @RequestParam(required = false) Long startTime, //
+      @RequestParam(required = false) Long minStartTime, //
+      @RequestParam(required = false) Long maxStartTime, //
+      @RequestParam(required = false) TaskStatusKind status, //
+      @RequestParam(defaultValue = "false") boolean onlyRecent, //
+      @RequestParam(required = false) Long duration, //
+      @RequestParam(required = false) Long minDuration, //
+      @RequestParam(required = false) Long maxDuration, //
+      @RequestParam(defaultValue = "0") long offset, //
+      @RequestParam(defaultValue = "100") long count, //
+      @RequestParam String apiKey //
+  ) {
+    ApiKey key = getApiKeyIfValid(apiKey );
+    if (key == null) {
+      return Errors.API_KEY_UNAUTHORIZED.getResponse();
+    }
+
+    Stream<Task> list = taskService.query( //
+        taskId, //
+        creationTime, //
+        minCreationTime, //
+        maxCreationTime, //
+        creatorUserId, //
+        goalId, //
+        startTime, //
+        minStartTime, //
+        maxStartTime, //
+        status, //
+        onlyRecent, //
+        duration, //
+        minDuration, //
+        maxDuration, //
+        offset, //
+        count //
+    ).map(x -> fillTask(x));
+    return new ResponseEntity<>(list, HttpStatus.OK);
+  }
+
+  @RequestMapping("/timeUtilityFunction/")
+  public ResponseEntity<?> viewTimeUtilityFunction( //
+      @RequestParam(required = false) Long timeUtilityFunctionId, //
+      @RequestParam(required = false) Long creationTime, //
+      @RequestParam(required = false) Long minCreationTime, //
+      @RequestParam(required = false) Long maxCreationTime, //
+      @RequestParam(required = false) Long creatorUserId, //
+      @RequestParam(defaultValue = "0") long offset, //
+      @RequestParam(defaultValue = "100") long count, //
+      @RequestParam String apiKey //
+  ) {
+
+    ApiKey key = getApiKeyIfValid(apiKey);
+    if (key == null) {
+      return Errors.API_KEY_UNAUTHORIZED.getResponse();
+    }
+
+    Stream<TimeUtilityFunction> list = timeUtilityFunctionService.query( //
+        timeUtilityFunctionId, //
+        creationTime, //
+        minCreationTime, //
+        maxCreationTime, //
+        creatorUserId, //
+        offset, //
+        count //
+    ).map(x -> fillTimeUtilityFunction(x));
+    return new ResponseEntity<>(list, HttpStatus.OK);
+  }
+
+  @RequestMapping("/timeUtilityFunctionPoint/")
+  public ResponseEntity<?> viewTimeUtilityFunctionPoint( //
+      @RequestParam(required = false) Long timeUtilityFunctionPointId, //
+      @RequestParam(required = false) Long creationTime, //
+      @RequestParam(required = false) Long minCreationTime, //
+      @RequestParam(required = false) Long maxCreationTime, //
+      @RequestParam(required = false) Long creatorUserId, //
+      @RequestParam(required = false) Long timeUtilityFunctionId, //
+      @RequestParam(required = false) Long startTime, //
+      @RequestParam(required = false) Long minStartTime, //
+      @RequestParam(required = false) Long maxStartTime, //
+      @RequestParam(required = false) Long utils, //
+      @RequestParam(required = false) Long minUtils, //
+      @RequestParam(required = false) Long maxUtils, //
+      @RequestParam(required = false) Boolean active, //
+
+      @RequestParam(defaultValue = "0") long offset, //
+      @RequestParam(defaultValue = "100") long count, //
+      @RequestParam String apiKey //
+  ) {
+
+    ApiKey key = getApiKeyIfValid(apiKey);
+    if (key == null) {
+      return Errors.API_KEY_UNAUTHORIZED.getResponse();
+    }
+
+    Stream<TimeUtilityFunctionPoint> list = timeUtilityFunctionPointService.query( //
+        timeUtilityFunctionPointId, //
+        creationTime, //
+        minCreationTime, //
+        maxCreationTime, //
+        creatorUserId, //
+        timeUtilityFunctionId, //
+        startTime, //
+        minStartTime, //
+        maxStartTime, //
+        utils, //
+        minUtils, //
+        maxUtils, //
+        active, //
+        offset, //
+        count //
+    ).map(x -> fillTimeUtilityFunctionPoint(x));
+    return new ResponseEntity<>(list, HttpStatus.OK);
+  }
+
 }
