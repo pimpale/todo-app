@@ -1,6 +1,8 @@
 package todo;
 
 import java.util.stream.Stream;
+import java.util.List;
+import java.util.Comparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -173,6 +175,29 @@ public class ApiController {
     return pastEventData;
   }
 
+  /**
+   * Fills in jackson objects for TimeUtilityFunction
+   *
+   * @param timeUtilityFunction - TimeUtilityFunction object
+   * @return TimeUtilityFunction object with filled jackson objects
+   */
+  TimeUtilityFunction fillTimeUtilityFunction(TimeUtilityFunction timeUtilityFunction) {
+    timeUtilityFunction.creator = fillUser(userService.getByUserId(timeUtilityFunction.creatorUserId));
+    return timeUtilityFunction;
+  }
+
+  /**
+   * Fills in jackson objects for TimeUtilityFunctionPoint
+   *
+   * @param timeUtilityFunctionPoint - TimeUtilityFunctionPoint object
+   * @return TimeUtilityFunctionPoint object with filled jackson objects
+   */
+  TimeUtilityFunctionPoint fillTimeUtilityFunctionPoint(TimeUtilityFunctionPoint timeUtilityFunctionPoint) {
+    timeUtilityFunctionPoint.creator = fillUser(userService.getByUserId(timeUtilityFunctionPoint.creatorUserId));
+    timeUtilityFunctionPoint.timeUtilityFunction = fillTimeUtilityFunction(
+        timeUtilityFunctionService.getByTimeUtilityFunctionId(timeUtilityFunctionPoint.timeUtilityFunctionId));
+    return timeUtilityFunctionPoint;
+  }
 
   /**
    * Fills in jackson objects for Task
@@ -185,7 +210,6 @@ public class ApiController {
     task.goal = fillGoal(goalService.getByGoalId(task.creatorUserId));
     return task;
   }
-
 
   /**
    * Returns an apiKey if valid
@@ -536,7 +560,6 @@ public class ApiController {
     return new ResponseEntity<>(fillSubscription(subscription), HttpStatus.OK);
   }
 
-
   @RequestMapping("/goal/new/")
   public ResponseEntity<?> newGoal( //
       @RequestParam String name, //
@@ -574,7 +597,7 @@ public class ApiController {
       @RequestParam String description, //
       @RequestParam long duration, //
       @RequestParam long timeUtilityFunctionId, //
-      @RequestParam GoalDataStatusKind goalDataStatusKind, //
+      @RequestParam GoalDataStatusKind status, //
       @RequestParam String apiKey) {
     ApiKey key = getApiKeyIfValid(apiKey);
     if (key == null) {
@@ -582,11 +605,11 @@ public class ApiController {
     }
 
     Goal goal = goalService.getByGoalId(goalId);
-    if(goal == null ) {
+    if (goal == null) {
       return Errors.GOAL_NONEXISTENT.getResponse();
     }
 
-    if(goal.creatorUserId != key.creatorUserId) {
+    if (goal.creatorUserId != key.creatorUserId) {
       return Errors.API_KEY_UNAUTHORIZED.getResponse();
     }
 
@@ -598,11 +621,78 @@ public class ApiController {
     goalData.description = description;
     goalData.duration = duration;
     goalData.timeUtilityFunctionId = timeUtilityFunctionId;
-    goalData.status = goalDataStatusKind;
+    goalData.status = status;
 
     return new ResponseEntity<>(fillGoalData(goalData), HttpStatus.OK);
   }
 
+  @RequestMapping("/task/new/")
+  public ResponseEntity<?> newTask( //
+      @RequestParam long goalId, //
+      @RequestParam long startTime, //
+      @RequestParam TaskStatusKind status, //
+      @RequestParam String apiKey) {
+    ApiKey key = getApiKeyIfValid(apiKey);
+    if (key == null) {
+      return Errors.API_KEY_NONEXISTENT.getResponse();
+    }
+
+    Goal goal = goalService.getByGoalId(goalId);
+    if (goal == null) {
+      return Errors.GOAL_NONEXISTENT.getResponse();
+    }
+
+    // prevent other users from modifying
+    if (goal.creatorUserId != key.creatorUserId) {
+      return Errors.API_KEY_UNAUTHORIZED.getResponse();
+    }
+
+    Task task = new Task();
+    task.creationTime = System.currentTimeMillis();
+    task.creatorUserId = key.creatorUserId;
+    task.goalId = goal.goalId;
+    task.startTime = startTime;
+    task.status = status;
+
+    return new ResponseEntity<>(fillTask(task), HttpStatus.OK);
+  }
+
+  class TimeUtilityFunctionPointArg {
+      long startTime;
+      long utils;
+  }
+
+  @RequestMapping("/timeUtilityFunction/new/")
+  public ResponseEntity<?> newTimeUtilityFunction( //
+      @RequestParam long startTime, //
+      @RequestParam List<TimeUtilityFunctionPoint> points, //
+      @RequestParam String apiKey
+  ) {
+    ApiKey key = getApiKeyIfValid(apiKey);
+    if (key == null) {
+      return Errors.API_KEY_NONEXISTENT.getResponse();
+    }
+
+    // check it has a point at zero and a point at max
+    points.sort((a, b) -> (int)(a.startTime - b.startTime));
+    if(points.size() < 1) {
+      return Errors.TIME_UTILITY_FUNCTION_NOT_VALID.getResponse();
+    }
+
+    TimeUtilityFunction timeUtilityFunction = new TimeUtilityFunction();
+    timeUtilityFunction.creationTime = System.currentTimeMillis();
+    timeUtilityFunction.creatorUserId = key.creatorUserId;
+    timeUtilityFunctionService.add(timeUtilityFunction);
+
+    for(int i = 0; i < points.size(); i++) {
+      TimeUtilityFunctionPoint timeUtilityFunctionPoint = new TimeUtilityFunctionPoint();
+      timeUtilityFunctionPoint.creationTime = System.currentTimeMillis();
+      timeUtilityFunctionPoint.creatorUserId = key.creatorUserId;
+      timeUtilityFunctionPoint.timeUtilityFunctionId = timeUtilityFunction.timeUtilityFunctionId;
+      timeUtilityFunctionPointService.add(timeUtilityFunctionPoint);
+    }
+    return new ResponseEntity<>(fillTimeUtilityFunction(timeUtilityFunction), HttpStatus.OK);
+  }
 
   @RequestMapping("/pastEvent/new/")
   public ResponseEntity<?> newPastEvent( //
@@ -633,7 +723,6 @@ public class ApiController {
     return new ResponseEntity<>(fillPastEventData(pastEventData), HttpStatus.OK);
   }
 
-
   @RequestMapping("/pastEventData/new/")
   public ResponseEntity<?> newPastEventData( //
       @RequestParam long pastEventId, //
@@ -648,11 +737,11 @@ public class ApiController {
     }
 
     PastEvent pastEvent = pastEventService.getByPastEventId(pastEventId);
-    if(pastEvent == null ) {
+    if (pastEvent == null) {
       return Errors.PAST_EVENT_NONEXISTENT.getResponse();
     }
 
-    if(pastEvent.creatorUserId != key.creatorUserId) {
+    if (pastEvent.creatorUserId != key.creatorUserId) {
       return Errors.API_KEY_UNAUTHORIZED.getResponse();
     }
 
@@ -667,9 +756,6 @@ public class ApiController {
 
     return new ResponseEntity<>(fillPastEventData(pastEventData), HttpStatus.OK);
   }
-
-
-
 
   @RequestMapping("/password/")
   public ResponseEntity<?> viewPassword( //
@@ -743,6 +829,5 @@ public class ApiController {
     ).map(x -> fillApiKey(x));
     return new ResponseEntity<>(list, HttpStatus.OK);
   }
-
 
 }
