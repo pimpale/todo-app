@@ -24,6 +24,10 @@ class SimpleLayout extends React.Component {
               <ArrowForward />Register
             </a>
             <br />
+            <a href="/todo_list" className="text-light">
+              <ArrowForward />Todo List
+            </a>
+            <br />
             <a href="/terms_of_service" className="text-light">
               <ArrowForward />Terms of Service
             </a>

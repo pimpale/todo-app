@@ -82,6 +82,7 @@ class ExternalHeader extends React.Component<ExternalHeaderProps, ExternalHeader
                 <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/feed">Login</a>
                 <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/register">Register</a>
                 <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/instructions">Instructions</a>
+                <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/todo_list">Todo List</a>
               </div>
             </div>
           </div>
