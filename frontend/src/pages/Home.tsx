@@ -8,7 +8,7 @@ import Section from '../components/Section';
 function Home() {
 
   const jumboStyle = {
-    height: "50vh",
+    height: "60vh",
     alignItems: "center",
     backgroundAttachment: "fixed",
     backgroundPosition: "center",
