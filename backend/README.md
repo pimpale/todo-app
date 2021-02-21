@@ -183,28 +183,26 @@ This service is designed to run on posix environments.
 
 6. Now that our dependencies are installed, we need to git clone our repositories.
 
-    A few important notes before we begin for Windows users on WSL:
-    * **Never edit WSL files from inside Windows,** this can [damage your installation]( https://devblogs.microsoft.com/commandline/do-not-change-linux-files-using-windows-apps-and-tools/ ).
-    * **Please git clone your repositories inside your Windows user directory.**
-    * You can access your Windows user directory from WSL without issues, just not the other way around.
-      * `cd '/mnt/c/Users/<your Windows username>/'`, where `<your Windows username>` is your username on Windows.
-
     Instructions:
-    1. Windows users need to pick a directory not inside WSL. If you don't use WSL, you can skip to step 2.
-        This command navigates to your user home directory.
-        ```
-        cd '/mnt/c/Users/<your Windows username>/'
-        ```
-        Replace `<your Windows username>` with your username on Windows.
-    2. We're creating a workspace directory in order to reduce clutter. 
+    1. We're creating a workspace directory in order to reduce clutter. 
         This is optional, but recommended.
         ```
+        cd ~
         mkdir workspace
         cd workspace
         ```
-    3. Now, git clone the repositories:
+        The name and location of this folder is up to you.
+        If you want to pick a different location, it should work equally well.
+    2. Now, git clone the repositories:
 
-        This depends on which team you're on:
+        First, let's ensure you're in the right directory.
+        To go into the workspace directory we created in the last step you can run:
+        ```
+        cd ~/workspace # or whatever else you chose
+        ```
+        If you chose your own directory, your command will be different.
+
+        Which git repository to clone depends on which team you're on:
         * todo-app developers:
            ```
            git clone https://github.com/pimpale/todo-app
