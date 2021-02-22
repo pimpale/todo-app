@@ -9,7 +9,7 @@ import CalendarCard from '../components/CalendarCard';
 
 import { Tab, Tabs, Form, Popover, Container, Row, Col, Card } from 'react-bootstrap';
 import { viewSessionData, viewSessionRequest, isApiErrorCode, viewCourseMembership } from '../utils/utils';
-import { viewSessionRequestResponse, viewCommittment, viewCourseData, viewCommittmentResponse } from '../utils/utils';
+import { viewTask, viewPastEvent, viewPastEventData, viewGoal, viewGoalData } from '../utils/utils';
 
 import { ViewSession, ViewSessionRequestResponse, ViewCommittment, ViewCommittmentResponse } from '../components/ViewData';
 
@@ -26,8 +26,8 @@ import { sessionToEvent, sessionRequestToEvent, sessionRequestResponseToEvent, c
 type EventCalendarProps = {
   apiKey: ApiKey,
   showAllHours: boolean,
-  courseMemberships: CourseMembership[],
-  activeCourseDatas: CourseData[]
+  //courseMemberships: CourseMembership[],
+  //activeCourseDatas: CourseData[]
 }
 
 // TODO make it so that selected data and selected modals are equivalent
@@ -72,208 +72,51 @@ function EventCalendar(props: EventCalendarProps) {
       apiKey: props.apiKey.key
     });
 
-    const maybeSessionRequestResponses = await viewSessionRequestResponse({
-      attendeeUserId: props.apiKey.creator.userId,
+    const maybePastEventData = await viewPastEventData({
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
-      responded: false,
       apiKey: props.apiKey.key
     });
 
-    const maybeCommittments = await viewCommittment({
-      attendeeUserId: props.apiKey.creator.userId,
+    const maybePastEvents = await viewPastEventData({
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
-      fromRequestResponse: false,
-      responded: false,
+      onlyRecent: true,
       apiKey: props.apiKey.key
     });
 
-    const maybeCommittmentResponses = await viewCommittmentResponse({
-      attendeeUserId: props.apiKey.creator.userId,
+    const maybeTasks = await viewTask({
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
       apiKey: props.apiKey.key
     });
 
     // note that we mark these with "STUDENT" to show that these are existing in our student capacity
-    const studentEvents = [
-      ...isApiErrorCode(maybeSessionRequests)
-        ? []
-        : maybeSessionRequests
-          .map(x => {
-            const courseData = props.activeCourseDatas
-              .find(cd => cd.course.courseId === x.course.courseId);
-            // means that course is hidden
-            if (courseData === undefined) {
-              return null;
-            }
-            return sessionRequestToEvent({
-              sessionRequest: x,
-              courseData: courseData,
-              relation: "STUDENT"
-            });
-          })
-          // remove nulls
-          .filter((x): x is EventInput => x !== null)
-      ,
+    const pastEventData = isApiErrorCode(maybePastEventData) ? [] : maybePastEventData.map((data: PastEventData) => ({
+      id: `PastEventData:${data.pastEventDataId}`,
+      start: new Date(data.startTime),
+      end: new Date(data.startTime + data.duration),
+      color: "#00000000",
+      borderColor: "#00000000",
+      extendedProps: data
+    }))
+  
+    const task = isApiErrorCode(maybeTasks) ? [] : maybeTasks.map((data: Task) => ({
+      id: `Task:${data.taskId}`,
+      start: new Date(data.startTime),
+      end: new Date(data.startTime + data.duration),
+      color: "#00000000",
+      borderColor: "#00000000",
+      extendedProps: data
+    }))
 
-      ...isApiErrorCode(maybeSessionRequestResponses)
-        ? []
-        : (await Promise.all(maybeSessionRequestResponses
-          // hide things you cancelled yourself
-          .filter(x => x.creator.userId !== props.apiKey.creator.userId)
-          .map(async x => {
-            const courseData = props.activeCourseDatas
-              .find(cd => cd.course.courseId === x.sessionRequest.course.courseId);
-            // means that course is hidden
-            if (courseData === undefined) {
-              return null;
-            }
 
-            if (!x.accepted) {
-              return sessionRequestResponseToEvent({
-                sessionRequestResponse: x,
-                courseData: courseData,
-                relation: "STUDENT"
-              });
-            }
-
-            // if accepted, we need to get the location of the committment
-            const maybeSessionData = await viewSessionData({
-              sessionId: x.committment.session.sessionId,
-              onlyRecent: true,
-              apiKey: props.apiKey.key
-            });
-            if (isApiErrorCode(maybeSessionData)) {
-              return null;
-            }
-
-            // we have an invariant that any session must have at least one session data, so its ok
-            return sessionRequestResponseToEvent({
-              sessionRequestResponse: x,
-              sessionData: maybeSessionData[0],
-              courseData: courseData,
-              relation: "STUDENT"
-            });
-          })))
-          // remove nulls
-          .filter((x): x is EventInput => x !== null)
-      ,
-
-      ...isApiErrorCode(maybeCommittments)
-        ? []
-        : (await Promise.all(maybeCommittments
-          .map(async x => {
-            const courseData = props.activeCourseDatas
-              .find(cd => cd.course.courseId === x.session.course.courseId);
-            // means that course is hidden
-            if (courseData === undefined) {
-              return null;
-            }
-
-            const maybeSessionData = await viewSessionData({
-              sessionId: x.session.sessionId,
-              onlyRecent: true,
-              apiKey: props.apiKey.key
-            });
-            if (isApiErrorCode(maybeSessionData)) {
-              return null;
-            }
-
-            // we have an invariant that any session must have at least one session data, so its ok
-            return committmentToEvent({
-              committment: x,
-              sessionData: maybeSessionData[0],
-              courseData: courseData,
-              relation: "STUDENT"
-            });
-          })))
-          .filter((x): x is EventInput => x !== null)
-      ,
-
-      ...isApiErrorCode(maybeCommittmentResponses)
-        ? []
-        : (await Promise.all(maybeCommittmentResponses
-          .map(async x => {
-            const courseData = props.activeCourseDatas
-              .find(cd => cd.course.courseId === x.committment.session.course.courseId);
-            // means that course is hidden
-            if (courseData === undefined) {
-              return null;
-            }
-
-            const maybeSessionData = await viewSessionData({
-              sessionId: x.committment.session.sessionId,
-              onlyRecent: true,
-              apiKey: props.apiKey.key
-            });
-            if (isApiErrorCode(maybeSessionData)) {
-              return null;
-            }
-
-            // we have an invariant that any session must have at least one session data, so its ok
-            return committmentResponseToEvent({
-              committmentResponse: x,
-              sessionData: maybeSessionData[0],
-              relation: "STUDENT"
-            });
-          })))
-          .filter((x): x is EventInput => x !== null)
-      ,
-
-    ];
-
-    const instructorEvents = // promise all waits on an array of promises
-      (await Promise.all(props.courseMemberships
-        .filter(x => x.courseMembershipKind === "INSTRUCTOR")
-        .map(async (x: CourseMembership) => {
-          // for each membership i have:
-
-          // if no matches
-          const courseData = props.activeCourseDatas.find(cd => cd.course.courseId === x.course.courseId);
-          if (courseData === undefined) {
-            return [];
-          }
-
-          const maybeSessionData = await viewSessionData({
-            courseId: x.course.courseId,
-            minStartTime: args.start.valueOf(),
-            maxStartTime: args.end.valueOf(),
-            onlyRecent: true,
-            active: true,
-            apiKey: props.apiKey.key,
-          });
-
-          const maybeSessionRequests = await viewSessionRequest({
-            courseId: x.course.courseId,
-            minStartTime: args.start.valueOf(),
-            maxStartTime: args.end.valueOf(),
-            responded: false,
-            apiKey: props.apiKey.key
-          });
-
-          // return an array made out of each session / session request converted to a calendar event
-          // note that we mark these with "INSTRUCTOR" to show that these are existing in our instructor capacity
-          return [
-            ...isApiErrorCode(maybeSessionRequests)
-              ? []
-              : maybeSessionRequests.map(x => sessionRequestToEvent({
-                sessionRequest: x,
-                courseData: courseData,
-                relation: "INSTRUCTOR"
-              })),
-            ...isApiErrorCode(maybeSessionData)
-              ? []
-              : maybeSessionData.map(x => sessionToEvent({
-                sessionData: x,
-                relation: "INSTRUCTOR"
-              })),
-          ];
-        }))).flat();
-
-    return [...studentEvents, ...instructorEvents];
+    return [...pastEventData, ...task];
+    
   }
+
+  
+
 
   //this handler runs any time we recieve a click on an event
   const clickHandler = (eca: EventClickArg) => {
