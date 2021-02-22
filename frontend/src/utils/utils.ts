@@ -248,19 +248,154 @@ export async function viewApiKey(props: ViewApiKeyProps): Promise<ApiKey[] | Api
   return await fetchApi("apiKey/", getFormData(props));
 }
 
-export type ViewCourseProps = {
-  courseId?: number, //
+export type ViewGoalProps = {
+  goalId?: number, //
   creationTime?: number, //
   minCreationTime?: number, //
   maxCreationTime?: number, //
   creatorUserId?: number, //
-  schoolId?: number, //
-  name?: string, //
-  partialName?: string, //
-  description?: string, //
   offset?: number,
   count?: number,
   apiKey: string,
+}
+
+export async function viewGoal(props: ViewGoalProps): Promise<Goal[] | ApiErrorCode> {
+  return await fetchApi("goal/", getFormData(props));
+}
+
+
+
+export type ViewGoalDataProps = {
+  goalDataId?: number, //
+  creationTime?: number, //
+  minCreationTime?: number, //
+  maxCreationTime?: number, //
+  creatorUserId?: number, //
+  goalId?: number,
+  name?: string,
+  partialName?: string,
+  description?: string,
+  partialDescription?: string,
+  duration?: number,
+  minDuration?: number,
+  maxDuration?: number,
+  timeUtilityFunctionId?: number,
+  status?: GoalDataStatusKind,
+  offset?: number,
+  count?: number,
+  apiKey: string,
+}
+
+export async function viewGoalData(props: ViewGoalDataProps): Promise<GoalData[] | ApiErrorCode> {
+  return await fetchApi("goalData/", getFormData(props));
+}
+
+export type ViewPastEventProps = {
+  pastEventId?: number, //
+  creationTime?: number, //
+  minCreationTime?: number, //
+  maxCreationTime?: number, //
+  creatorUserId?: number, //
+  offset?: number,
+  count?: number,
+  apiKey: string,
+}
+
+export async function viewPastEvent(props: ViewPastEventProps): Promise<PastEvent[] | ApiErrorCode> {
+  return await fetchApi("pastEvent/", getFormData(props));
+}
+
+export type ViewPastEventDataProps = {
+  pastEventDataId?: number, //
+  creationTime?: number, //
+  minCreationTime?: number, //
+  maxCreationTime?: number, //
+  creatorUserId?: number, //
+  pastEventId?: number,
+  name?: string,
+  partialName?: string,
+  description?: string,
+  partialDescription?: string,
+  startTime?: number,
+  minStartTime?: number,
+  maxStartTime?: number,
+  duration?: number,
+  minDuration?: number,
+  maxDuration?: number,
+  active?: boolean,
+  onlyRecent?: boolean,
+  offset?: number,
+  count?: number,
+  apiKey: string,
+}
+
+export async function viewPastEventData(props: ViewPastEventDataProps): Promise<PastEventData[] | ApiErrorCode> {
+  return await fetchApi("pastEventData/", getFormData(props));
+}
+
+export type ViewTaskProps = {
+  taskId?: number, //
+  creationTime?: number, //
+  minCreationTime?: number, //
+  maxCreationTime?: number, //
+  creatorUserId?: number, //
+  goalId?: number,
+  name?: string,
+  partialName?: string,
+  startTime?: number,
+  minStartTime?: number,
+  maxStartTime?: number,
+  status?: TaskStatusKind,
+  onlyRecent?: boolean,
+  duration?: number,
+  minDuration?: number,
+  maxDuration?: number,
+  active?: boolean,
+  offset?: number,
+  count?: number,
+  apiKey: string,
+}
+
+export async function viewTask(props: ViewTaskProps): Promise<Task[] | ApiErrorCode> {
+  return await fetchApi("task/", getFormData(props));
+}
+
+export type ViewTimeUtilityFunctionProps = {
+  timeUtilityFunctionId?: number, //
+  creationTime?: number, //
+  minCreationTime?: number, //
+  maxCreationTime?: number, //
+  creatorUserId?: number, //
+  offset?: number,
+  count?: number,
+  apiKey: string,
+}
+
+export async function viewTimeUtilityFunction(props: ViewTimeUtilityFunctionProps): Promise<TimeUtilityFunction[] | ApiErrorCode> {
+  return await fetchApi("timeUtilityFunction/", getFormData(props));
+}
+
+export type ViewTimeUtilityFunctionPointProps = {
+  timeUtilityFunctionPointId?: number, //
+  creationTime?: number, //
+  minCreationTime?: number, //
+  maxCreationTime?: number, //
+  creatorUserId?: number, //
+  timeUtilityFunctionId?: number,
+  startTime?: number,
+  minStartTime?: number,
+  maxStartTime?: number,
+  utils?: number,
+  minUtils?: number,
+  maxUtils?: number,
+  active?: boolean,
+  offset?: number,
+  count?: number,
+  apiKey: string,
+}
+
+export async function viewTimeUtilityFunctionPoint(props: ViewTimeUtilityFunctionPointProps): Promise<TimeUtilityFunctionPoint[] | ApiErrorCode> {
+  return await fetchApi("timeUtilityFunctionPoint/", getFormData(props));
 }
 
 export function isApiErrorCode(maybeApiErrorCode: any): maybeApiErrorCode is ApiErrorCode {
