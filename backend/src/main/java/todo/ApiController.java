@@ -586,6 +586,7 @@ public class ApiController {
     goalData.duration = duration;
     goalData.timeUtilityFunctionId = timeUtilityFunctionId;
     goalData.status = GoalDataStatusKind.PENDING;
+    goalDataService.add(goalData);
 
     return new ResponseEntity<>(fillGoalData(goalData), HttpStatus.OK);
   }
@@ -622,6 +623,7 @@ public class ApiController {
     goalData.duration = duration;
     goalData.timeUtilityFunctionId = timeUtilityFunctionId;
     goalData.status = status;
+    goalDataService.add(goalData);
 
     return new ResponseEntity<>(fillGoalData(goalData), HttpStatus.OK);
   }
@@ -655,6 +657,7 @@ public class ApiController {
     task.startTime = startTime;
     task.duration = duration;
     task.status = status;
+    taskService.add(task);
 
     return new ResponseEntity<>(fillTask(task), HttpStatus.OK);
   }
@@ -722,6 +725,7 @@ public class ApiController {
     pastEventData.startTime = startTime;
     pastEventData.duration = duration;
     pastEventData.active = true;
+    pastEventDataService.add(pastEventData);
 
     return new ResponseEntity<>(fillPastEventData(pastEventData), HttpStatus.OK);
   }
@@ -758,6 +762,7 @@ public class ApiController {
     pastEventData.startTime = startTime;
     pastEventData.duration = duration;
     pastEventData.active = active;
+    pastEventDataService.add(pastEventData);
 
     return new ResponseEntity<>(fillPastEventData(pastEventData), HttpStatus.OK);
   }

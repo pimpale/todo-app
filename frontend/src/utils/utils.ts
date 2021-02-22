@@ -192,9 +192,9 @@ export async function newGoal(props: NewGoalProps): Promise<GoalData | ApiErrorC
 }
 
 export type NewGoalDataProps = {
+  goalId: number, //
   name: string, //
   description: string, //
-  startTime: number, //
   duration: number, //
   timeUtilityFunctionId: number, //
   status: GoalDataStatusKind, //
@@ -365,6 +365,7 @@ export type ViewGoalDataProps = {
   maxDuration?: number,
   timeUtilityFunctionId?: number,
   status?: GoalDataStatusKind,
+  onlyRecent?: boolean,
   offset?: number,
   count?: number,
   apiKey: string,

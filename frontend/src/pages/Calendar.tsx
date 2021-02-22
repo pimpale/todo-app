@@ -8,14 +8,14 @@ import DashboardLayout from '../components/DashboardLayout';
 import CalendarCard from '../components/CalendarCard';
 
 import { Tab, Tabs, Form, Popover, Container, Row, Col, Card } from 'react-bootstrap';
-import { viewTask, viewPastEventData, viewGoal, viewGoalData, isApiErrorCode} from '../utils/utils';
+import { viewTask, viewPastEventData, viewGoal, viewGoalData, isApiErrorCode } from '../utils/utils';
 
 import UtilityWrapper from '../components/UtilityWrapper';
 
 import CreatePastEvent from '../components/CreatePastEvent';
 import CreateTask from '../components/CreateTask';
 import ManagePastEvent from '../components/ManagePastEvent';
-import UserManageTask from '../components/UserManageTask';
+import ManageTask from '../components/ManageTask';
 import DisplayModal from '../components/DisplayModal';
 
 type EventCalendarProps = {
@@ -38,7 +38,7 @@ function EventCalendar(props: EventCalendarProps) {
 
   // the currently selected data
   const [selectedManageTask, setSelectedManageTask] = React.useState<Task | null>(null);
-  const [selectedManagePastEvent, setSelectedManagePastEvent] = React.useState<PastEvent | null>(null);
+  const [selectedManagePastEventData, setSelectedManagePastEventData] = React.useState<PastEventData | null>(null);
 
   const calendarRef = React.useRef<FullCalendar | null>(null);
 
@@ -55,12 +55,14 @@ function EventCalendar(props: EventCalendarProps) {
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
       onlyRecent: true,
+      active:true,
       apiKey: props.apiKey.key
     });
 
     const maybeTasks = await viewTask({
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
+      status: "VALID",
       apiKey: props.apiKey.key
     });
 
@@ -77,14 +79,30 @@ function EventCalendar(props: EventCalendarProps) {
 
     const task = isApiErrorCode(maybeTasks)
       ? []
-      : maybeTasks.map(t => ({
-        id: `Task:${t.taskId}`,
-        start: new Date(t.startTime),
-        end: new Date(t.startTime + t.duration),
-        color: "#00000000",
-        borderColor: "#00000000",
-        task: t
-      }))
+      : await Promise.all(
+        maybeTasks.flatMap(async t => {
+          const maybeGoalData = await viewGoalData({
+            goalId: t.goal.goalId,
+            onlyRecent: true,
+            apiKey: props.apiKey.key
+          });
+
+          if (isApiErrorCode(maybeGoalData)) {
+            return [];
+          }
+
+          // we have an invariant that any session must have at least one session data, so its ok
+          return [{
+            id: `Task:${t.taskId}`,
+            start: new Date(t.startTime),
+            end: new Date(t.startTime + t.duration),
+            color: "#00000000",
+            borderColor: "#00000000",
+            task: t,
+            goalData: t
+          }]
+        })
+      );
 
     return [...pastEventData, ...task];
   }
@@ -95,7 +113,7 @@ function EventCalendar(props: EventCalendarProps) {
     // we switch on what type it is
     switch (eca.event.id.split(':')[0]) {
       case "PastEventData": {
-        setSelectedManagePastEvent(props.pastEventData);
+        setSelectedManagePastEventData(props.pastEventData);
         break;
       }
       case "Task": {
@@ -118,7 +136,7 @@ function EventCalendar(props: EventCalendarProps) {
       height={"auto"}
       datesSet={({ view }) => /* Keeps window size in sync */view.calendar.updateSize()}
       allDaySlot={false}
-      slotDuration="00:15:00"
+      slotDuration="00:30:00"
       nowIndicator={true}
       editable={false}
       selectable={true}
@@ -127,13 +145,6 @@ function EventCalendar(props: EventCalendarProps) {
       eventContent={CalendarCard}
       unselectCancel=".modal-content"
       eventClick={clickHandler}
-      businessHours={{
-        daysOfWeek: [1, 2, 3, 4, 5], // MTWHF
-        startTime: "08:00", // 8am
-        endTime: "18:00", // 6pm
-        startRecur: new Date()
-      }}
-      selectConstraint="businessHours"
       unselect={() => {
         setSelectedSpan(null);
       }}
@@ -161,9 +172,9 @@ function EventCalendar(props: EventCalendarProps) {
       >
         <Tabs className="py-3">
           <Tab eventKey="task" title="Create Task">
-            <UserCreateSession
+            <CreateTask
               apiKey={props.apiKey}
-              start={selectedSpan.start}
+              startTime={selectedSpan.start}
               duration={selectedSpan.duration}
               postSubmit={() => setSelectedSpan(null)}
             />
@@ -179,191 +190,35 @@ function EventCalendar(props: EventCalendarProps) {
         </Tabs>
       </DisplayModal>
     }
-    {selectedManageSession === null ? <> </> :
+    {selectedManagePastEventData === null ? <> </> :
       <DisplayModal
-        title="Manage Session"
-        show={selectedManageSession !== null}
-        onClose={() => setSelectedManageSession(null)}
+        title="Manage Event"
+        show={selectedManagePastEventData !== null}
+        onClose={() => setSelectedManagePastEventData(null)}
       >
-        <UserManageSession session={selectedManageSession} apiKey={props.apiKey} />
+        <ManagePastEvent pastEventId={selectedManagePastEventData.pastEvent.pastEventId} apiKey={props.apiKey} />
       </DisplayModal>
     }
-    {selectedViewSession === null ? <> </> :
+    {selectedManageTask === null ? <> </> :
       <DisplayModal
-        title="View Session"
-        show={selectedManageSession !== null}
-        onClose={() => setSelectedViewSession(null)}
+        title="Manage Event"
+        show={selectedManageTask !== null}
+        onClose={() => setSelectedManageTask(null)}
       >
-        <ViewSession session={selectedViewSession} expanded apiKey={props.apiKey} />
-      </DisplayModal>
-    }
-    {selectedReviewSessionRequest === null ? <> </> :
-      <DisplayModal
-        title="Review Student Request"
-        show={selectedReviewSessionRequest !== null}
-        onClose={() => setSelectedReviewSessionRequest(null)}
-      >
-        <UserReviewSessionRequest
-          sessionRequest={selectedReviewSessionRequest}
-          apiKey={props.apiKey}
-          postSubmit={() => setSelectedReviewSessionRequest(null)}
-        />
-      </DisplayModal>
-    }
-    {selectedManageSessionRequest === null ? <> </> :
-      <DisplayModal
-        title="Manage your Session Request"
-        show={selectedManageSessionRequest !== null}
-        onClose={() => setSelectedManageSessionRequest(null)}
-      >
-        <StudentManageSessionRequest
-          sessionRequest={selectedManageSessionRequest}
-          apiKey={props.apiKey}
-          postSubmit={() => setSelectedManageSessionRequest(null)}
-        />
-      </DisplayModal>
-    }
-    {selectedViewSessionRequestResponse === null ? <> </> :
-      <DisplayModal
-        title="View Session Request Response"
-        show={selectedViewSessionRequestResponse !== null}
-        onClose={() => setSelectedViewSessionRequestResponse(null)}
-      >
-        <ViewSessionRequestResponse
-          sessionRequestResponse={selectedViewSessionRequestResponse}
-          apiKey={props.apiKey}
-          expanded
-        />
-      </DisplayModal>
-    }
-    {selectedViewCommittment === null ? <> </> :
-      <DisplayModal
-        title="View Committment"
-        show={selectedViewCommittment !== null}
-        onClose={() => setSelectedViewCommittment(null)}
-      >
-        <ViewCommittment
-          committment={selectedViewCommittment}
-          apiKey={props.apiKey}
-          expanded
-        />
-      </DisplayModal>
-    }
-    {selectedViewCommittmentResponse === null ? <> </> :
-      <DisplayModal
-        title="View Attendance"
-        show={selectedViewCommittmentResponse !== null}
-        onClose={() => setSelectedViewCommittmentResponse(null)}
-      >
-        <ViewCommittmentResponse
-          committmentResponse={selectedViewCommittmentResponse}
-          apiKey={props.apiKey}
-          expanded
-        />
+        <ManageTask taskId={selectedManageTask.taskId} apiKey={props.apiKey} />
       </DisplayModal>
     }
   </>
 }
 
-const loadCourseMemberships = async (props: AsyncProps<CourseMembership[]>) => {
-  const maybeCourseMembership = await viewCourseMembership({
-    userId: props.apiKey.creator.userId,
-    onlyRecent: true,
-    apiKey: props.apiKey.key,
-  });
-  if (isApiErrorCode(maybeCourseMembership)) {
-    throw Error;
-  }
-  return maybeCourseMembership;
-}
-
-
-const loadCourseData = async (props: AsyncProps<CourseData[]>) => {
-  const maybeCourseData = await viewCourseData({
-    recentMemberUserId: props.apiKey.creator.userId,
-    onlyRecent: true,
-    apiKey: props.apiKey.key,
-  });
-
-  if (isApiErrorCode(maybeCourseData)) {
-    throw Error;
-  }
-  // there's an invariant that there must always be one course data per valid course id
-  return maybeCourseData;
-}
-
-
-
 function CalendarWidget(props: AuthenticatedComponentProps) {
-  const [showAllHours, setShowAllHours] = React.useState(false);
-  const [hiddenCourses, setHiddenCourses] = React.useState<number[]>([]);
-
-
   return <UtilityWrapper title="Upcoming Appointments">
     <Popover id="information-tooltip">
       This screen shows all future appointments.
       You can click any date to add an appointment on that date,
       or click an existing appointment to delete it.
     </Popover>
-    <Async promiseFn={loadCourseData} apiKey={props.apiKey}>
-      <Async.Pending>
-        <Loader />
-      </Async.Pending>
-      <Async.Rejected>
-        <Form.Text className="text-danger">An unknown error has occured.</Form.Text>
-      </Async.Rejected>
-      <Async.Fulfilled<CourseData[]>>{cds =>
-        <Row>
-          <Col sm>
-            <Card className="my-3 mx-3">
-              <Card.Body>
-                <Card.Title> View Settings </Card.Title>
-                <Form.Check
-                  checked={showAllHours}
-                  onChange={_ => setShowAllHours(!showAllHours)}
-                  label="Show All Hours"
-                />
-                {cds.length === 0
-                  ? <> </>
-                  : <Card.Subtitle className="my-2"> Hide Courses </Card.Subtitle>
-                }
-                {cds.map((cd: CourseData) =>
-                  <Form.Check
-                    checked={hiddenCourses.includes(cd.course.courseId)}
-                    onChange={_ => setHiddenCourses(
-                      hiddenCourses.includes(cd.course.courseId)
-                        // if its included, remove it
-                        ? hiddenCourses.filter(ci => ci !== cd.course.courseId)
-                        // if its not included, disinclude it
-                        : [...hiddenCourses, cd.course.courseId]
-                    )}
-                    label={`Hide ${cd.name}`}
-                  />)}
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col lg={10}>
-            <Async promiseFn={loadCourseMemberships} apiKey={props.apiKey}>
-              <Async.Pending>
-                <Loader />
-              </Async.Pending>
-              <Async.Rejected>
-                <Form.Text className="text-danger">An unknown error has occured.</Form.Text>
-              </Async.Rejected>
-              <Async.Fulfilled<CourseMembership[]>>{cms =>
-                <EventCalendar
-                  activeCourseDatas={cds.filter(cm => !hiddenCourses.includes(cm.course.courseId))}
-                  apiKey={props.apiKey}
-                  showAllHours={showAllHours}
-                  courseMemberships={cms}
-                />
-              }
-              </Async.Fulfilled>
-            </Async>
-          </Col>
-        </Row>}
-      </Async.Fulfilled>
-    </Async>
+    <EventCalendar apiKey={props.apiKey} />
   </UtilityWrapper>
 };
 

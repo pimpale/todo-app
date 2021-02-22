@@ -21,7 +21,7 @@ import ResetPassword from './pages/ResetPassword';
 import Calendar from './pages/Calendar';
 
 // todo list
-import TodoList from './pages/TodoList';
+import Dashboard from './pages/Dashboard';
 
 // settings
 import Settings from './pages/Settings';
@@ -62,10 +62,9 @@ function App() {
         <Route path="/reset_password" component={ResetPassword} />
         <Route path="/register" component={Register} />
         <Route path="/register_confirm" component={RegisterConfirm} />
-        <Route path="/todo_list" component={TodoList} />
-        <AuthenticatedRoute path="/calendar" {...apiKeyGetSetter} component={Settings} />
+        <AuthenticatedRoute path="/calendar" {...apiKeyGetSetter} component={Calendar} />
         <AuthenticatedRoute path="/settings" {...apiKeyGetSetter} component={Settings} />
-        <AuthenticatedRoute path="/feed" {...apiKeyGetSetter} component={Settings} />
+        <AuthenticatedRoute path="/dashboard" {...apiKeyGetSetter} component={Settings} />
         <Route path="/" component={Error404} />
       </Switch>
     </BrowserRouter>
