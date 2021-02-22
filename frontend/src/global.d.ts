@@ -1,23 +1,8 @@
 declare global {
-
-
-  type VerificationChallenge = {
-    creationTime: number,
-    name: string,
-    email: string,
-  }
-
-  type User = {
-    userId: number,
-    creationTime: number,
-    name: string,
-    email: string,
-  }
-
   type PasswordReset = {
     creationTime: number;
   }
-
+  // changes with PasswordKind and Password in the future?
   type PasswordKind = "CHANGE" | "RESET" | "CANCEL";
 
   type Password = {
@@ -36,14 +21,27 @@ declare global {
     passwordReset: PasswordReset,
   }
 
+  type VerificationChallenge = {
+    creationTime: number,
+    name: string,
+    email: string,
+  }
+
+  type User = {
+    userId: number,
+    creationTime: number,
+    name: string,
+    email: string,
+  }
+
   type SubscriptionKind = "VALID" | "CANCEL";
 
   type Subscription = {
-    subscriptionId:number,
-    creationTime:number,
-    creator:User,
-    subscriptionKind:SubscriptionKind,
-    maxUses:number
+    subscriptionId: number,
+    creationTime: number,
+    creator: User,
+    subscriptionKind: SubscriptionKind,
+    maxUses: number
   }
 
   type Invoice = { // Did not use yet
@@ -52,7 +50,6 @@ declare global {
     creator: User,
     subscriptionId: Subscription,
     amountCents: number
-
   }
 
   type ApiKeyKind = "VALID" | "CANCEL";
@@ -72,25 +69,28 @@ declare global {
   }
 
   type Goal = {
-      goalId: number,
-      creationTime:number,
-      creator:User
-  };
-
-  type UtilDistribution = {
-      utilDistributionId:number,
-      creationTime:number,
-      creator:User,
-      goal:Goal
+    goalId: number,
+    creationTime: number,
+    creator: User
   }
-
-  type UtilDistributionPoint = {
-    utilDistributionPointId: number,
+  // changes: took Goal out of TimeUtilityFunction
+  type TimeUtilityFunction = {
+    timeUtilityFunctionId: number,
     creationTime: number,
     creator: User,
-    utilTime: number,
-    utils: number
   }
+
+  type TimeUtilityFunctionPoint = {
+    timeUtilityFunctionPointId: number,
+    creationTime: number,
+    creator: User,
+    timeUtilityFunction: TimeUtilityFunction,
+    startTime: number,
+    utils: number,
+    active: boolean
+  }
+
+  type GoalDataStatusKind = "SUCCEED" | "FAIL" | "CANCEL" | "UNRESOLVED";
 
   type GoalData = {
     goalDataId: number,
@@ -99,10 +99,9 @@ declare global {
     goal: Goal 
     name: string,
     description: string,
-    utilDistribution: UtilDistribution,
+    timeUtilityFunction: TimeUtilityFunction,
     duration: number,
-    status: "CANCELLED" | "SUCCEEDED" | "FAILED" | "UNRESOLVED"
-
+    status: GoalDataStatusKind
   }
 
   type GoalDependency = {
@@ -113,42 +112,34 @@ declare global {
     dependentGoal: Goal 
   }
 
+  type TaskStatusKind = "VALID" | "CANCEL";
+
   type Task = {
     taskId: number,
     creationTime: number,
     creator: User,
     goal: Goal, 
     startTime: number,
-    duration: number
+    duration: number,
+    status: TaskStatusKind
   }
 
-  type event = {
-    eventId: number,
+  type PastEvent = {
+    pastEventId: number,
     creationTime: number,
     creator: User
   }
 
-  type eventData = {
-    eventDataId: number,
+  type PastEventData = {
+    pastEventDataId: number, 
     creationTime: number,
     creator: User,
-    event: event, 
-    active: boolean,
-    hasTaskId: true,
-    taskId: Task
-  } | {
-    eventDataId: number, 
-    creationTime: number,
-    creator: User,
-    event: event, 
-    active: boolean,
-    hasTaskId: false,
+    pastEvent: PastEvent, 
     startTime: number,
     duration: number,
     name: string,
-    description: string
+    description: string,
+    active: boolean
   }
-
-      
 }
 export { }
