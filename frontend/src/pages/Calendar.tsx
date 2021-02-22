@@ -64,21 +64,7 @@ function EventCalendar(props: EventCalendarProps) {
       timeZone: string;
     }) => {
 
-    const maybeSessionRequests = await viewSessionRequest({
-      attendeeUserId: props.apiKey.creator.userId,
-      minStartTime: args.start.valueOf(),
-      maxStartTime: args.end.valueOf(),
-      responded: false,
-      apiKey: props.apiKey.key
-    });
-
     const maybePastEventData = await viewPastEventData({
-      minStartTime: args.start.valueOf(),
-      maxStartTime: args.end.valueOf(),
-      apiKey: props.apiKey.key
-    });
-
-    const maybePastEvents = await viewPastEventData({
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
       onlyRecent: true,
@@ -91,7 +77,6 @@ function EventCalendar(props: EventCalendarProps) {
       apiKey: props.apiKey.key
     });
 
-    // note that we mark these with "STUDENT" to show that these are existing in our student capacity
     const pastEventData = isApiErrorCode(maybePastEventData) ? [] : maybePastEventData.map((data: PastEventData) => ({
       id: `PastEventData:${data.pastEventDataId}`,
       start: new Date(data.startTime),
@@ -109,10 +94,7 @@ function EventCalendar(props: EventCalendarProps) {
       borderColor: "#00000000",
       extendedProps: data
     }))
-
-
     return [...pastEventData, ...task];
-    
   }
 
   
