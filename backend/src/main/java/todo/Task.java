@@ -6,6 +6,7 @@ public class Task {
   long creatorUserId;
   long goalId;
   public long startTime;
+  public long duration;
   public TaskStatusKind status;
 
   public User creator;

@@ -8,26 +8,18 @@ import DashboardLayout from '../components/DashboardLayout';
 import CalendarCard from '../components/CalendarCard';
 
 import { Tab, Tabs, Form, Popover, Container, Row, Col, Card } from 'react-bootstrap';
-import { viewSessionData, viewSessionRequest, isApiErrorCode, viewCourseMembership } from '../utils/utils';
-import { viewTask, viewPastEvent, viewPastEventData, viewGoal, viewGoalData } from '../utils/utils';
-
-import { ViewSession, ViewSessionRequestResponse, ViewCommittment, ViewCommittmentResponse } from '../components/ViewData';
+import { viewTask, viewPastEventData, viewGoal, viewGoalData, isApiErrorCode} from '../utils/utils';
 
 import UtilityWrapper from '../components/UtilityWrapper';
 
-import UserCreateSession from '../components/UserCreateSession';
-import StudentCreateSessionRequest from '../components/StudentCreateSessionRequest';
-import UserReviewSessionRequest from '../components/UserReviewSessionRequest';
-import UserManageSession from '../components/UserManageSession';
-import StudentManageSessionRequest from '../components/StudentManageSessionRequest';
+import CreatePastEvent from '../components/CreatePastEvent';
+import CreateTask from '../components/CreateTask';
+import ManagePastEvent from '../components/ManagePastEvent';
+import UserManageTask from '../components/UserManageTask';
 import DisplayModal from '../components/DisplayModal';
-import { sessionToEvent, sessionRequestToEvent, sessionRequestResponseToEvent, committmentToEvent, committmentResponseToEvent } from '../components/ToCalendar';
 
 type EventCalendarProps = {
   apiKey: ApiKey,
-  showAllHours: boolean,
-  //courseMemberships: CourseMembership[],
-  //activeCourseDatas: CourseData[]
 }
 
 // TODO make it so that selected data and selected modals are equivalent
@@ -45,13 +37,8 @@ function EventCalendar(props: EventCalendarProps) {
   }
 
   // the currently selected data
-  const [selectedManageSession, setSelectedManageSession] = React.useState<Session | null>(null);
-  const [selectedViewSession, setSelectedViewSession] = React.useState<Session | null>(null);
-  const [selectedManageSessionRequest, setSelectedManageSessionRequest] = React.useState<SessionRequest | null>(null);
-  const [selectedReviewSessionRequest, setSelectedReviewSessionRequest] = React.useState<SessionRequest | null>(null);
-  const [selectedViewSessionRequestResponse, setSelectedViewSessionRequestResponse] = React.useState<SessionRequestResponse | null>(null);
-  const [selectedViewCommittment, setSelectedViewCommittment] = React.useState<Committment | null>(null);
-  const [selectedViewCommittmentResponse, setSelectedViewCommittmentResponse] = React.useState<CommittmentResponse | null>(null);
+  const [selectedManageTask, setSelectedManageTask] = React.useState<Task | null>(null);
+  const [selectedManagePastEvent, setSelectedManagePastEvent] = React.useState<PastEvent | null>(null);
 
   const calendarRef = React.useRef<FullCalendar | null>(null);
 
@@ -77,78 +64,49 @@ function EventCalendar(props: EventCalendarProps) {
       apiKey: props.apiKey.key
     });
 
-    const pastEventData = isApiErrorCode(maybePastEventData) ? [] : maybePastEventData.map((data: PastEventData) => ({
-      id: `PastEventData:${data.pastEventDataId}`,
-      start: new Date(data.startTime),
-      end: new Date(data.startTime + data.duration),
-      color: "#00000000",
-      borderColor: "#00000000",
-      extendedProps: data
-    }))
-  
-    const task = isApiErrorCode(maybeTasks) ? [] : maybeTasks.map((data: Task) => ({
-      id: `Task:${data.taskId}`,
-      start: new Date(data.startTime),
-      end: new Date(data.startTime + data.duration),
-      color: "#00000000",
-      borderColor: "#00000000",
-      extendedProps: data
-    }))
+    const pastEventData = isApiErrorCode(maybePastEventData)
+      ? []
+      : maybePastEventData.map(ped => ({
+        id: `PastEventData:${ped.pastEventDataId}`,
+        start: new Date(ped.startTime),
+        end: new Date(ped.startTime + ped.duration),
+        color: "#00000000",
+        borderColor: "#00000000",
+        pastEventData: ped
+      }))
+
+    const task = isApiErrorCode(maybeTasks)
+      ? []
+      : maybeTasks.map(t => ({
+        id: `Task:${t.taskId}`,
+        start: new Date(t.startTime),
+        end: new Date(t.startTime + t.duration),
+        color: "#00000000",
+        borderColor: "#00000000",
+        task: t
+      }))
+
     return [...pastEventData, ...task];
   }
-
-  
-
 
   //this handler runs any time we recieve a click on an event
   const clickHandler = (eca: EventClickArg) => {
     const props = eca.event.extendedProps;
     // we switch on what type it is
     switch (eca.event.id.split(':')[0]) {
-      case "Session": {
-        if (props.relation === "INSTRUCTOR") {
-          // if we are an instructor we get the editable view of the course
-          setSelectedManageSession(props.sessionData.session);
-        } else {
-          // otherwise get the view only version
-          setSelectedViewSession(props.sessionData.session);
-        }
+      case "PastEventData": {
+        setSelectedManagePastEvent(props.pastEventData);
         break;
       }
-      case "SessionRequest": {
-        if (props.relation === "INSTRUCTOR") {
-          // if we are an instructor we get to reivew the request
-          setSelectedReviewSessionRequest(props.sessionRequest);
-        } else {
-          // otherwise we can manage it
-          setSelectedManageSessionRequest(props.sessionRequest);
-        }
-        break;
-      }
-      case "SessionRequestResponse": {
-        setSelectedViewSessionRequestResponse(props.sessionRequestResponse);
-        break;
-      }
-      case "Committment": {
-        setSelectedViewCommittment(props.committment);
-        break;
-      }
-      case "CommittmentResponse": {
-        setSelectedViewCommittmentResponse(props.committmentResponse);
+      case "Task": {
+        setSelectedManageTask(props.task);
         break;
       }
     }
   }
 
-  const showAllHoursProps = props.showAllHours ? {} : {
-    slotMinTime: "08:00",
-    slotMaxTime: "18:00",
-    weekends: false
-  }
-
   return <>
     <FullCalendar
-      {...showAllHoursProps}
       ref={calendarRef}
       plugins={[timeGridPlugin, interactionPlugin]}
       headerToolbar={{
@@ -202,35 +160,22 @@ function EventCalendar(props: EventCalendarProps) {
         onClose={() => setSelectedSpan(null)}
       >
         <Tabs className="py-3">
-          {props.courseMemberships.filter(x => x.courseMembershipKind === "INSTRUCTOR").length === 0 ? <> </> :
-            <Tab eventKey="session" title="Create Session">
-              <UserCreateSession
-                apiKey={props.apiKey}
-                start={selectedSpan.start}
-                duration={selectedSpan.duration}
-                postSubmit={() => setSelectedSpan(null)}
-              />
-            </Tab>
-          }
-          {props.courseMemberships.filter(x => x.courseMembershipKind === "STUDENT").length === 0 ? <> </> :
-            <Tab eventKey="profile" title="Create Request">
-              <StudentCreateSessionRequest
-                apiKey={props.apiKey}
-                start={selectedSpan.start}
-                duration={selectedSpan.duration}
-                postSubmit={() => setSelectedSpan(null)}
-              />
-            </Tab>
-          }
-          {props.courseMemberships.filter(x => x.courseMembershipKind !== "CANCEL").length > 0 ? <> </> :
-            <Tab eventKey="joincourse" title="Join a Course">
-              <p>You need to join a course in order to create an event.</p>
-              <ul>
-                <li>If you're a student, you can <a href="/add_course">join a course</a>.</li>
-                <li>If you're an instructor, <a href="/add_course">create a course</a>.</li>
-              </ul>
-            </Tab>
-          }
+          <Tab eventKey="task" title="Create Task">
+            <UserCreateSession
+              apiKey={props.apiKey}
+              start={selectedSpan.start}
+              duration={selectedSpan.duration}
+              postSubmit={() => setSelectedSpan(null)}
+            />
+          </Tab>
+          <Tab eventKey="event" title="Create Event">
+            <CreatePastEvent
+              apiKey={props.apiKey}
+              startTime={selectedSpan.start}
+              duration={selectedSpan.duration}
+              postSubmit={() => setSelectedSpan(null)}
+            />
+          </Tab>
         </Tabs>
       </DisplayModal>
     }

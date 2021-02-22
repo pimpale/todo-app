@@ -2,10 +2,10 @@ package todo;
 
 import java.util.stream.Stream;
 import java.util.List;
-import java.util.Comparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -630,6 +630,7 @@ public class ApiController {
   public ResponseEntity<?> newTask( //
       @RequestParam long goalId, //
       @RequestParam long startTime, //
+      @RequestParam long duration, //
       @RequestParam TaskStatusKind status, //
       @RequestParam String apiKey) {
     ApiKey key = getApiKeyIfValid(apiKey);
@@ -652,6 +653,7 @@ public class ApiController {
     task.creatorUserId = key.creatorUserId;
     task.goalId = goal.goalId;
     task.startTime = startTime;
+    task.duration = duration;
     task.status = status;
 
     return new ResponseEntity<>(fillTask(task), HttpStatus.OK);
@@ -662,9 +664,9 @@ public class ApiController {
       long utils;
   }
 
+  @Transactional
   @RequestMapping("/timeUtilityFunction/new/")
   public ResponseEntity<?> newTimeUtilityFunction( //
-      @RequestParam long startTime, //
       @RequestParam List<TimeUtilityFunctionPoint> points, //
       @RequestParam String apiKey
   ) {
@@ -697,9 +699,9 @@ public class ApiController {
   @RequestMapping("/pastEvent/new/")
   public ResponseEntity<?> newPastEvent( //
       @RequestParam String name, //
+      @RequestParam String description, //
       @RequestParam long startTime, //
       @RequestParam long duration, //
-      @RequestParam long timeUtilityFunctionId, //
       @RequestParam String apiKey) {
     ApiKey key = getApiKeyIfValid(apiKey);
     if (key == null) {
@@ -716,6 +718,7 @@ public class ApiController {
     pastEventData.creationTime = System.currentTimeMillis();
     pastEventData.creatorUserId = key.creatorUserId;
     pastEventData.name = name;
+    pastEventData.description = description;
     pastEventData.startTime = startTime;
     pastEventData.duration = duration;
     pastEventData.active = true;
@@ -727,6 +730,7 @@ public class ApiController {
   public ResponseEntity<?> newPastEventData( //
       @RequestParam long pastEventId, //
       @RequestParam String name, //
+      @RequestParam String description, //
       @RequestParam long startTime, //
       @RequestParam long duration, //
       @RequestParam boolean active, //
@@ -750,6 +754,7 @@ public class ApiController {
     pastEventData.creationTime = System.currentTimeMillis();
     pastEventData.creatorUserId = key.creatorUserId;
     pastEventData.name = name;
+    pastEventData.description = description;
     pastEventData.startTime = startTime;
     pastEventData.duration = duration;
     pastEventData.active = active;

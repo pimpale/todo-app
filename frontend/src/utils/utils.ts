@@ -4,7 +4,7 @@
  * @param {int} ms milliseconds to sleep for
  * @return {Promise<void>} a promise that will resolve in ms milliseconds
  */
-export function sleep(ms: number) : Promise<void> {
+export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
@@ -78,6 +78,13 @@ export const ApiErrorCodes = [
   "EMAIL_RATELIMIT",
   "EMAIL_BLACKLISTED",
 
+  "GOAL_NONEXISTENT",
+
+  "PAST_EVENT_NONEXISTENT",
+
+  "TIME_UTILITY_FUNCTION_NONEXISTENT",
+  "TIME_UTILITY_FUNCTION_NOT_VALID",
+  "NEGATIVE_START_TIME",
   "NEGATIVE_DURATION",
   "CANNOT_ALTER_PAST",
 
@@ -134,8 +141,8 @@ export async function newPasswordReset(props: NewPasswordResetProps): Promise<Pa
 }
 
 export type NewSubscriptionProps = {
-  subscriptionKind:SubscriptionKind,
-  apiKey:string
+  subscriptionKind: SubscriptionKind,
+  apiKey: string
 }
 
 export async function newSubscription(props: NewSubscriptionProps): Promise<Subscription | ApiErrorCode> {
@@ -172,6 +179,83 @@ export async function newResetPassword(props: NewResetPasswordProps): Promise<Pa
   return await fetchApi("password/newReset/", getFormData(props));
 }
 
+export type NewGoalProps = {
+  name: string, //
+  description: string, //
+  duration: number, //
+  timeUtilityFunctionId: number, //
+  apiKey: string
+}
+
+export async function newGoal(props: NewGoalProps): Promise<GoalData | ApiErrorCode> {
+  return await fetchApi("goal/new/", getFormData(props));
+}
+
+export type NewGoalDataProps = {
+  name: string, //
+  description: string, //
+  startTime: number, //
+  duration: number, //
+  timeUtilityFunctionId: number, //
+  status: GoalDataStatusKind, //
+  apiKey: string
+}
+
+export async function newGoalData(props: NewGoalDataProps): Promise<GoalData | ApiErrorCode> {
+  return await fetchApi("goalData/new/", getFormData(props));
+}
+
+export type NewTaskProps = { //
+  goalId: number, //
+  startTime: number, //
+  duration: number, //
+  status: TaskStatusKind, //
+  apiKey: string
+}
+
+export async function newTask(props: NewTaskProps): Promise<Task | ApiErrorCode> {
+  return await fetchApi("task/new/", getFormData(props));
+}
+
+export type TimeUtilityFunctionPointProps = {
+  startTime: number,
+  utils: number,
+}
+
+export type NewTimeUtilityFunctionProps = {
+  points: TimeUtilityFunctionPointProps[], //
+  apiKey: string
+}
+
+export async function newTimeUtilityFunction(props: NewTimeUtilityFunctionProps): Promise<TimeUtilityFunction | ApiErrorCode> {
+  return await fetchApi("timeUtilityFunction/new/", getFormData(props));
+}
+
+export type NewPastEventProps = {
+  name: string, //
+  description: string, //
+  startTime: number, //
+  duration: number, //
+  apiKey: string
+}
+
+export async function newPastEvent(props: NewPastEventProps): Promise<PastEventData | ApiErrorCode> {
+  return await fetchApi("pastEvent/new/", getFormData(props));
+}
+
+export type NewPastEventDataProps = {
+  pastEventId:number, //
+  name:string, //
+  description: string, //
+  startTime:number, //
+  duration:number, //
+  active:boolean, //
+  apiKey:string
+}
+
+export async function newPastEventData(props: NewPastEventDataProps): Promise<PastEventData | ApiErrorCode> {
+  return await fetchApi("pastEventData/new/", getFormData(props));
+}
 
 export type ViewSubscriptionProps = {
   subscriptionId?: number, //
@@ -402,6 +486,6 @@ export function isApiErrorCode(maybeApiErrorCode: any): maybeApiErrorCode is Api
   return typeof maybeApiErrorCode === 'string' && ApiErrorCodes.includes(maybeApiErrorCode as any);
 }
 
-export const INT_MAX:number = 999999999999999;
+export const INT_MAX: number = 999999999999999;
 
 export const isPasswordValid = (pass: string) => pass.length >= 8 && /\d/.test(pass);
