@@ -792,6 +792,7 @@ public class ApiController {
     return new ResponseEntity<>(list, HttpStatus.OK);
   }
 
+  @RequestMapping("/apiKey/")
   public ResponseEntity<?> viewApiKey( //
       @RequestParam(required = false) Long apiKeyId, //
       @RequestParam(required = false) Long creatorUserId, //
@@ -860,6 +861,7 @@ public class ApiController {
     return new ResponseEntity<>(list, HttpStatus.OK);
   }
 
+  @RequestMapping("/goalData/")
   public ResponseEntity<?> viewGoalData( //
       @RequestParam(required = false) Long goalDataId, //
       @RequestParam(required = false) Long creationTime, //
@@ -939,6 +941,7 @@ public class ApiController {
     return new ResponseEntity<>(list, HttpStatus.OK);
   }
 
+  @RequestMapping("/pastEventData/")
   public ResponseEntity<?> viewPastEventData( //
       @RequestParam(required = false) Long pastEventDataId, //
       @RequestParam(required = false) Long creationTime, //
@@ -992,6 +995,7 @@ public class ApiController {
     return new ResponseEntity<>(list, HttpStatus.OK);
   }
 
+  @RequestMapping("/task/")
   public ResponseEntity<?> viewTask( //
       @RequestParam(required = false) Long taskId, //
       @RequestParam(required = false) Long creationTime, //
