@@ -217,13 +217,9 @@ export async function newTask(props: NewTaskProps): Promise<Task | ApiErrorCode>
   return await fetchApi("task/new/", getFormData(props));
 }
 
-export type TimeUtilityFunctionPointProps = {
-  startTime: number,
-  utils: number,
-}
-
 export type NewTimeUtilityFunctionProps = {
-  points: TimeUtilityFunctionPointProps[], //
+  startTimes: number[], //
+  utils: number[], //
   apiKey: string
 }
 

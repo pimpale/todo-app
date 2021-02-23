@@ -7,7 +7,6 @@ public class TimeUtilityFunctionPoint {
   long timeUtilityFunctionId;
   public long startTime;
   public long utils;
-  public boolean active;
 
   User creator;
   TimeUtilityFunction timeUtilityFunction;

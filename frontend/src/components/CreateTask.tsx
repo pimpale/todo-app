@@ -1,7 +1,7 @@
 import React from "react"
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Button, Form } from "react-bootstrap";
-import { newGoal, newTimeUtilityFunction, TimeUtilityFunctionPointProps, newTask, isApiErrorCode } from "../utils/utils";
+import { newGoal, newTimeUtilityFunction, newTask, isApiErrorCode } from "../utils/utils";
 
 
 type CreateTaskProps = {
@@ -17,7 +17,8 @@ function CreateTask(props: CreateTaskProps) {
     description: string,
     startTime: number,
     duration: number,
-    timeUtilityFunctionPoints:TimeUtilityFunctionPointProps[]
+    startTimes: number[]
+    utils: number[]
   }
 
   const onSubmit = async (values: CreateTaskValue,
@@ -39,7 +40,8 @@ function CreateTask(props: CreateTaskProps) {
     }
 
     const maybeTimeUtilFunction = await newTimeUtilityFunction({
-      points: values.timeUtilityFunctionPoints,
+      utils: values.utils,
+      startTimes: values.startTimes,
       apiKey: props.apiKey.key,
     })
 
@@ -54,7 +56,7 @@ function CreateTask(props: CreateTaskProps) {
         }
         case "TIME_UTILITY_FUNCTION_NOT_VALID": {
           fprops.setErrors({
-            timeUtilityFunctionPoints: "Function is invalid."
+            utils: "Function is invalid."
           });
           break;
         }
@@ -141,7 +143,9 @@ function CreateTask(props: CreateTaskProps) {
         description: "",
         startTime: props.startTime,
         duration: props.duration,
-        timeUtilityFunctionPoints: [],
+        // TODO we need to actually create a picker
+        startTimes: [0],
+        utils: [10],
       }}
       initialStatus={{
         failureResult: "",
@@ -154,11 +158,10 @@ function CreateTask(props: CreateTaskProps) {
           onSubmit={fprops.handleSubmit} >
           <div hidden={fprops.status.successResult !== ""}>
             <Form.Group >
-              <Form.Label>Task Name</Form.Label>
               <Form.Control
                 name="name"
                 type="text"
-                placeholder="Event Name"
+                placeholder="Task Name"
                 as="input"
                 value={fprops.values.name}
                 onChange={e => fprops.setFieldValue("name", e.target.value)}
@@ -167,12 +170,11 @@ function CreateTask(props: CreateTaskProps) {
               <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
             </Form.Group>
             <Form.Group >
-              <Form.Label>Description</Form.Label>
               <Form.Control
                 name="description"
                 type="text"
-                placeholder="Description"
-                as="input"
+                placeholder="Task Description (Optional)"
+                as="textarea"
                 value={fprops.values.description}
                 onChange={e => fprops.setFieldValue("description", e.target.value)}
                 isInvalid={!!fprops.errors.description}

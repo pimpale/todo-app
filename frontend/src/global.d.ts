@@ -90,7 +90,7 @@ declare global {
     active: boolean
   }
 
-  type GoalDataStatusKind = "SUCCEED" | "FAIL" | "CANCEL" | "UNRESOLVED";
+  type GoalDataStatusKind = "SUCCEED" | "FAIL" | "CANCEL" | "PENDING";
 
   type GoalData = {
     goalDataId: number,

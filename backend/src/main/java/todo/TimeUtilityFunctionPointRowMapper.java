@@ -14,7 +14,6 @@ public class TimeUtilityFunctionPointRowMapper implements RowMapper<TimeUtilityF
     tufp.timeUtilityFunctionId = row.getLong("time_utility_function_id");
     tufp.startTime = row.getLong("start_time");
     tufp.utils = row.getLong("utils");
-    tufp.active = row.getBoolean("active");
     return tufp;
   }
 }

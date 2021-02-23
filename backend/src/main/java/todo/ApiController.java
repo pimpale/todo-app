@@ -662,15 +662,11 @@ public class ApiController {
     return new ResponseEntity<>(fillTask(task), HttpStatus.OK);
   }
 
-  class TimeUtilityFunctionPointArg {
-      long startTime;
-      long utils;
-  }
-
   @Transactional
   @RequestMapping("/timeUtilityFunction/new/")
   public ResponseEntity<?> newTimeUtilityFunction( //
-      @RequestParam List<TimeUtilityFunctionPoint> points, //
+      @RequestParam long[] startTimes, //
+      @RequestParam long[] utils, //
       @RequestParam String apiKey
   ) {
     ApiKey key = getApiKeyIfValid(apiKey);
@@ -678,9 +674,7 @@ public class ApiController {
       return Errors.API_KEY_NONEXISTENT.getResponse();
     }
 
-    // check it has a point at zero and a point at max
-    points.sort((a, b) -> (int)(a.startTime - b.startTime));
-    if(points.size() < 1) {
+    if(startTimes.length < 1  || startTimes.length != utils.length) {
       return Errors.TIME_UTILITY_FUNCTION_NOT_VALID.getResponse();
     }
 
@@ -689,11 +683,13 @@ public class ApiController {
     timeUtilityFunction.creatorUserId = key.creatorUserId;
     timeUtilityFunctionService.add(timeUtilityFunction);
 
-    for(int i = 0; i < points.size(); i++) {
+    for(int i = 0; i < startTimes.length; i++) {
       TimeUtilityFunctionPoint timeUtilityFunctionPoint = new TimeUtilityFunctionPoint();
       timeUtilityFunctionPoint.creationTime = System.currentTimeMillis();
       timeUtilityFunctionPoint.creatorUserId = key.creatorUserId;
       timeUtilityFunctionPoint.timeUtilityFunctionId = timeUtilityFunction.timeUtilityFunctionId;
+      timeUtilityFunctionPoint.startTime = startTimes[i];
+      timeUtilityFunctionPoint.utils = utils[i];
       timeUtilityFunctionPointService.add(timeUtilityFunctionPoint);
     }
     return new ResponseEntity<>(fillTimeUtilityFunction(timeUtilityFunction), HttpStatus.OK);

@@ -38,7 +38,7 @@ public class TimeUtilityFunctionPointService {
     timeUtilityFunctionPoint.creationTime = System.currentTimeMillis();
     // Add timeUtilityFunctionPoint
     String sql =
-        "INSERT INTO timeUtilityFunctionPoint values (?, ?, ?, ?, ?, ?, ?)";
+        "INSERT INTO time_utility_function_point values (?, ?, ?, ?, ?, ?, ?)";
     jdbcTemplate.update(
         sql,
         timeUtilityFunctionPoint.timeUtilityFunctionPointId,
@@ -46,8 +46,7 @@ public class TimeUtilityFunctionPointService {
         timeUtilityFunctionPoint.creatorUserId,
         timeUtilityFunctionPoint.timeUtilityFunctionId,
         timeUtilityFunctionPoint.startTime,
-        timeUtilityFunctionPoint.utils,
-        timeUtilityFunctionPoint.active
+        timeUtilityFunctionPoint.utils
     );
   }
 
@@ -64,7 +63,6 @@ public class TimeUtilityFunctionPointService {
       Long utils,
       Long minUtils,
       Long maxUtils,
-      Boolean active,
       long offset,
       long count) {
     String sql = "SELECT tufp.* FROM time_utility_function_point tufp"
@@ -81,7 +79,6 @@ public class TimeUtilityFunctionPointService {
       + (utils                 == null ? "" : " AND tufp.utils = " + utils)
       + (minUtils              == null ? "" : " AND tufp.utils > " + minUtils)
       + (maxUtils              == null ? "" : " AND tufp.utils < " + maxUtils)
-      + (active                == null ? "" : " AND tufp.active = " + active)
       + (" ORDER BY tufp.time_utility_function_point_id")
       + (" LIMIT " + offset + ", " + count)
       + ";";

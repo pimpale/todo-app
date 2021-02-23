@@ -95,8 +95,7 @@ create table time_utility_function_point(
   creator_user_id integer not null,
   time_utility_function_id integer not null,
   start_time integer not null,
-  utils integer not null,
-  active integer not null
+  utils integer not null
 );
 
 -- invariant: goal_id is valid
@@ -110,7 +109,7 @@ create table goal_data(
   description varchar(100) not null,
   duration integer not null,
   time_utility_function_id integer not null,
-  status integer not null -- SUCCEED FAIL CANCEL UNRESOLVED
+  status integer not null -- SUCCEED FAIL CANCEL PENDING
 );
 
 -- invariant: goal_id != dependent_goal_id

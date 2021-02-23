@@ -38,7 +38,7 @@ public class TimeUtilityFunctionService {
     timeUtilityFunction.creationTime = System.currentTimeMillis();
     // Add timeUtilityFunction
     String sql =
-        "INSERT INTO timeUtilityFunction values (?, ?, ?)";
+        "INSERT INTO time_utility_function values (?, ?, ?)";
     jdbcTemplate.update(
         sql,
         timeUtilityFunction.timeUtilityFunctionId,

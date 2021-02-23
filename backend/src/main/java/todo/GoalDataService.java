@@ -85,7 +85,7 @@ public class GoalDataService {
             + (creationTime          == null ? "" : " AND gd.creation_time = " + creationTime)
             + (minCreationTime       == null ? "" : " AND gd.creation_time > " + minCreationTime)
             + (maxCreationTime       == null ? "" : " AND gd.creation_time < " + maxCreationTime)
-            + (creatorUserId         == null ? "" : " AND gd.creator_id = " + creatorUserId)
+            + (creatorUserId         == null ? "" : " AND gd.creator_user_id = " + creatorUserId)
             + (goalId                == null ? "" : " AND gd.goal_id = " + goalId)
             + (name                  == null ? "" : " AND gd.name = " + Utils.escape(name))
             + (partialName           == null ? "" : " AND gd.name LIKE " + Utils.escape("%"+partialName+"%"))

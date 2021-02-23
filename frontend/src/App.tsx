@@ -63,8 +63,8 @@ function App() {
         <Route path="/register" component={Register} />
         <Route path="/register_confirm" component={RegisterConfirm} />
         <AuthenticatedRoute path="/calendar" {...apiKeyGetSetter} component={Calendar} />
+        <AuthenticatedRoute path="/dashboard" {...apiKeyGetSetter} component={Dashboard} />
         <AuthenticatedRoute path="/settings" {...apiKeyGetSetter} component={Settings} />
-        <AuthenticatedRoute path="/dashboard" {...apiKeyGetSetter} component={Settings} />
         <Route path="/" component={Error404} />
       </Switch>
     </BrowserRouter>
