@@ -469,7 +469,6 @@ export type ViewTimeUtilityFunctionPointProps = {
   utils?: number,
   minUtils?: number,
   maxUtils?: number,
-  active?: boolean,
   offset?: number,
   count?: number,
   apiKey: string,

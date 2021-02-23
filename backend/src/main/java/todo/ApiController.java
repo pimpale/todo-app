@@ -1,7 +1,6 @@
 package todo;
 
 import java.util.stream.Stream;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,7 +147,7 @@ public class ApiController {
    */
   GoalData fillGoalData(GoalData goalData) {
     goalData.creator = fillUser(userService.getByUserId(goalData.creatorUserId));
-    goalData.goal = fillGoal(goalService.getByGoalId(goalData.creatorUserId));
+    goalData.goal = fillGoal(goalService.getByGoalId(goalData.goalId));
     return goalData;
   }
 
@@ -207,7 +206,7 @@ public class ApiController {
    */
   Task fillTask(Task task) {
     task.creator = fillUser(userService.getByUserId(task.creatorUserId));
-    task.goal = fillGoal(goalService.getByGoalId(task.creatorUserId));
+    task.goal = fillGoal(goalService.getByGoalId(task.goalId));
     return task;
   }
 
@@ -1092,8 +1091,6 @@ public class ApiController {
       @RequestParam(required = false) Long utils, //
       @RequestParam(required = false) Long minUtils, //
       @RequestParam(required = false) Long maxUtils, //
-      @RequestParam(required = false) Boolean active, //
-
       @RequestParam(defaultValue = "0") long offset, //
       @RequestParam(defaultValue = "100") long count, //
       @RequestParam String apiKey //
@@ -1117,7 +1114,6 @@ public class ApiController {
         utils, //
         minUtils, //
         maxUtils, //
-        active, //
         offset, //
         count //
     ).map(x -> fillTimeUtilityFunctionPoint(x));

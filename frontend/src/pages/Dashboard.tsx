@@ -67,7 +67,9 @@ function Dashboard(props: AuthenticatedComponentProps) {
             <Form.Text className="text-danger">An unknown error has occured while loading data.</Form.Text>
           </Async.Rejected>
           <Async.Fulfilled<DashboardData[]>>{ddata => <>
-            {ddata.map(d =>
+            {ddata
+                .filter(d => d.task !== null)
+                .map(d =>
               <Card>
                 <ManageTask taskId={d.task!.taskId} apiKey={props.apiKey} />
               </Card>

@@ -38,7 +38,7 @@ public class TimeUtilityFunctionPointService {
     timeUtilityFunctionPoint.creationTime = System.currentTimeMillis();
     // Add timeUtilityFunctionPoint
     String sql =
-        "INSERT INTO time_utility_function_point values (?, ?, ?, ?, ?, ?, ?)";
+        "INSERT INTO time_utility_function_point values (?, ?, ?, ?, ?, ?)";
     jdbcTemplate.update(
         sql,
         timeUtilityFunctionPoint.timeUtilityFunctionPointId,

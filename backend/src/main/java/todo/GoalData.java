@@ -12,9 +12,9 @@ public class GoalData {
   public GoalDataStatusKind status;
 
   // for jackson
-  User creator;
-  Goal goal;
-  TimeUtilityFunction timeUtilityFunction;
+  public User creator;
+  public Goal goal;
+  public TimeUtilityFunction timeUtilityFunction;
 }
 
 enum GoalDataStatusKind {
