@@ -27,7 +27,7 @@ function CalendarCard(eventInfo: EventContentArg) {
       return <PastEventCard
       pastEventData={props.pastEventData}
       />
-    case "Committment":
+    case "Task":
       return <TaskCard
         task={props.task}
         goalData={props.goalData}
