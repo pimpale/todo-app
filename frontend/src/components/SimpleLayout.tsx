@@ -13,24 +13,25 @@ class SimpleLayout extends React.Component {
             <a href="/"><img src={TransparentLogoIcon} alt="Application Icon" /></a>
             <h4 className="text-light">todo-app</h4>
             <a href="/" className="text-light">
-              <ArrowForward />Log In
-             </a>
+              <ArrowForward />Home
+            </a>
             <br />
-            <a href="/instructions" className="text-light">
-              <ArrowForward />Instructions
+            <a href="/dashboard" className="text-light">
+              <ArrowForward />Log In
             </a>
             <br />
             <a href="/register" className="text-light">
               <ArrowForward />Register
             </a>
             <br />
-            <a href="/todo_list" className="text-light">
-              <ArrowForward />Todo List
+            <a href="/instructions" className="text-light">
+              <ArrowForward />Instructions
             </a>
             <br />
             <a href="/terms_of_service" className="text-light">
               <ArrowForward />Terms of Service
             </a>
+            <br />
           </Col>
           <Col className="px-3 py-3">
             {this.props.children}
@@ -41,4 +42,11 @@ class SimpleLayout extends React.Component {
   }
 }
 
+/*
+<br />
+<a href="/todo_list" className="text-light">
+  <ArrowForward />Todo List
+</a>
+<br />
+*/
 export default SimpleLayout;

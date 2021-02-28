@@ -78,11 +78,10 @@ class ExternalHeader extends React.Component<ExternalHeaderProps, ExternalHeader
             <div className="collapse navbar-collapse"
               id="navbarSupportedContent">
               <div className="navbar-nav ml-auto">
-                <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="">Home</a>
-                <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/feed">Login</a>
-                <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/register">Register</a>
                 <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/instructions">Instructions</a>
-                <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/todo_list">Todo List</a>
+                <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/terms_of_service">Terms of Service</a>
+                <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/dashboard">Login</a>
+                <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/register">Register</a>
               </div>
             </div>
           </div>
@@ -91,7 +90,8 @@ class ExternalHeader extends React.Component<ExternalHeaderProps, ExternalHeader
     );
   }
 }
-
+/* <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="">Home</a>
+<a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/todo_list">Todo List</a>*/
 interface ExternalLayoutProps {
   fixed: boolean;
   transparentTop: boolean;
