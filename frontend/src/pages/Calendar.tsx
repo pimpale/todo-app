@@ -86,24 +86,24 @@ function EventCalendar(props: EventCalendarProps) {
             onlyRecent: true,
             apiKey: props.apiKey.key
           });
-
+          
           if (isApiErrorCode(maybeGoalData)) {
-            return [];
+            return {};
           }
-
+          
           // we have an invariant that any session must have at least one session data, so its ok
-          return [{
+          return {
             id: `Task:${t.taskId}`,
             start: new Date(t.startTime),
             end: new Date(t.startTime + t.duration),
             color: "#00000000",
             borderColor: "#00000000",
             task: t,
-            goalData: t
-          }]
+            goalData: maybeGoalData[0]
+          }
         })
+        
       );
-
     return [...pastEventData, ...task];
   }
 
