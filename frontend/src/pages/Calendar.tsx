@@ -138,7 +138,7 @@ function EventCalendar(props: EventCalendarProps) {
       allDaySlot={false}
       slotDuration="00:30:00"
       nowIndicator={true}
-      editable={false}
+      editable={true}
       selectable={true}
       selectMirror={true}
       events={eventSource}

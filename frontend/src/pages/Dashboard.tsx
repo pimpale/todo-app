@@ -22,12 +22,11 @@ type DashboardData = {
 
 
 const loadDashboardData = async (props: AsyncProps<DashboardData[]>) => {
-  //console.log(new Date(2020, 0, 1).toLocaleDateString());
   const maybeGoalData = await viewGoalData({
     creatorUserId: props.apiKey.creator.userId,
     onlyRecent: true,
     status: "PENDING",
-    apiKey: props.apiKey.key
+    apiKey: props.apiKey.key,
   });
 
   if (isApiErrorCode(maybeGoalData)) {
@@ -40,7 +39,8 @@ const loadDashboardData = async (props: AsyncProps<DashboardData[]>) => {
         goalId: gd.goal.goalId,
         onlyRecent: true,
         status: "VALID",
-        apiKey: props.apiKey.key
+        apiKey: props.apiKey.key,
+        
       });
 
       if (isApiErrorCode(maybeTask) || maybeTask.length === 0) {
@@ -56,71 +56,7 @@ const loadDashboardData = async (props: AsyncProps<DashboardData[]>) => {
       }
     }))
 
-    
-    /*
-    const maybeEventData = await viewPastEventData({
-      creatorUserId: props.apiKey.creator.userId,
-      onlyRecent: true,
-      active: true,
-      apiKey: props.apiKey.key
-    });
-
-    if(isApiErrorCode(maybeEventData) ){
-      throw Error;
-    }
-    
-    const eventData = maybeEventData.map(data =>
-      {
-        return{
-          goalData: null,
-          task: null,
-          pastEvent: data
-        }
-      }
-    )
-    return task;
-    */
 }
-
-
-const loadDashboardEvent = async (props: AsyncProps<DashboardData[]>) => {
-
-  const maybeGoalData = await viewGoalData({
-    creatorUserId: props.apiKey.creator.userId,
-    onlyRecent: true,
-    status: "PENDING",
-    apiKey: props.apiKey.key
-  });
-
-  if (isApiErrorCode(maybeGoalData)) {
-    throw Error;
-  }
-
-  return await Promise.all(
-    maybeGoalData.map(async gd => {
-      const maybeTask = await viewTask({
-        goalId: gd.goal.goalId,
-        startTime: Date.now(),
-        onlyRecent: true,
-        status: "VALID",
-        apiKey: props.apiKey.key
-      });
-
-      if (isApiErrorCode(maybeTask) || maybeTask.length === 0) {
-        return {
-          goalData: gd,
-          task: null,
-          //pastEvent: null
-        }
-      } else {
-        return {
-          goalData: gd,
-          task: null,
-          //pastEvent: null
-        }
-      }
-    }))
-  }
 
 function Dashboard(props: AuthenticatedComponentProps) {
   return <DashboardLayout {...props}>
@@ -149,10 +85,11 @@ function Dashboard(props: AuthenticatedComponentProps) {
                   
                 }}
                 isInvalid={false}
-                setFn={(e: GoalData | null) => null} />
+                setFn={(e: GoalData | null) => null}
+                 />
     
     <Container fluid className="py-4 px-4">
-      <Async promiseFn={loadDashboardData} apiKey={props.apiKey}>
+      <Async promiseFn={loadDashboardData} apiKey={props.apiKey} name={"Example"} description={null}>
         {({ reload: reloadDashboardData }) => <>
           <Async.Pending><Loader /></Async.Pending>
           <Async.Rejected>
