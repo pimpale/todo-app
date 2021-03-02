@@ -26,6 +26,7 @@ import Dashboard from './pages/Dashboard';
 // settings
 import Settings from './pages/Settings';
 
+
 function getPreexistingApiKey() {
   const preexistingApiKeyString = localStorage.getItem("apiKey");
   if (preexistingApiKeyString == null) {

@@ -10,9 +10,10 @@ import DisplayModal from '../components/DisplayModal';
 import { ViewUser, } from '../components/ViewData';
 import CreateTask from '../components/CreateTask';
 import ManageTask from '../components/ManageTask';
-import { viewTask, viewGoalData, isApiErrorCode } from '../utils/utils';
+import { viewTask, viewGoalData, isApiErrorCode, viewPastEventData } from '../utils/utils';
 import format from "date-fns/format";
 
+import SearchSingleGoal from '../components/SearchSingleGoal';
 
 type DashboardData = {
   goalData: GoalData
@@ -21,7 +22,7 @@ type DashboardData = {
 
 
 const loadDashboardData = async (props: AsyncProps<DashboardData[]>) => {
-
+  //console.log(new Date(2020, 0, 1).toLocaleDateString());
   const maybeGoalData = await viewGoalData({
     creatorUserId: props.apiKey.creator.userId,
     onlyRecent: true,
@@ -45,20 +46,111 @@ const loadDashboardData = async (props: AsyncProps<DashboardData[]>) => {
       if (isApiErrorCode(maybeTask) || maybeTask.length === 0) {
         return {
           goalData: gd,
-          task: null
+          task: null,
         }
       } else {
         return {
           goalData: gd,
-          task: maybeTask[0]
+          task: maybeTask[0],
         }
       }
     }))
+
+    
+    /*
+    const maybeEventData = await viewPastEventData({
+      creatorUserId: props.apiKey.creator.userId,
+      onlyRecent: true,
+      active: true,
+      apiKey: props.apiKey.key
+    });
+
+    if(isApiErrorCode(maybeEventData) ){
+      throw Error;
+    }
+    
+    const eventData = maybeEventData.map(data =>
+      {
+        return{
+          goalData: null,
+          task: null,
+          pastEvent: data
+        }
+      }
+    )
+    return task;
+    */
 }
 
 
+const loadDashboardEvent = async (props: AsyncProps<DashboardData[]>) => {
+
+  const maybeGoalData = await viewGoalData({
+    creatorUserId: props.apiKey.creator.userId,
+    onlyRecent: true,
+    status: "PENDING",
+    apiKey: props.apiKey.key
+  });
+
+  if (isApiErrorCode(maybeGoalData)) {
+    throw Error;
+  }
+
+  return await Promise.all(
+    maybeGoalData.map(async gd => {
+      const maybeTask = await viewTask({
+        goalId: gd.goal.goalId,
+        startTime: Date.now(),
+        onlyRecent: true,
+        status: "VALID",
+        apiKey: props.apiKey.key
+      });
+
+      if (isApiErrorCode(maybeTask) || maybeTask.length === 0) {
+        return {
+          goalData: gd,
+          task: null,
+          //pastEvent: null
+        }
+      } else {
+        return {
+          goalData: gd,
+          task: null,
+          //pastEvent: null
+        }
+      }
+    }))
+  }
+
 function Dashboard(props: AuthenticatedComponentProps) {
   return <DashboardLayout {...props}>
+    <SearchSingleGoal
+                name="searchSingleGoal"
+                search={async input => {
+                  const maybeGoalName = await viewGoalData({
+                    partialName: input,
+                    onlyRecent: true,
+                    status: "PENDING",
+                    apiKey: props.apiKey.key,
+                  });
+                  /*
+                  const maybeGoalDescription = await viewGoalData({
+                    partialDescription: input,
+                    onlyRecent: true,
+                    status: "PENDING",
+                    apiKey: props.apiKey.key,
+                  });
+                  */
+                  if(isApiErrorCode(maybeGoalName)){//} || isApiErrorCode(maybeGoalDescription)) {
+                      return [];
+                  }
+
+                  return [...maybeGoalName];//, ...maybeGoalDescription];
+                  
+                }}
+                isInvalid={false}
+                setFn={(e: GoalData | null) => null} />
+    
     <Container fluid className="py-4 px-4">
       <Async promiseFn={loadDashboardData} apiKey={props.apiKey}>
         {({ reload: reloadDashboardData }) => <>
