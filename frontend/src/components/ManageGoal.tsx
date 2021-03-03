@@ -2,36 +2,40 @@ import React from 'react';
 import { Form, Button, Table } from 'react-bootstrap'; import Loader from '../components/Loader';
 import { Async, AsyncProps } from 'react-async';
 import DisplayModal from '../components/DisplayModal';
-import { viewTask, newTask, viewGoalData, newGoalData, isApiErrorCode} from '../utils/utils';
+import { viewGoal, newGoal, viewGoalData, newGoalData, isApiErrorCode} from '../utils/utils';
 import { Edit, Cancel, Unarchive} from '@material-ui/icons';
 import { Formik, FormikHelpers } from 'formik'
 import format from 'date-fns/format';
 
 
-type EditTaskProps = {
-  task: Task,
+type EditGoalProps = {
   goalData: GoalData,
   apiKey: ApiKey,
   postSubmit: () => void
 };
 
-function EditTask(props: EditTaskProps) {
+function EditGoal(props: EditGoalProps) {
 
-  type EditTaskValue = {
+  type EditGoalValue = {
     name: string,
     description: string,
+    startTime: number|null,
+    duration: number|null,
   }
 
-  const onSubmit = async (values: EditTaskValue,
-    fprops: FormikHelpers<EditTaskValue>) => {
+  const onSubmit = async (values: EditGoalValue,
+    fprops: FormikHelpers<EditGoalValue>) => {
 
     const maybeGoalData  = await newGoalData({
-      goalId: props.task.goal.goalId,
+      goalId: props.goalData.goal.goalId,
       apiKey: props.apiKey.key,
       name: values.name,
       description: values.description,
-      duration:props.task.duration,
+      durationEstimate:props.goalData.durationEstimate,
       timeUtilityFunctionId: props.goalData.timeUtilityFunction.timeUtilityFunctionId,
+      scheduled: values.startTime !== null && values.duration !== null,
+      startTime: values.startTime ?? 0,
+      duration:values.duration ?? 0,
       status: props.goalData.status,
     });
 
@@ -60,7 +64,7 @@ function EditTask(props: EditTaskProps) {
         }
         default: {
           fprops.setStatus({
-            failureResult: "An unknown or network error has occured while modifying task data.",
+            failureResult: "An unknown or network error has occured while modifying goal data.",
             successResult: ""
           });
           break;
@@ -71,7 +75,7 @@ function EditTask(props: EditTaskProps) {
 
     fprops.setStatus({
       failureResult: "",
-      successResult: "Task Successfully Modified"
+      successResult: "Goal Successfully Modified"
     });
 
     // execute callback
@@ -79,11 +83,13 @@ function EditTask(props: EditTaskProps) {
   }
 
   return <>
-    <Formik<EditTaskValue>
+    <Formik<EditGoalValue>
       onSubmit={onSubmit}
       initialValues={{
         name: props.goalData.name,
-        description: props.goalData.description
+        description: props.goalData.description,
+        startTime: props.goalData.startTime,
+        duration: props.goalData.duration
       }}
       initialStatus={{
         failureResult: "",
@@ -96,7 +102,7 @@ function EditTask(props: EditTaskProps) {
           onSubmit={fprops.handleSubmit} >
           <div hidden={fprops.status.successResult !== ""}>
             <Form.Group >
-              <Form.Label>Task Name</Form.Label>
+              <Form.Label>Goal Name</Form.Label>
               <Form.Control
                 name="name"
                 type="text"
@@ -109,7 +115,7 @@ function EditTask(props: EditTaskProps) {
               <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
             </Form.Group>
             <Form.Group >
-              <Form.Label >Task Description</Form.Label>
+              <Form.Label >Goal Description</Form.Label>
               <Form.Control
                 name="description"
                 type="text"
@@ -131,31 +137,35 @@ function EditTask(props: EditTaskProps) {
   </>
 }
 
-
-type CancelTaskProps = {
-  task: Task,
+type CancelGoalProps = {
   goalData: GoalData,
   apiKey: ApiKey,
   postSubmit: () => void
 };
 
-function CancelTask(props: CancelTaskProps) {
+function CancelGoal(props: CancelGoalProps) {
 
-  type CancelTaskValue = {}
+  type CancelGoalValue = {}
 
-  const onSubmit = async (_: CancelTaskValue,
-    fprops: FormikHelpers<CancelTaskValue>) => {
+  const onSubmit = async (_: CancelGoalValue,
+    fprops: FormikHelpers<CancelGoalValue>) => {
 
-    const maybeTask = await newTask({
-      goalId: props.task.goal.goalId,
-      duration: props.task.duration,
-      startTime: props.task.startTime,
-      status: "CANCEL",
+    const maybeGoalData  = await newGoalData({
+      goalId: props.goalData.goal.goalId,
       apiKey: props.apiKey.key,
+      name: props.goalData.name,
+      description: props.goalData.description,
+      durationEstimate:props.goalData.durationEstimate,
+      timeUtilityFunctionId: props.goalData.timeUtilityFunction.timeUtilityFunctionId,
+      scheduled: props.goalData.scheduled,
+      startTime: props.goalData.startTime ?? 0,
+      duration: props.goalData.duration ?? 0,
+      status: props.goalData.status,
     });
 
-    if (isApiErrorCode(maybeTask)) {
-      switch (maybeTask) {
+
+    if (isApiErrorCode(maybeGoalData)) {
+      switch (maybeGoalData) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
@@ -165,21 +175,21 @@ function CancelTask(props: CancelTaskProps) {
         }
         case "API_KEY_UNAUTHORIZED": {
           fprops.setStatus({
-            failureResult: "You are not authorized to manage this event.",
+            failureResult: "You are not authorized to manage this goal.",
             successResult: ""
           });
           break;
         }
         case "PAST_EVENT_NONEXISTENT": {
           fprops.setStatus({
-            failureResult: "This event does not exist.",
+            failureResult: "This goal does not exist.",
             successResult: ""
           });
           break;
         }
         default: {
           fprops.setStatus({
-            failureResult: "An unknown or network error has occured while managing event.",
+            failureResult: "An unknown or network error has occured while managing goal.",
             successResult: ""
           });
           break;
@@ -198,7 +208,7 @@ function CancelTask(props: CancelTaskProps) {
   }
 
   return <>
-    <Formik<CancelTaskValue>
+    <Formik<CancelGoalValue>
       onSubmit={onSubmit}
       initialValues={{}}
       initialStatus={{
@@ -212,7 +222,7 @@ function CancelTask(props: CancelTaskProps) {
           onSubmit={fprops.handleSubmit} >
           <div hidden={fprops.status.successResult !== ""}>
             <p>
-              Are you sure you want to cancel task for {props.goalData.name}?
+              Are you sure you want to cancel goal for {props.goalData.name}?
             </p>
             <Button type="submit">Confirm</Button>
             <br />
@@ -225,118 +235,91 @@ function CancelTask(props: CancelTaskProps) {
   </>
 }
 
-
-
-type ManageTaskData = {
-    task: Task,
-    goalData: GoalData,
-}
-
-const loadManageTaskData = async (props: AsyncProps<ManageTaskData>) => {
-  const maybeTask = await viewTask({
-    taskId: props.taskId,
-    onlyRecent: true,
-    apiKey: props.apiKey.key
-  });
-
-  let task:Task;
-  if (isApiErrorCode(maybeTask) || maybeTask.length === 0) {
-    throw Error;
-  } else {
-    task = maybeTask[0];
-  }
-
+const loadManageGoalData = async (props: AsyncProps<GoalData>) => {
   const maybeGoalData = await viewGoalData({
-    goalId: task.goal.goalId,
+    goalId: props.goalId,
     onlyRecent: true,
     apiKey: props.apiKey.key
   });
 
-  let goalData:GoalData;
   if (isApiErrorCode(maybeGoalData) || maybeGoalData.length === 0) {
     throw Error;
-  } else {
-    goalData = maybeGoalData[0];
   }
-
-  return { task, goalData }
-
+  return maybeGoalData[0];
 }
 
 
-const ManageTask = (props: {
-  taskId: number,
+const ManageGoal = (props: {
+  goalId: number,
   apiKey: ApiKey,
 }) => {
 
-  const [showEditTask, setShowEditTask] = React.useState(false);
-  const [showCancelTask, setShowCancelTask] = React.useState(false);
+  const [showEditGoal, setShowEditGoal] = React.useState(false);
+  const [showCancelGoal, setShowCancelGoal] = React.useState(false);
 
 
   return <Async
-    promiseFn={loadManageTaskData}
+    promiseFn={loadManageGoalData}
     apiKey={props.apiKey}
-    taskId={props.taskId}>
+    goalId={props.goalId}>
     {({ reload }) => <>
       <Async.Pending><Loader /></Async.Pending>
       <Async.Rejected>
         <span className="text-danger">An unknown error has occured.</span>
       </Async.Rejected>
-      <Async.Fulfilled<ManageTaskData>>{mtd => <>
+      <Async.Fulfilled<GoalData>>{gd => <>
         <Table hover bordered>
           <tbody>
             <tr>
               <th>Status</th>
-              <td>{mtd.task.status}</td>
+              <td>{gd.status}</td>
             </tr>
             <tr>
               <th>Goal Name</th>
-              <td>{mtd.goalData.name}</td>
+              <td>{gd.name}</td>
             </tr>
             <tr>
               <th>Goal Description</th>
-              <td>{mtd.goalData.description}</td>
+              <td>{gd.description}</td>
             </tr>
             <tr>
               <th>Creation Time</th>
-              <td>{format(mtd.task.creationTime, "MMM do")} </td>
+              <td>{format(gd.goal.creationTime, "MMM do")} </td>
             </tr>
           </tbody>
         </Table>
-        <Button variant="secondary" onClick={_ => setShowEditTask(true)}>Edit <Edit /></Button>
+        <Button variant="secondary" onClick={_ => setShowEditGoal(true)}>Edit <Edit /></Button>
 
-        { mtd.task.status === "VALID"
-            ? <Button variant="danger" onClick={_ => setShowCancelTask(true)}>Cancel <Cancel /></Button>
+        { gd.status !== "CANCEL"
+            ? <Button variant="danger" onClick={_ => setShowCancelGoal(true)}>Cancel <Cancel /></Button>
             : <> </>
         }
 
         <DisplayModal
-          title="Edit Task"
-          show={showEditTask}
-          onClose={() => setShowEditTask(false)}
+          title="Edit Goal"
+          show={showEditGoal}
+          onClose={() => setShowEditGoal(false)}
         >
-          <EditTask
-            task={mtd.task}
-            goalData={mtd.goalData}
+          <EditGoal
+            goalData={gd}
             apiKey={props.apiKey}
             postSubmit={() => {
-              setShowEditTask(false);
+              setShowEditGoal(false);
               reload();
             }}
           />
         </DisplayModal>
 
         <DisplayModal
-          title="Cancel Task"
-          show={showCancelTask}
-          onClose={() => setShowCancelTask(false)}
+          title="Cancel Goal"
+          show={showCancelGoal}
+          onClose={() => setShowCancelGoal(false)}
         >
-          <CancelTask
-            task={mtd.task}
-            goalData={mtd.goalData}
+          <CancelGoal
+            goalData={gd}
             apiKey={props.apiKey}
             postSubmit={() => {
-              setShowCancelTask(false);
+              setShowCancelGoal(false);
               reload();
             }}
           />
@@ -348,4 +331,4 @@ const ManageTask = (props: {
   </Async>
 }
 
-export default ManageTask;
+export default ManageGoal;

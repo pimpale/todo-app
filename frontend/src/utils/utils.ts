@@ -182,8 +182,11 @@ export async function newResetPassword(props: NewResetPasswordProps): Promise<Pa
 export type NewGoalProps = {
   name: string, //
   description: string, //
-  duration: number, //
+  durationEstimate: number, //
   timeUtilityFunctionId: number, //
+  scheduled: boolean, //
+  startTime: number, //
+  duration: number, //
   apiKey: string
 }
 
@@ -195,26 +198,17 @@ export type NewGoalDataProps = {
   goalId: number, //
   name: string, //
   description: string, //
-  duration: number, //
+  durationEstimate: number, //
   timeUtilityFunctionId: number, //
+  scheduled: boolean, //
+  startTime: number, //
+  duration: number, //
   status: GoalDataStatusKind, //
   apiKey: string
 }
 
-export async function newGoalData(props: NewGoalDataProps): Promise<GoalData | ApiErrorCode> {
+export async function newGoalData(props: NewGoalDataProps): Promise<GoalDataUnscheduled | ApiErrorCode> {
   return await fetchApi("goalData/new/", getFormData(props));
-}
-
-export type NewTaskProps = { //
-  goalId: number, //
-  startTime: number, //
-  duration: number, //
-  status: TaskStatusKind, //
-  apiKey: string
-}
-
-export async function newTask(props: NewTaskProps): Promise<Task | ApiErrorCode> {
-  return await fetchApi("task/new/", getFormData(props));
 }
 
 export type NewTimeUtilityFunctionProps = {
@@ -356,10 +350,17 @@ export type ViewGoalDataProps = {
   partialName?: string,
   description?: string,
   partialDescription?: string,
+  durationEstimate?: number,
+  minDurationEstimate?: number,
+  maxDurationEstimate?: number,
+  timeUtilityFunctionId?: number,
+  scheduled?: boolean,
+  startTime?: number,
+  minStartTime?: number,
+  maxStartTime?: number,
   duration?: number,
   minDuration?: number,
   maxDuration?: number,
-  timeUtilityFunctionId?: number,
   status?: GoalDataStatusKind,
   onlyRecent?: boolean,
   offset?: number,
@@ -412,33 +413,6 @@ export type ViewPastEventDataProps = {
 
 export async function viewPastEventData(props: ViewPastEventDataProps): Promise<PastEventData[] | ApiErrorCode> {
   return await fetchApi("pastEventData/", getFormData(props));
-}
-
-export type ViewTaskProps = {
-  taskId?: number, //
-  creationTime?: number, //
-  minCreationTime?: number, //
-  maxCreationTime?: number, //
-  creatorUserId?: number, //
-  goalId?: number,
-  name?: string,
-  partialName?: string,
-  startTime?: number,
-  minStartTime?: number,
-  maxStartTime?: number,
-  status?: TaskStatusKind,
-  onlyRecent?: boolean,
-  duration?: number,
-  minDuration?: number,
-  maxDuration?: number,
-  active?: boolean,
-  offset?: number,
-  count?: number,
-  apiKey: string,
-}
-
-export async function viewTask(props: ViewTaskProps): Promise<Task[] | ApiErrorCode> {
-  return await fetchApi("task/", getFormData(props));
 }
 
 export type ViewTimeUtilityFunctionProps = {

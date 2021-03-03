@@ -1,18 +1,18 @@
 import React from "react"
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Button, Form } from "react-bootstrap";
-import { newGoal, newTimeUtilityFunction, newTask, isApiErrorCode } from "../utils/utils";
+import { newGoal, newTimeUtilityFunction, isApiErrorCode } from "../utils/utils";
 
 
-type CreateTaskProps = {
+type CreateGoalProps = {
   startTime: number;
   duration: number;
   apiKey: ApiKey;
   postSubmit: () => void;
 }
 
-function CreateTask(props: CreateTaskProps) {
-  type CreateTaskValue = {
+function CreateGoal(props: CreateGoalProps) {
+  type CreateGoalValue = {
     name: string,
     description: string,
     startTime: number,
@@ -21,10 +21,10 @@ function CreateTask(props: CreateTaskProps) {
     utils: number[]
   }
 
-  const onSubmit = async (values: CreateTaskValue,
-    fprops: FormikHelpers<CreateTaskValue>) => {
+  const onSubmit = async (values: CreateGoalValue,
+    fprops: FormikHelpers<CreateGoalValue>) => {
 
-    let errors: FormikErrors<CreateTaskValue> = {};
+    let errors: FormikErrors<CreateGoalValue> = {};
 
     // Validate input
 
@@ -74,8 +74,11 @@ function CreateTask(props: CreateTaskProps) {
     const maybeGoalData = await newGoal({
       name: values.name,
       description: values.description,
-      duration: values.duration,
+      durationEstimate: values.duration,
       timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
+      scheduled: true,
+      startTime: values.startTime,
+      duration: values.duration,
       apiKey: props.apiKey.key,
     });
 
@@ -99,44 +102,16 @@ function CreateTask(props: CreateTaskProps) {
       return;
     }
 
-    const maybeTask = await newTask({
-      goalId: maybeGoalData.goal.goalId,
-      startTime: values.startTime,
-      duration: values.duration,
-      apiKey: props.apiKey.key,
-      status: "VALID"
-    });
-
-    if (isApiErrorCode(maybeTask)) {
-      switch (maybeTask) {
-        case "API_KEY_NONEXISTENT": {
-          fprops.setStatus({
-            failureResult: "You have been automatically logged out. Please relogin.",
-            successResult: ""
-          });
-          break;
-        }
-        default: {
-          fprops.setStatus({
-            failureResult: "An unknown or network error has occured while trying to create task.",
-            successResult: ""
-          });
-          break;
-        }
-      }
-      return;
-    }
-
     fprops.setStatus({
       failureResult: "",
-      successResult: "Task Created"
+      successResult: "Goal Created"
     });
     // execute callback
     props.postSubmit();
   }
 
   return <>
-    <Formik<CreateTaskValue>
+    <Formik<CreateGoalValue>
       onSubmit={onSubmit}
       initialValues={{
         name: "",
@@ -161,7 +136,7 @@ function CreateTask(props: CreateTaskProps) {
               <Form.Control
                 name="name"
                 type="text"
-                placeholder="Task Name"
+                placeholder="Goal Name"
                 as="input"
                 value={fprops.values.name}
                 onChange={e => fprops.setFieldValue("name", e.target.value)}
@@ -173,7 +148,7 @@ function CreateTask(props: CreateTaskProps) {
               <Form.Control
                 name="description"
                 type="text"
-                placeholder="Task Description (Optional)"
+                placeholder="Goal Description (Optional)"
                 as="textarea"
                 value={fprops.values.description}
                 onChange={e => fprops.setFieldValue("description", e.target.value)}
@@ -192,4 +167,4 @@ function CreateTask(props: CreateTaskProps) {
   </>
 }
 
-export default CreateTask;
+export default CreateGoal;

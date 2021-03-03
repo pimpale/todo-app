@@ -107,9 +107,13 @@ create table goal_data(
   goal_id integer not null,
   name varchar(100) not null,
   description varchar(100) not null,
-  duration integer not null,
+  duration_estimate integer not null,
   time_utility_function_id integer not null,
-  status integer not null -- SUCCEED FAIL CANCEL PENDING
+  scheduled integer not null, -- boolean
+  -- ONLY VALID WHEN scheduled is true
+  start_time integer not null,
+  duration integer not null,
+  status integer not null -- PENDING SUCCEED FAIL CANCEL
 );
 
 -- invariant: goal_id != dependent_goal_id
@@ -122,17 +126,6 @@ create table goal_dependency(
   creator_user_id integer not null,
   goal_id integer not null,
   dependent_goal_id integer not null
-);
-
--- invariant: goal_id is valid
-drop table if exists task;
-create table task(
-  task_id integer not null primary key,
-  creation_time integer not null,
-  creator_user_id integer not null,
-  goal_id integer not null,
-  start_time integer not null,
-  status integer not null -- VALID CANCEL
 );
 
 drop table if exists past_event;

@@ -7,9 +7,12 @@ public class GoalData {
   long goalId;
   public String name;
   public String description;
-  public long duration;
+  public long durationEstimate;
   long timeUtilityFunctionId;
   public GoalDataStatusKind status;
+  public boolean scheduled;
+  public long duration;
+  public long startTime;
 
   // for jackson
   public User creator;

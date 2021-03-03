@@ -8,16 +8,16 @@ import Section from '../components/Section';
 import Loader from '../components/Loader';
 import DisplayModal from '../components/DisplayModal';
 import { ViewUser, } from '../components/ViewData';
-import CreateTask from '../components/CreateTask';
-import ManageTask from '../components/ManageTask';
-import { viewTask, viewGoalData, isApiErrorCode, viewPastEventData } from '../utils/utils';
+import CreateGoal from '../components/CreateGoal';
+import CalendarSolver from '../components/CalendarSolver';
+import ManageGoal from '../components/ManageGoal';
+import { viewGoalData, isApiErrorCode, viewPastEventData } from '../utils/utils';
 import format from "date-fns/format";
 
 import SearchSingleGoal from '../components/SearchSingleGoal';
 
 type DashboardData = {
   goalData: GoalData
-  task: Task | null
 }
 
 
@@ -33,76 +33,56 @@ const loadDashboardData = async (props: AsyncProps<DashboardData[]>) => {
     throw Error;
   }
 
-  return await Promise.all(
-    maybeGoalData.map(async gd => {
-      const maybeTask = await viewTask({
-        goalId: gd.goal.goalId,
-        onlyRecent: true,
-        status: "VALID",
-        apiKey: props.apiKey.key,
-        
-      });
-
-      if (isApiErrorCode(maybeTask) || maybeTask.length === 0) {
-        return {
-          goalData: gd,
-          task: null,
-        }
-      } else {
-        return {
-          goalData: gd,
-          task: maybeTask[0],
-        }
-      }
-    }))
-
+  return maybeGoalData.map(goalData => ({ goalData }));
 }
 
 function Dashboard(props: AuthenticatedComponentProps) {
   return <DashboardLayout {...props}>
     <SearchSingleGoal
-                name="searchSingleGoal"
-                search={async input => {
-                  const maybeGoalName = await viewGoalData({
-                    partialName: input,
-                    onlyRecent: true,
-                    status: "PENDING",
-                    apiKey: props.apiKey.key,
-                  });
-                  /*
-                  const maybeGoalDescription = await viewGoalData({
-                    partialDescription: input,
-                    onlyRecent: true,
-                    status: "PENDING",
-                    apiKey: props.apiKey.key,
-                  });
-                  */
-                  if(isApiErrorCode(maybeGoalName)){//} || isApiErrorCode(maybeGoalDescription)) {
-                      return [];
-                  }
+      name="searchSingleGoal"
+      search={async input => {
+        const maybeGoalName = await viewGoalData({
+          partialName: input,
+          onlyRecent: true,
+          status: "PENDING",
+          apiKey: props.apiKey.key,
+        });
+        /*
+        const maybeGoalDescription = await viewGoalData({
+          partialDescription: input,
+          onlyRecent: true,
+          status: "PENDING",
+          apiKey: props.apiKey.key,
+        });
+        */
+        if (isApiErrorCode(maybeGoalName)) {//} || isApiErrorCode(maybeGoalDescription)) {
+          return [];
+        }
 
-                  return [...maybeGoalName];//, ...maybeGoalDescription];
-                  
-                }}
-                isInvalid={false}
-                setFn={(e: GoalData | null) => null}
-                 />
-    
+        return [...maybeGoalName];//, ...maybeGoalDescription];
+
+      }}
+      isInvalid={false}
+      setFn={(e: GoalData | null) => null}
+    />
+
     <Container fluid className="py-4 px-4">
-      <Async promiseFn={loadDashboardData} apiKey={props.apiKey} name={"Example"} description={null}>
+      <Async promiseFn={loadDashboardData} apiKey={props.apiKey}>
         {({ reload: reloadDashboardData }) => <>
           <Async.Pending><Loader /></Async.Pending>
           <Async.Rejected>
             <Form.Text className="text-danger">An unknown error has occured while loading data.</Form.Text>
           </Async.Rejected>
           <Async.Fulfilled<DashboardData[]>>{ddata => <>
-            {ddata
-                .filter(d => d.task !== null)
-                .map(d =>
-              <Card>
-                <ManageTask taskId={d.task!.taskId} apiKey={props.apiKey} />
+            {ddata.map(d =>
+              <Card key={d.goalData.goalDataId}>
+                <ManageGoal goalId={d.goalData.goal.goalId} apiKey={props.apiKey} />
               </Card>
             )}
+            <CalendarSolver goalData={ddata
+              .map(d => d.goalData)
+              .filter((gd): gd is GoalDataScheduled => gd.scheduled)
+            }/>
           </>}
           </Async.Fulfilled>
         </>}

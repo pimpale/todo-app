@@ -35,7 +35,7 @@ public class GoalDataService {
     goalData.goalDataId = nextId();
     // Add goalData
     String sql =
-        "INSERT INTO goal_data values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        "INSERT INTO goal_data values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     jdbcTemplate.update(
         sql,
         goalData.goalDataId,
@@ -44,8 +44,11 @@ public class GoalDataService {
         goalData.goalId,
         goalData.name,
         goalData.description,
-        goalData.duration,
+        goalData.durationEstimate,
         goalData.timeUtilityFunctionId,
+        goalData.scheduled,
+        goalData.startTime,
+        goalData.duration,
         goalData.status.value
     );
   }
@@ -57,24 +60,31 @@ public class GoalDataService {
   }
 
   // Restrict goalDatas by
-  public Stream<GoalData> query(
-      Long goalDataId,
-      Long creationTime,
-      Long minCreationTime,
-      Long maxCreationTime,
-      Long creatorUserId,
-      Long goalId,
-      String name,
-      String partialName,
-      String description,
-      String partialDescription,
-      Long duration,
-      Long minDuration,
-      Long maxDuration,
-      Long timeUtilityFunctionId,
-      GoalDataStatusKind status,
-      boolean onlyRecent,
-      long offset,
+  public Stream<GoalData> query( //
+      Long goalDataId, //
+      Long creationTime, //
+      Long minCreationTime, //
+      Long maxCreationTime, //
+      Long creatorUserId, //
+      Long goalId, //
+      String name, //
+      String partialName, //
+      String description, //
+      String partialDescription, //
+      Long durationEstimate, //
+      Long minDurationEstimate, //
+      Long maxDurationEstimate, //
+      Long timeUtilityFunctionId, //
+      Boolean scheduled, //
+      Long duration, //
+      Long minDuration, //
+      Long maxDuration, //
+      Long startTime, //
+      Long minStartTime, //
+      Long maxStartTime, //
+      GoalDataStatusKind status, //
+      boolean onlyRecent, //
+      long offset, //
       long count) {
 
     String sql =
@@ -91,10 +101,17 @@ public class GoalDataService {
             + (partialName           == null ? "" : " AND gd.name LIKE " + Utils.escape("%"+partialName+"%"))
             + (description           == null ? "" : " AND gd.description = " + Utils.escape(description))
             + (partialDescription    == null ? "" : " AND gd.description LIKE " + Utils.escape("%"+partialDescription+"%"))
-            + (duration              == null ? "" : " AND gd.duration = " + duration)
-            + (minDuration           == null ? "" : " AND gd.duration > " + minDuration)
-            + (maxDuration           == null ? "" : " AND gd.duration < " + maxDuration)
+            + (durationEstimate      == null ? "" : " AND gd.duration_estimate = " + durationEstimate)
+            + (minDurationEstimate   == null ? "" : " AND gd.duration_estimate > " + minDurationEstimate)
+            + (maxDurationEstimate   == null ? "" : " AND gd.duration_estimate < " + maxDurationEstimate)
             + (timeUtilityFunctionId == null ? "" : " AND gd.time_utility_function_id= " + timeUtilityFunctionId)
+            + (scheduled             == null ? "" : " AND gd.scheduled= " + scheduled)
+            + (startTime             == null ? "" : " AND gd.scheduled AND gd.start_time = " + startTime)
+            + (minStartTime          == null ? "" : " AND gd.scheduled AND gd.start_time > " + minStartTime)
+            + (maxStartTime          == null ? "" : " AND gd.scheduled AND gd.start_time < " + maxStartTime)
+            + (duration              == null ? "" : " AND gd.scheduled AND gd.duration = " + duration)
+            + (minDuration           == null ? "" : " AND gd.scheduled AND gd.duration > " + minDuration)
+            + (maxDuration           == null ? "" : " AND gd.scheduled AND gd.duration < " + maxDuration)
             + (status                == null ? "" : " AND gd.status = " + status.value)
             + (" ORDER BY gd.goal_data_id")
             + (" LIMIT " + offset + ", " + count)

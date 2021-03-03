@@ -1,6 +1,4 @@
 import React from 'react'
-import { Async, AsyncProps } from 'react-async';
-import Loader from '../components/Loader';
 import FullCalendar, { EventInput, DateSelectArg, EventClickArg } from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
@@ -8,14 +6,14 @@ import DashboardLayout from '../components/DashboardLayout';
 import CalendarCard from '../components/CalendarCard';
 
 import { Tab, Tabs, Form, Popover, Container, Row, Col, Card } from 'react-bootstrap';
-import { viewTask, viewPastEventData, viewGoal, viewGoalData, isApiErrorCode } from '../utils/utils';
+import { viewPastEventData, viewGoal, viewGoalData, isApiErrorCode } from '../utils/utils';
 
 import UtilityWrapper from '../components/UtilityWrapper';
 
 import CreatePastEvent from '../components/CreatePastEvent';
-import CreateTask from '../components/CreateTask';
+import CreateGoal from '../components/CreateGoal';
 import ManagePastEvent from '../components/ManagePastEvent';
-import ManageTask from '../components/ManageTask';
+import ManageGoal from '../components/ManageGoal';
 import DisplayModal from '../components/DisplayModal';
 
 type EventCalendarProps = {
@@ -37,7 +35,7 @@ function EventCalendar(props: EventCalendarProps) {
   }
 
   // the currently selected data
-  const [selectedManageTask, setSelectedManageTask] = React.useState<Task | null>(null);
+  const [selectedManageGoalData, setSelectedManageGoalData] = React.useState<GoalData | null>(null);
   const [selectedManagePastEventData, setSelectedManagePastEventData] = React.useState<PastEventData | null>(null);
 
   const calendarRef = React.useRef<FullCalendar | null>(null);
@@ -59,10 +57,11 @@ function EventCalendar(props: EventCalendarProps) {
       apiKey: props.apiKey.key
     });
 
-    const maybeTasks = await viewTask({
+    const maybeGoalData = await viewGoalData({
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
-      status: "VALID",
+      scheduled: true,
+      status: "PENDING",
       apiKey: props.apiKey.key
     });
 
@@ -77,32 +76,19 @@ function EventCalendar(props: EventCalendarProps) {
         pastEventData: ped
       }))
 
-    const task = isApiErrorCode(maybeTasks)
-      ? []
-      : await Promise.all(
-        maybeTasks.flatMap(async t => {
-          const maybeGoalData = await viewGoalData({
-            goalId: t.goal.goalId,
-            onlyRecent: true,
-            apiKey: props.apiKey.key
-          });
-          
-          if (isApiErrorCode(maybeGoalData)) {
-            return {};
-          }
-          
-          // we have an invariant that any session must have at least one session data, so its ok
-          return {
-            id: `Task:${t.taskId}`,
-            start: new Date(t.startTime),
-            end: new Date(t.startTime + t.duration),
+    const task = isApiErrorCode(maybeGoalData)
+    ? []
+    : maybeGoalData
+    // this asserts that x is scheduled if x's scheduled is true
+    .filter((x): x is GoalDataScheduled => x.scheduled)
+    .map(gd => ({
+            id: `GoalData:${gd.goalDataId}`,
+            start: new Date(gd.startTime),
+            end: new Date(gd.startTime + gd.duration),
             color: "#00000000",
             borderColor: "#00000000",
-            task: t,
-            goalData: maybeGoalData[0]
-          }
+            goalData: gd
         })
-        
       );
     return [...pastEventData, ...task];
   }
@@ -116,8 +102,8 @@ function EventCalendar(props: EventCalendarProps) {
         setSelectedManagePastEventData(props.pastEventData);
         break;
       }
-      case "Task": {
-        setSelectedManageTask(props.task);
+      case "GoalData": {
+        setSelectedManageGoalData(props.goalData);
         break;
       }
     }
@@ -172,7 +158,7 @@ function EventCalendar(props: EventCalendarProps) {
       >
         <Tabs className="py-3">
           <Tab eventKey="task" title="Create Task">
-            <CreateTask
+            <CreateGoal
               apiKey={props.apiKey}
               startTime={selectedSpan.start}
               duration={selectedSpan.duration}
@@ -199,13 +185,13 @@ function EventCalendar(props: EventCalendarProps) {
         <ManagePastEvent pastEventId={selectedManagePastEventData.pastEvent.pastEventId} apiKey={props.apiKey} />
       </DisplayModal>
     }
-    {selectedManageTask === null ? <> </> :
+    {selectedManageGoalData === null ? <> </> :
       <DisplayModal
         title="Manage Event"
-        show={selectedManageTask !== null}
-        onClose={() => setSelectedManageTask(null)}
+        show={selectedManageGoalData !== null}
+        onClose={() => setSelectedManageGoalData(null)}
       >
-        <ManageTask taskId={selectedManageTask.taskId} apiKey={props.apiKey} />
+        <ManageGoal goalId={selectedManageGoalData.goal.goalId} apiKey={props.apiKey} />
       </DisplayModal>
     }
   </>

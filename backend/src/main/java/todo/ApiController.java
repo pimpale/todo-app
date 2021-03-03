@@ -39,8 +39,6 @@ public class ApiController {
   @Autowired
   GoalDataService goalDataService;
   @Autowired
-  TaskService taskService;
-  @Autowired
   PastEventService pastEventService;
   @Autowired
   PastEventDataService pastEventDataService;
@@ -196,18 +194,6 @@ public class ApiController {
     timeUtilityFunctionPoint.timeUtilityFunction = fillTimeUtilityFunction(
         timeUtilityFunctionService.getByTimeUtilityFunctionId(timeUtilityFunctionPoint.timeUtilityFunctionId));
     return timeUtilityFunctionPoint;
-  }
-
-  /**
-   * Fills in jackson objects for Task
-   *
-   * @param task - Task object
-   * @return Task object with filled jackson objects
-   */
-  Task fillTask(Task task) {
-    task.creator = fillUser(userService.getByUserId(task.creatorUserId));
-    task.goal = fillGoal(goalService.getByGoalId(task.goalId));
-    return task;
   }
 
   /**
@@ -563,8 +549,11 @@ public class ApiController {
   public ResponseEntity<?> newGoal( //
       @RequestParam String name, //
       @RequestParam String description, //
-      @RequestParam long duration, //
+      @RequestParam long durationEstimate, //
       @RequestParam long timeUtilityFunctionId, //
+      @RequestParam boolean scheduled, //
+      @RequestParam long startTime, //
+      @RequestParam long duration, //
       @RequestParam String apiKey) {
     ApiKey key = getApiKeyIfValid(apiKey);
     if (key == null) {
@@ -582,8 +571,11 @@ public class ApiController {
     goalData.creatorUserId = key.creatorUserId;
     goalData.name = name;
     goalData.description = description;
-    goalData.duration = duration;
+    goalData.duration = durationEstimate;
     goalData.timeUtilityFunctionId = timeUtilityFunctionId;
+    goalData.scheduled = scheduled;
+    goalData.duration = duration;
+    goalData.startTime = startTime;
     goalData.status = GoalDataStatusKind.PENDING;
     goalDataService.add(goalData);
 
@@ -595,8 +587,11 @@ public class ApiController {
       @RequestParam long goalId, //
       @RequestParam String name, //
       @RequestParam String description, //
-      @RequestParam long duration, //
+      @RequestParam long durationEstimate, //
       @RequestParam long timeUtilityFunctionId, //
+      @RequestParam boolean scheduled, //
+      @RequestParam long startTime, //
+      @RequestParam long duration, //
       @RequestParam GoalDataStatusKind status, //
       @RequestParam String apiKey) {
     ApiKey key = getApiKeyIfValid(apiKey);
@@ -619,46 +614,15 @@ public class ApiController {
     goalData.creatorUserId = key.creatorUserId;
     goalData.name = name;
     goalData.description = description;
-    goalData.duration = duration;
+    goalData.duration = durationEstimate;
     goalData.timeUtilityFunctionId = timeUtilityFunctionId;
+    goalData.scheduled = scheduled;
+    goalData.duration = duration;
+    goalData.startTime = startTime;
     goalData.status = status;
     goalDataService.add(goalData);
 
     return new ResponseEntity<>(fillGoalData(goalData), HttpStatus.OK);
-  }
-
-  @RequestMapping("/task/new/")
-  public ResponseEntity<?> newTask( //
-      @RequestParam long goalId, //
-      @RequestParam long startTime, //
-      @RequestParam long duration, //
-      @RequestParam TaskStatusKind status, //
-      @RequestParam String apiKey) {
-    ApiKey key = getApiKeyIfValid(apiKey);
-    if (key == null) {
-      return Errors.API_KEY_NONEXISTENT.getResponse();
-    }
-
-    Goal goal = goalService.getByGoalId(goalId);
-    if (goal == null) {
-      return Errors.GOAL_NONEXISTENT.getResponse();
-    }
-
-    // prevent other users from modifying
-    if (goal.creatorUserId != key.creatorUserId) {
-      return Errors.API_KEY_UNAUTHORIZED.getResponse();
-    }
-
-    Task task = new Task();
-    task.creationTime = System.currentTimeMillis();
-    task.creatorUserId = key.creatorUserId;
-    task.goalId = goal.goalId;
-    task.startTime = startTime;
-    task.duration = duration;
-    task.status = status;
-    taskService.add(task);
-
-    return new ResponseEntity<>(fillTask(task), HttpStatus.OK);
   }
 
   @Transactional
@@ -878,10 +842,17 @@ public class ApiController {
       @RequestParam(required = false) String partialName, //
       @RequestParam(required = false) String description, //
       @RequestParam(required = false) String partialDescription, //
+      @RequestParam(required = false) Long durationEstimate, //
+      @RequestParam(required = false) Long minDurationEstimate, //
+      @RequestParam(required = false) Long maxDurationEstimate, //
+      @RequestParam(required = false) Long timeUtilityFunctionId, //
+      @RequestParam(required = false) Boolean scheduled, //
       @RequestParam(required = false) Long duration, //
       @RequestParam(required = false) Long minDuration, //
       @RequestParam(required = false) Long maxDuration, //
-      @RequestParam(required = false) Long timeUtilityFunctionId, //
+      @RequestParam(required = false) Long startTime, //
+      @RequestParam(required = false) Long minStartTime, //
+      @RequestParam(required = false) Long maxStartTime, //
       @RequestParam(required = false) GoalDataStatusKind status, //
       @RequestParam(defaultValue = "false") boolean onlyRecent, //
       @RequestParam(defaultValue = "0") long offset, //
@@ -895,24 +866,31 @@ public class ApiController {
     }
 
     Stream<GoalData> list = goalDataService.query( //
-        goalDataId, //
-        creationTime, //
-        minCreationTime, //
-        maxCreationTime, //
-        creatorUserId, //
-        goalId, //
-        name, //
-        partialName, //
-        description, //
-        partialDescription, //
-        duration, //
-        minDuration, //
-        maxDuration, //
-        timeUtilityFunctionId, //
-        status, //
-        onlyRecent, //
-        offset, //
-        count //
+       goalDataId, //
+       creationTime, //
+       minCreationTime, //
+       maxCreationTime, //
+       creatorUserId, //
+       goalId, //
+       name, //
+       partialName, //
+       description, //
+       partialDescription, //
+       durationEstimate, //
+       minDurationEstimate, //
+       maxDurationEstimate, //
+       timeUtilityFunctionId, //
+       scheduled, //
+       duration, //
+       minDuration, //
+       maxDuration, //
+       startTime, //
+       minStartTime, //
+       maxStartTime, //
+       status, //
+       onlyRecent, //
+       offset, //
+       count //
     ).map(x -> fillGoalData(x));
     return new ResponseEntity<>(list, HttpStatus.OK);
   }
@@ -997,54 +975,6 @@ public class ApiController {
         offset, //
         count //
     ).map(x -> fillPastEventData(x));
-    return new ResponseEntity<>(list, HttpStatus.OK);
-  }
-
-  @RequestMapping("/task/")
-  public ResponseEntity<?> viewTask( //
-      @RequestParam(required = false) Long taskId, //
-      @RequestParam(required = false) Long creationTime, //
-      @RequestParam(required = false) Long minCreationTime, //
-      @RequestParam(required = false) Long maxCreationTime, //
-      @RequestParam(required = false) Long creatorUserId, //
-      @RequestParam(required = false) Long goalId, //
-      @RequestParam(required = false) String name, //
-      @RequestParam(required = false) String partialName, //
-      @RequestParam(required = false) Long startTime, //
-      @RequestParam(required = false) Long minStartTime, //
-      @RequestParam(required = false) Long maxStartTime, //
-      @RequestParam(required = false) TaskStatusKind status, //
-      @RequestParam(defaultValue = "false") boolean onlyRecent, //
-      @RequestParam(required = false) Long duration, //
-      @RequestParam(required = false) Long minDuration, //
-      @RequestParam(required = false) Long maxDuration, //
-      @RequestParam(defaultValue = "0") long offset, //
-      @RequestParam(defaultValue = "100") long count, //
-      @RequestParam String apiKey //
-  ) {
-    ApiKey key = getApiKeyIfValid(apiKey );
-    if (key == null) {
-      return Errors.API_KEY_UNAUTHORIZED.getResponse();
-    }
-
-    Stream<Task> list = taskService.query( //
-        taskId, //
-        creationTime, //
-        minCreationTime, //
-        maxCreationTime, //
-        creatorUserId, //
-        goalId, //
-        startTime, //
-        minStartTime, //
-        maxStartTime, //
-        status, //
-        onlyRecent, //
-        duration, //
-        minDuration, //
-        maxDuration, //
-        offset, //
-        count //
-    ).map(x -> fillTask(x));
     return new ResponseEntity<>(list, HttpStatus.OK);
   }
 

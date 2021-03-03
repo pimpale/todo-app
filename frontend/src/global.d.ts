@@ -92,36 +92,44 @@ declare global {
 
   type GoalDataStatusKind = "SUCCEED" | "FAIL" | "CANCEL" | "PENDING";
 
-  type GoalData = {
+  type GoalDataScheduled = {
     goalDataId: number,
     creationTime: number,
     creator: User,
-    goal: Goal 
+    goal: Goal
     name: string,
     description: string,
     timeUtilityFunction: TimeUtilityFunction,
+    durationEstimate: number,
+    scheduled: true,
+    startTime: number,
     duration: number,
     status: GoalDataStatusKind
   }
+
+  type GoalDataUnscheduled = {
+    goalDataId: number,
+    creationTime: number,
+    creator: User,
+    goal: Goal
+    name: string,
+    description: string,
+    timeUtilityFunction: TimeUtilityFunction,
+    durationEstimate: number,
+    scheduled: false,
+    startTime: null,
+    duration: null,
+    status: GoalDataStatusKind
+  }
+
+  type GoalData  = GoalDataScheduled | GoalDataUnscheduled;
 
   type GoalDependency = {
     goalDependencyId: number,
     creationTime: number,
     creator: User,
-    goal: Goal, 
-    dependentGoal: Goal 
-  }
-
-  type TaskStatusKind = "VALID" | "CANCEL";
-
-  type Task = {
-    taskId: number,
-    creationTime: number,
-    creator: User,
-    goal: Goal, 
-    startTime: number,
-    duration: number,
-    status: TaskStatusKind
+    goal: Goal,
+    dependentGoal: Goal
   }
 
   type PastEvent = {
@@ -131,10 +139,10 @@ declare global {
   }
 
   type PastEventData = {
-    pastEventDataId: number, 
+    pastEventDataId: number,
     creationTime: number,
     creator: User,
-    pastEvent: PastEvent, 
+    pastEvent: PastEvent,
     startTime: number,
     duration: number,
     name: string,
