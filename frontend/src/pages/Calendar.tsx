@@ -1,12 +1,12 @@
 import React from 'react'
-import FullCalendar, { EventInput, DateSelectArg, EventClickArg } from '@fullcalendar/react'
+import FullCalendar, { EventApi, EventDropArg, DateSelectArg, EventChangeArg, EventClickArg } from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import DashboardLayout from '../components/DashboardLayout';
-import CalendarCard from '../components/CalendarCard';
+import CalendarCard, { pastEventDataToEvent, goalDataToEvent } from '../components/CalendarCard';
 
 import { Tab, Tabs, Form, Popover, Container, Row, Col, Card } from 'react-bootstrap';
-import { viewPastEventData, viewGoal, viewGoalData, isApiErrorCode } from '../utils/utils';
+import { newPastEventData, newGoalData, viewPastEventData, viewGoal, viewGoalData, isApiErrorCode } from '../utils/utils';
 
 import UtilityWrapper from '../components/UtilityWrapper';
 
@@ -53,13 +53,14 @@ function EventCalendar(props: EventCalendarProps) {
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
       onlyRecent: true,
-      active:true,
+      active: true,
       apiKey: props.apiKey.key
     });
 
     const maybeGoalData = await viewGoalData({
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
+      onlyRecent: true,
       scheduled: true,
       status: "PENDING",
       apiKey: props.apiKey.key
@@ -67,29 +68,14 @@ function EventCalendar(props: EventCalendarProps) {
 
     const pastEventData = isApiErrorCode(maybePastEventData)
       ? []
-      : maybePastEventData.map(ped => ({
-        id: `PastEventData:${ped.pastEventDataId}`,
-        start: new Date(ped.startTime),
-        end: new Date(ped.startTime + ped.duration),
-        color: "#00000000",
-        borderColor: "#00000000",
-        pastEventData: ped
-      }))
+      : maybePastEventData.map(pastEventDataToEvent)
 
     const task = isApiErrorCode(maybeGoalData)
-    ? []
-    : maybeGoalData
-    // this asserts that x is scheduled if x's scheduled is true
-    .filter((x): x is GoalDataScheduled => x.scheduled)
-    .map(gd => ({
-            id: `GoalData:${gd.goalDataId}`,
-            start: new Date(gd.startTime),
-            end: new Date(gd.startTime + gd.duration),
-            color: "#00000000",
-            borderColor: "#00000000",
-            goalData: gd
-        })
-      );
+      ? []
+      : maybeGoalData
+        // this asserts that x is scheduled if x's scheduled is true
+        .filter((x): x is GoalDataScheduled => x.scheduled)
+        .map(goalDataToEvent);
     return [...pastEventData, ...task];
   }
 
@@ -105,6 +91,47 @@ function EventCalendar(props: EventCalendarProps) {
       case "GoalData": {
         setSelectedManageGoalData(props.goalData);
         break;
+      }
+    }
+  }
+
+  const changeHandler = async (event:EventApi, oldEvent:EventApi, revert:()=>void) => {
+    switch (event.id.split(':')[0]) {
+      case "PastEventData": {
+        const oped = oldEvent.extendedProps.pastEventData;
+        const maybePastEventData = await newPastEventData({
+          pastEventId: oped.pastEvent.pastEventId,
+          name: oped.name,
+          description: oped.description,
+          startTime: event.start!.valueOf(),
+          duration: event.end!.valueOf() - event.start!.valueOf(),
+          active: oped.active,
+          apiKey: props.apiKey.key,
+        });
+        if (isApiErrorCode(maybePastEventData)) {
+          revert();
+        }
+        event.setExtendedProp("pastEventData", maybePastEventData);
+        break;
+      }
+      case "GoalData": {
+        const ogd = oldEvent.extendedProps.goalData;
+        const maybeGoalData = await newGoalData({
+          goalId: ogd.goal.goalId,
+          name: ogd.name,
+          description: ogd.description,
+          durationEstimate: ogd.durationEstimate,
+          timeUtilityFunctionId: ogd.timeUtilityFunction.timeUtilityFunctionId,
+          scheduled: true,
+          startTime: event.start!.valueOf(),
+          duration: event.end!.valueOf() - event.start!.valueOf(),
+          status: ogd.status,
+          apiKey: props.apiKey.key
+        })
+        if (isApiErrorCode(maybeGoalData)) {
+          revert();
+        }
+        event.setExtendedProp("goalData", maybeGoalData);
       }
     }
   }
@@ -131,6 +158,8 @@ function EventCalendar(props: EventCalendarProps) {
       eventContent={CalendarCard}
       unselectCancel=".modal-content"
       eventClick={clickHandler}
+      eventResize={(era) => changeHandler(era.event, era.oldEvent, era.revert)}
+      eventDrop={(eda) => changeHandler(eda.event, eda.oldEvent, eda.revert)}
       unselect={() => {
         setSelectedSpan(null);
       }}

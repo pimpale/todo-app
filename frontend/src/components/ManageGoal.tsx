@@ -28,7 +28,6 @@ function EditGoal(props: EditGoalProps) {
 
     const maybeGoalData  = await newGoalData({
       goalId: props.goalData.goal.goalId,
-      apiKey: props.apiKey.key,
       name: values.name,
       description: values.description,
       durationEstimate:props.goalData.durationEstimate,
@@ -37,6 +36,7 @@ function EditGoal(props: EditGoalProps) {
       startTime: values.startTime ?? 0,
       duration:values.duration ?? 0,
       status: props.goalData.status,
+      apiKey: props.apiKey.key,
     });
 
     if (isApiErrorCode(maybeGoalData)) {

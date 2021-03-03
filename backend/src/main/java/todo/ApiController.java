@@ -146,6 +146,8 @@ public class ApiController {
   GoalData fillGoalData(GoalData goalData) {
     goalData.creator = fillUser(userService.getByUserId(goalData.creatorUserId));
     goalData.goal = fillGoal(goalService.getByGoalId(goalData.goalId));
+    goalData.timeUtilityFunction = fillTimeUtilityFunction(
+        timeUtilityFunctionService.getByTimeUtilityFunctionId(goalData.timeUtilityFunctionId));
     return goalData;
   }
 

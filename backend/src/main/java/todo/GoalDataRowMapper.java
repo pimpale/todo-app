@@ -20,6 +20,7 @@ public class GoalDataRowMapper implements RowMapper<GoalData> {
     gd.scheduled = row.getBoolean("scheduled");
     gd.startTime = row.getLong("start_time");
     gd.duration = row.getLong("duration");
+    gd.status = GoalDataStatusKind.from(row.getInt("status"));
     return gd;
   }
 }
