@@ -112,7 +112,7 @@ function CreateGoal(props: CreateGoalProps) {
   }
 
   return <>
-    <UtilityPicker />
+    <UtilityPicker start={props.startTime} duration={props.duration} />
     <Formik<CreateGoalValue>
       onSubmit={onSubmit}
       initialValues={{
