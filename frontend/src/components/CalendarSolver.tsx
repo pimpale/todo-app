@@ -14,6 +14,7 @@ type CalendarSolverProps = {
 type CalendarSolverState = {
   goalData: GoalDataScheduled[];
   iteration: number;
+  stopIteration: boolean;
   fullCalendar: React.RefObject<FullCalendar>;
 
 }
@@ -24,29 +25,46 @@ class CalendarSolver extends React.Component<CalendarSolverProps, CalendarSolver
     this.state = {
       goalData: this.props.goalData,
       iteration: 0,
+      stopIteration:true,
       fullCalendar: React.createRef<FullCalendar>(),
     };
   }
 
   startOptimize = () => {
-    setTimeout(this.annealIteration, 100);
+    this.setState({
+        stopIteration: false
+    });
+    setTimeout(this.annealIteration,100);
+  }
+
+  stopOptimize = () => {
+    this.setState({
+        stopIteration: true
+    });
+  }
+
+  multiplier = () => {
+      return 100000000 - this.state.iteration;
   }
 
   annealIteration = () => {
     this.setState({
         goalData: this.state.goalData.map(gd => {
             console.log(gd.startTime );
-            gd.startTime += (Math.random()-0.5)*1000000;
+            gd.startTime += (Math.random()-0.5)*this.multiplier();
             return gd;
         })
     });
-    setTimeout(this.annealIteration, 100);
+    if(!this.state.stopIteration) {
+      setTimeout(this.annealIteration, 10);
+    }
   }
 
 
   render() {
     return <>
-      <button onClick={this.startOptimize}>Nice</button>
+      <button onClick={this.startOptimize}>Start</button>
+      <button onClick={this.stopOptimize}>Stop</button>
       <FullCalendar
         ref={this.state.fullCalendar}
         plugins={[timeGridPlugin, interactionPlugin]}

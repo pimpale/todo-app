@@ -2,6 +2,7 @@ import React from "react"
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Button, Form } from "react-bootstrap";
 import { newGoal, newTimeUtilityFunction, isApiErrorCode } from "../utils/utils";
+import UtilityPicker from "../components/UtilityPicker"
 
 
 type CreateGoalProps = {
@@ -111,6 +112,7 @@ function CreateGoal(props: CreateGoalProps) {
   }
 
   return <>
+    <UtilityPicker />
     <Formik<CreateGoalValue>
       onSubmit={onSubmit}
       initialValues={{

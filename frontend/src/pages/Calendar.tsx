@@ -1,12 +1,12 @@
 import React from 'react'
-import FullCalendar, { EventApi, EventDropArg, DateSelectArg, EventChangeArg, EventClickArg } from '@fullcalendar/react'
+import FullCalendar, { EventApi, DateSelectArg, EventClickArg } from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import DashboardLayout from '../components/DashboardLayout';
 import CalendarCard, { pastEventDataToEvent, goalDataToEvent } from '../components/CalendarCard';
 
-import { Tab, Tabs, Form, Popover, Container, Row, Col, Card } from 'react-bootstrap';
-import { newPastEventData, newGoalData, viewPastEventData, viewGoal, viewGoalData, isApiErrorCode } from '../utils/utils';
+import { Tab, Tabs, Popover, Container, } from 'react-bootstrap';
+import { newPastEventData, newGoalData, viewPastEventData, viewGoalData, isApiErrorCode } from '../utils/utils';
 
 import UtilityWrapper from '../components/UtilityWrapper';
 
