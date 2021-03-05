@@ -1,6 +1,6 @@
 import React from "react"
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
-import { Button, Form } from "react-bootstrap";
+import { Card, Button, Form } from "react-bootstrap";
 import { newGoal, newTimeUtilityFunction, isApiErrorCode } from "../utils/utils";
 import UtilityPicker from "../components/UtilityPicker"
 
@@ -18,8 +18,7 @@ function CreateGoal(props: CreateGoalProps) {
     description: string,
     startTime: number,
     duration: number,
-    startTimes: number[]
-    utils: number[]
+    points: { x: number, y: number }[]
   }
 
   const onSubmit = async (values: CreateGoalValue,
@@ -41,8 +40,8 @@ function CreateGoal(props: CreateGoalProps) {
     }
 
     const maybeTimeUtilFunction = await newTimeUtilityFunction({
-      utils: values.utils,
-      startTimes: values.startTimes,
+      startTimes: values.points.map(p => p.x),
+      utils: values.points.map(p => p.y),
       apiKey: props.apiKey.key,
     })
 
@@ -57,7 +56,7 @@ function CreateGoal(props: CreateGoalProps) {
         }
         case "TIME_UTILITY_FUNCTION_NOT_VALID": {
           fprops.setErrors({
-            utils: "Function is invalid."
+            points: "Utility function is invalid."
           });
           break;
         }
@@ -83,7 +82,7 @@ function CreateGoal(props: CreateGoalProps) {
       apiKey: props.apiKey.key,
     });
 
-    if(isApiErrorCode(maybeGoalData)) {
+    if (isApiErrorCode(maybeGoalData)) {
       switch (maybeGoalData) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
@@ -112,7 +111,6 @@ function CreateGoal(props: CreateGoalProps) {
   }
 
   return <>
-    <UtilityPicker start={props.startTime} duration={props.duration} />
     <Formik<CreateGoalValue>
       onSubmit={onSubmit}
       initialValues={{
@@ -120,9 +118,7 @@ function CreateGoal(props: CreateGoalProps) {
         description: "",
         startTime: props.startTime,
         duration: props.duration,
-        // TODO we need to actually create a picker
-        startTimes: [0],
-        utils: [10],
+        points: [],
       }}
       initialStatus={{
         failureResult: "",
@@ -134,6 +130,20 @@ function CreateGoal(props: CreateGoalProps) {
           noValidate
           onSubmit={fprops.handleSubmit} >
           <div hidden={fprops.status.successResult !== ""}>
+            <Form.Group>
+              <Card>
+                <Card.Body>
+                  <UtilityPicker
+                    startTime={props.startTime}
+                    duration={props.duration}
+                    points={fprops.values.points}
+                    setPoints={p => fprops.setFieldValue("points", p)}
+                  />
+                </Card.Body>
+              </Card>
+              <Form.Text className="text-danger">{fprops.errors.points}</Form.Text>
+            </Form.Group>
+
             <Form.Group >
               <Form.Control
                 name="name"
@@ -158,7 +168,7 @@ function CreateGoal(props: CreateGoalProps) {
               />
               <Form.Control.Feedback type="invalid">{fprops.errors.description}</Form.Control.Feedback>
             </Form.Group>
-             <Button type="submit">Submit Form</Button>
+            <Button type="submit">Submit Form</Button>
             <br />
             <Form.Text className="text-danger">{fprops.status.failureResult}</Form.Text>
           </div>
