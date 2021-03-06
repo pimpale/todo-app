@@ -10,7 +10,6 @@ interface SearchSingleGoalProps {
   search: (input: string) => Promise<GoalData[]>,
   isInvalid: boolean,
   setFn: (Goal: GoalData | null) => void
-  searchState: (sprops: string) => void
 }
 
 type GoalDataOption = {
