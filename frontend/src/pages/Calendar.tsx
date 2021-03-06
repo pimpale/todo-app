@@ -158,6 +158,7 @@ function EventCalendar(props: EventCalendarProps) {
       eventContent={CalendarCard}
       unselectCancel=".modal-content"
       eventClick={clickHandler}
+      eventOverlap={false}
       eventResize={(era) => changeHandler(era.event, era.oldEvent, era.revert)}
       eventDrop={(eda) => changeHandler(eda.event, eda.oldEvent, eda.revert)}
       unselect={() => {
