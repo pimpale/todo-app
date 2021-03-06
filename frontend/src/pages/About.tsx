@@ -42,7 +42,7 @@ function About() {
       <br />
       <h3>Technologies Used For This Product</h3>
       <p>
-        In building our application, we used various programming languages: TypeScript, Java, JavaScript, Rust, HTML, CSS, and SQL.
+        In building our application, we used various programming languages: TypeScript, Java, JavaScript, React, HTML, CSS, and SQL.
       </p>
     </section>
   </SimpleLayout>
