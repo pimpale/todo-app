@@ -36,10 +36,8 @@ export default function SearchSingleGoal(props: SearchSingleGoalProps) {
   const onChange = (opt: ValueType<GoalDataOption, false>) => {
     if (opt == null) {
       props.setFn(null);
-      props.searchState("");
     } else {
       props.setFn(opt.value);
-      props.searchState(opt.value.name);
     }
   }
 

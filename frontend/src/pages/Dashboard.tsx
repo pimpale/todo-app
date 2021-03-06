@@ -14,28 +14,23 @@ import ManageGoal from '../components/ManageGoal';
 import { viewGoalData, isApiErrorCode, viewPastEventData } from '../utils/utils';
 import format from "date-fns/format";
 
-import SearchSingleGoal from '../components/SearchSingleGoal';
-
 type DashboardData = {
   goalData: GoalData
 }
-
-
 
 const loadDashboardData = async (props: AsyncProps<DashboardData[]>) => {
   const maybeGoalData = await viewGoalData({
     creatorUserId: props.apiKey.creator.userId,
     onlyRecent: true,
-    partialName: props.search,
     status: "PENDING",
     apiKey: props.apiKey.key,
   });
-  
+
   if (isApiErrorCode(maybeGoalData)) {
     throw Error;
   }
 
-  return maybeGoalData.map(goalData => ({ goalData:goalData }));
+  return maybeGoalData.map(goalData => ({ goalData }));
 }
 
 function Dashboard(props: AuthenticatedComponentProps) {
