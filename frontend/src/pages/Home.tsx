@@ -23,66 +23,43 @@ function Home() {
   return (
     <ExternalLayout fixed={true} transparentTop={true}>
       <Jumbotron fluid style={jumboStyle}>
-        <h1 className="text-light"> Academics, Achievement, Attendance first. </h1>
+        <h1 className="text-light"> Academics, Achievement, Career first. </h1>
       </Jumbotron>
       <Container>
-        <Section id="getstarted" name="Get Started For Free">
+        <Section id="welcome" name="Welcome to *InsertAppNameHere*">
           <div>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Integer ornare ante placerat odio lacinia condimentum.
-            Quisque dignissim vulputate vestibulum.
-            Pellentesque mollis enim vel ornare laoreet.
-            Donec sagittis eget turpis non malesuada.
-            Donec ullamcorper eleifend ullamcorper.
-            In eget felis malesuada, porttitor dolor viverra, cursus elit.
-            Proin dictum neque vel sapien suscipit faucibus.
-            Nulla ullamcorper nibh in purus finibus, elementum rhoncus dolor placerat.
-            Fusce hendrerit libero elit, sit amet mattis nisi porttitor ac.
+            Welcome to *InsertAppNameHere*, an application built for a class project, but an application designed for the busiest of people. As students at UCLA, we know how
+            frustrasting it is to schedule classes, clubs, and homework so we made this application to help all kinds of people efficiently plan their schedule. 
             <a href="/register">Register</a>
           </div>
         </Section>
-        <Section id="getstarted" name="Get Started For Free">
+        <Section id="whyUs" name="Our Application">
           <div>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Integer ornare ante placerat odio lacinia condimentum.
-            Quisque dignissim vulputate vestibulum.
-            Pellentesque mollis enim vel ornare laoreet.
-            Donec sagittis eget turpis non malesuada.
-            Donec ullamcorper eleifend ullamcorper.
-            In eget felis malesuada, porttitor dolor viverra, cursus elit.
-            Proin dictum neque vel sapien suscipit faucibus.
-            Nulla ullamcorper nibh in purus finibus, elementum rhoncus dolor placerat.
-            Fusce hendrerit libero elit, sit amet mattis nisi porttitor ac.
+            A scheduling app shouldn't have to take more than a few minutes to arrange the multiple events of your day; therefore, we use an algorithm modeled after simulated
+            annealing to choose the best fit for certain events around your Commitments (immovable events such as classes, interviews, work, etc.).
+            <br />
+            With all your events in one place, our application gives you a simple TO-DO feed to see what is upcoming in your schedule, allowing you to take a quick glance and
+            go back to working efficiently.
             <a href="/register">Register</a>
           </div>
         </Section>
-        <Section id="getstarted" name="Get Started For Free">
+        <Section id="aboutCreators" name="About the Creators">
           <div>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Integer ornare ante placerat odio lacinia condimentum.
-            Quisque dignissim vulputate vestibulum.
-            Pellentesque mollis enim vel ornare laoreet.
-            Donec sagittis eget turpis non malesuada.
-            Donec ullamcorper eleifend ullamcorper.
-            In eget felis malesuada, porttitor dolor viverra, cursus elit.
-            Proin dictum neque vel sapien suscipit faucibus.
-            Nulla ullamcorper nibh in purus finibus, elementum rhoncus dolor placerat.
-            Fusce hendrerit libero elit, sit amet mattis nisi porttitor ac.
+            Govind Pimpale
+            <br />
+            Edmund Yim
+            <br />
+            Brandon Le
+            <br />
+            Edgar Hukassian
+            <br />
+            Warren Pagsuguiron: I am a 4th year Electrical Engineering major who is also passionate about Computer Science. After UCLA, I plan on working on robotics.
             <a href="/register">Register</a>
           </div>
         </Section>
-        <Section id="getstarted" name="Get Started For Free">
+        <Section id="specialThanks" name="Special Thanks">
           <div>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Integer ornare ante placerat odio lacinia condimentum.
-            Quisque dignissim vulputate vestibulum.
-            Pellentesque mollis enim vel ornare laoreet.
-            Donec sagittis eget turpis non malesuada.
-            Donec ullamcorper eleifend ullamcorper.
-            In eget felis malesuada, porttitor dolor viverra, cursus elit.
-            Proin dictum neque vel sapien suscipit faucibus.
-            Nulla ullamcorper nibh in purus finibus, elementum rhoncus dolor placerat.
-            Fusce hendrerit libero elit, sit amet mattis nisi porttitor ac.
+            We want to thank Professor Eggert & the Language and Teaching Assistants of Winter 2021 CS 97 for their hard-work during the quarter.
             <a href="/register">Register</a>
           </div>
         </Section>
