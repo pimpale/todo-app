@@ -27,6 +27,8 @@ import Dashboard from './pages/Dashboard';
 // settings
 import Settings from './pages/Settings';
 
+// search
+import Search from './pages/Search';
 
 function getPreexistingApiKey() {
   const preexistingApiKeyString = localStorage.getItem("apiKey");
@@ -68,6 +70,7 @@ function App() {
         <AuthenticatedRoute path="/calendar" {...apiKeyGetSetter} component={Calendar} />
         <AuthenticatedRoute path="/dashboard" {...apiKeyGetSetter} component={Dashboard} />
         <AuthenticatedRoute path="/settings" {...apiKeyGetSetter} component={Settings} />
+        <AuthenticatedRoute path="/search" {...apiKeyGetSetter} component={Search} />
         <Route path="/" component={Error404} />
       </Switch>
     </BrowserRouter>

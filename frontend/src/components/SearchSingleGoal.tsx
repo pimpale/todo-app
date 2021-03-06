@@ -1,3 +1,4 @@
+import React from 'react'
 import AsyncSelect from 'react-select/async';
 import { ValueType } from 'react-select';
 import { isApiErrorCode } from '../utils/utils';
@@ -9,6 +10,7 @@ interface SearchSingleGoalProps {
   search: (input: string) => Promise<GoalData[]>,
   isInvalid: boolean,
   setFn: (Goal: GoalData | null) => void
+  searchState: (sprops: string) => void
 }
 
 type GoalDataOption = {
@@ -34,8 +36,10 @@ export default function SearchSingleGoal(props: SearchSingleGoalProps) {
   const onChange = (opt: ValueType<GoalDataOption, false>) => {
     if (opt == null) {
       props.setFn(null);
+      props.searchState("");
     } else {
-      props.setFn(opt.value)
+      props.setFn(opt.value);
+      props.searchState(opt.value.name);
     }
   }
 

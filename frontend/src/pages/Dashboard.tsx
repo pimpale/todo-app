@@ -21,51 +21,26 @@ type DashboardData = {
 }
 
 
+
 const loadDashboardData = async (props: AsyncProps<DashboardData[]>) => {
   const maybeGoalData = await viewGoalData({
     creatorUserId: props.apiKey.creator.userId,
     onlyRecent: true,
+    partialName: props.search,
     status: "PENDING",
     apiKey: props.apiKey.key,
   });
-
+  
   if (isApiErrorCode(maybeGoalData)) {
     throw Error;
   }
 
-  return maybeGoalData.map(goalData => ({ goalData }));
+  return maybeGoalData.map(goalData => ({ goalData:goalData }));
 }
 
 function Dashboard(props: AuthenticatedComponentProps) {
+
   return <DashboardLayout {...props}>
-    <SearchSingleGoal
-      name="searchSingleGoal"
-      search={async input => {
-        const maybeGoalName = await viewGoalData({
-          partialName: input,
-          onlyRecent: true,
-          status: "PENDING",
-          apiKey: props.apiKey.key,
-        });
-        /*
-        const maybeGoalDescription = await viewGoalData({
-          partialDescription: input,
-          onlyRecent: true,
-          status: "PENDING",
-          apiKey: props.apiKey.key,
-        });
-        */
-        if (isApiErrorCode(maybeGoalName)) {//} || isApiErrorCode(maybeGoalDescription)) {
-          return [];
-        }
-
-        return [...maybeGoalName];//, ...maybeGoalDescription];
-
-      }}
-      isInvalid={false}
-      setFn={(e: GoalData | null) => null}
-    />
-
     <Container fluid className="py-4 px-4">
       <Async promiseFn={loadDashboardData} apiKey={props.apiKey}>
         {({ reload: reloadDashboardData }) => <>
