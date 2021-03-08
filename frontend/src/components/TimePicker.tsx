@@ -1,10 +1,6 @@
-import React from 'react'
 import Select from 'react-select'
-import setHours from 'date-fns/setHours';
-import getHours from 'date-fns/getHours';
-import getMinutes from 'date-fns/getMinutes';
-import setMinutes from 'date-fns/setMinutes';
 import format from 'date-fns/format'
+import {setHrMin} from '../utils/utils';
 
 type TimePickerProps = {
   time: number,
@@ -21,31 +17,25 @@ type OptionType = {
 
 function TimePicker(props: TimePickerProps) {
 
-  const setHrMin = (d:number,hr:number, min:number) => setMinutes(setHours(d, hr), min)
 
   const options = [];
   for (let hr = 0; hr < 24; hr++) {
     for (let min = 0; min < 60; min += 30) {
-      if( props.minTime && props.minTime >= setHrMin(props.time, hr, min).valueOf()) {
+      if( props.minTime && props.minTime >= setHrMin(new Date(props.time), hr, min).valueOf()) {
           continue;
       }
-      if( props.maxTime && props.maxTime <= setHrMin(props.time, hr, min).valueOf()) {
+      if( props.maxTime && props.maxTime <= setHrMin(new Date(props.time), hr, min).valueOf()) {
           continue;
       }
-      // options.push({ value: setHrMin(props.time, hr, min), label: `${hr}:${min}` });
-      options.push({ value: setHrMin(props.time, hr, min), label: format(setHrMin(props.time, hr, min), 'p') });
+      options.push({ value: setHrMin(new Date(props.time), hr, min), label: format(setHrMin(new Date(props.time), hr, min), 'p') });
     }
   }
-
-  const defaultHr = getHours(props.time);
-  const defaultMin = getMinutes(props.time);
 
   return <>
     <Select<OptionType>
       className={props.className}
       options={options}
-      // defaultValue={{value: new Date(props.time), label: `${defaultHr}:${defaultMin}`}}
-      defaultValue={{value: new Date(props.time), label: format(new Date(props.time), 'p')}}
+      defaultValue={{value: new Date(props.time), label: format(props.time, 'p')}}
       isClearable={false}
       onChange={o => props.setTime(o!.value.valueOf())}
     />

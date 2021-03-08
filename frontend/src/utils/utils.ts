@@ -1,3 +1,6 @@
+import setHours from 'date-fns/setHours';
+import setMinutes from 'date-fns/setMinutes';
+
 /**
  * Returns a promise that will be resolved in some milliseconds
  * use await sleep(some milliseconds)
@@ -459,3 +462,6 @@ export function isApiErrorCode(maybeApiErrorCode: any): maybeApiErrorCode is Api
 export const INT_MAX: number = 999999999999999;
 
 export const isPasswordValid = (pass: string) => pass.length >= 8 && /\d/.test(pass);
+
+export const setHrMin = (d:Date,hr:number, min:number) => setMinutes(setHours(d, hr), min)
+

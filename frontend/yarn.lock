@@ -10658,6 +10658,13 @@ react-chartjs-2@^2.11.1:
     lodash "^4.17.19"
     prop-types "^15.7.2"
 
+react-day-picker@^7.4.8:
+  version "7.4.8"
+  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-7.4.8.tgz#675625240d3fae1b41c0a9d5177c968c8517c1d4"
+  integrity sha512-pp0hnxFVoRuBQcRdR1Hofw4CQtOCGVmzCNrscyvS0Q8NEc+UiYLEDqE5dk37bf0leSnBW4lheIt0CKKhuKzDVw==
+  dependencies:
+    prop-types "^15.6.2"
+
 react-dev-utils@^11.0.3:
   version "11.0.3"
   resolved "https://registry.yarnpkg.com/react-dev-utils/-/react-dev-utils-11.0.3.tgz#b61ed499c7d74f447d4faddcc547e5e671e97c08"

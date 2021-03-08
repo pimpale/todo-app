@@ -1,10 +1,17 @@
 import React from 'react'
 import Select from 'react-select'
-import { Row } from 'react-bootstrap';
+import { Col, Row } from 'react-bootstrap';
 import { Line } from 'react-chartjs-2';
-import TimePicker from '../components/TimePicker';
 import moment from 'moment';
-import 'chartjs-plugin-dragdata'
+import TimePicker from '../components/TimePicker';
+import { setHrMin } from '../utils/utils';
+import getHours from 'date-fns/getHours'
+import getMinutes from 'date-fns/getMinutes'
+
+
+import DayPickerInput from 'react-day-picker/DayPickerInput';
+import 'react-day-picker/lib/style.css';
+import 'chartjs-plugin-dragdata';
 
 type UtilityPickerProps = {
   startTime: number,
@@ -84,53 +91,68 @@ function UtilityPicker(props: UtilityPickerProps) {
 
   return <>
     <Row>
-      <TimePicker time={start} setTime={setStart} maxTime={end} className="col-sm" />
-      <Select
-        className="col-sm"
-        isClearable={false}
-        defaultValue={{ value: "", label: "Select" }}
-        options={[
-          { value: "constant", label: "No Time Preference" },
-          { value: "deadline", label: "Deadline" },
-          { value: "interval", label: "Interval" },
-        ]}
-        onChange={o => {
-          const t = (start + end) / 2;
-          switch (o!.value) {
-            case "constant": {
-              props.setPoints(noTimePrefTUF(start, end));
-              break;
+      <Col>
+        Date:
+        <DayPickerInput value={new Date(start)} onDayChange={day => {
+          setStart(setHrMin(day, getHours(start), getMinutes(start)).valueOf());
+          setEnd(setHrMin(day, getHours(end), getMinutes(end)).valueOf());
+        }} />
+      </Col>
+      <Col>
+        From:
+        <TimePicker time={start} setTime={(t: number) => setStart(t)} maxTime={end} />
+      </Col>
+      <Col>
+        To:
+        <TimePicker time={end} setTime={(t: number) => setEnd(t)} minTime={start} />
+      </Col>
+      <Col>
+        Utility Distribution
+        <Select
+          isClearable={false}
+          defaultValue={{ value: "", label: "Select" }}
+          options={[
+            { value: "constant", label: "No Time Preference" },
+            { value: "deadline", label: "Deadline" },
+            { value: "interval", label: "Interval" },
+          ]}
+          onChange={o => {
+            const t = (start + end) / 2;
+            switch (o!.value) {
+              case "constant": {
+                props.setPoints(noTimePrefTUF(start, end));
+                break;
+              }
+              case "deadline": {
+                props.setPoints([{
+                  x: t - 1,
+                  y: 1
+                }, {
+                  x: t + 1,
+                  y: 0
+                }])
+                break;
+              }
+              case "interval": {
+                props.setPoints([{
+                  x: t - 1000001,
+                  y: 0
+                }, {
+                  x: t - 1000000,
+                  y: 1
+                }, {
+                  x: t + 1000000,
+                  y: 1
+                }, {
+                  x: t + 1000001,
+                  y: 0
+                }])
+                break;
+              }
             }
-            case "deadline": {
-              props.setPoints([{
-                x: t - 1,
-                y: 1
-              }, {
-                x: t + 1,
-                y: 0
-              }])
-              break;
-            }
-            case "interval": {
-              props.setPoints([{
-                x: t - 1000001,
-                y: 0
-              }, {
-                x: t - 1000000,
-                y: 1
-              }, {
-                x: t + 1000000,
-                y: 1
-              }, {
-                x: t + 1000001,
-                y: 0
-              }])
-              break;
-            }
-          }
-        }}
-      />
-      <TimePicker time={end} setTime={setEnd} minTime={start} className="col-sm" />
+          }}
+        />
+      </Col>
     </Row>
     <Line
       options={lineOptions}

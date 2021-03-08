@@ -35,6 +35,7 @@
     "react-bootstrap": "^1.5.1",
     "react-bootstrap-select": "^0.14.0",
     "react-chartjs-2": "^2.11.1",
+    "react-day-picker": "^7.4.8",
     "react-dom": "^17.0.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.1",
