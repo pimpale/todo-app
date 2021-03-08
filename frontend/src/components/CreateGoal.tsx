@@ -135,9 +135,10 @@ function CreateGoal(props: CreateGoalProps) {
                 <Card.Body>
                   <UtilityPicker
                     startTime={props.startTime}
-                    duration={props.duration}
+                    endTime={props.startTime + props.duration}
                     points={fprops.values.points}
                     setPoints={p => fprops.setFieldValue("points", p)}
+                    mutable
                   />
                 </Card.Body>
               </Card>

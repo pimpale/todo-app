@@ -5,7 +5,6 @@ import AuthenticatedRoute from './components/AuthenticatedRoute';
 
 // public pages
 import Home from './pages/Home';
-import TermsOfService from './pages/TermsOfService';
 import Instructions from './pages/Instructions';
 import About from './pages/About';
 import Error404 from './pages/Error404';
@@ -62,7 +61,6 @@ function App() {
         <Route path="/" exact component={Home} />
         <Route path="/instructions" component={Instructions} />
         <Route path="/about" component={About} />
-        <Route path="/terms_of_service" component={TermsOfService} />
         <Route path="/forgot_password" component={ForgotPassword} />
         <Route path="/reset_password" component={ResetPassword} />
         <Route path="/register" component={Register} />

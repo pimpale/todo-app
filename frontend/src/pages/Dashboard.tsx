@@ -9,7 +9,6 @@ import Loader from '../components/Loader';
 import DisplayModal from '../components/DisplayModal';
 import { ViewUser, } from '../components/ViewData';
 import CreateGoal from '../components/CreateGoal';
-import CalendarSolver from '../components/CalendarSolver';
 import ManageGoal from '../components/ManageGoal';
 import { viewGoalData, isApiErrorCode, viewPastEventData } from '../utils/utils';
 import format from "date-fns/format";
@@ -49,10 +48,6 @@ function Dashboard(props: AuthenticatedComponentProps) {
                 <ManageGoal goalId={d.goalData.goal.goalId} apiKey={props.apiKey} />
               </Card>
             )}
-            <CalendarSolver goalData={ddata
-              .map(d => d.goalData)
-              .filter((gd): gd is GoalDataScheduled => gd.scheduled)
-            }/>
           </>}
           </Async.Fulfilled>
         </>}

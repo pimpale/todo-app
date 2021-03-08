@@ -3,6 +3,7 @@ import FullCalendar, { EventApi, DateSelectArg, EventClickArg } from '@fullcalen
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import DashboardLayout from '../components/DashboardLayout';
+import CalendarSolver from '../components/CalendarSolver';
 import CalendarCard, { pastEventDataToEvent, goalDataToEvent } from '../components/CalendarCard';
 
 import { Tab, Tabs, Popover, Container, } from 'react-bootstrap';
@@ -24,6 +25,9 @@ type EventCalendarProps = {
 // Look at AdminManageAdminships for examples
 
 function EventCalendar(props: EventCalendarProps) {
+
+  // whether we're currently in optimize mode or not
+  const [optimizing, setOptimizing] = React.useState(false);
 
   // Closing it should also unselect anything using it
   const [selectedSpan, setSelectedSpanRaw] = React.useState<{ start: number, duration: number } | null>(null);
@@ -95,7 +99,7 @@ function EventCalendar(props: EventCalendarProps) {
     }
   }
 
-  const changeHandler = async (event:EventApi, oldEvent:EventApi, revert:()=>void) => {
+  const changeHandler = async (event: EventApi, oldEvent: EventApi, revert: () => void) => {
     switch (event.id.split(':')[0]) {
       case "PastEventData": {
         const oped = oldEvent.extendedProps.pastEventData;
@@ -136,13 +140,26 @@ function EventCalendar(props: EventCalendarProps) {
     }
   }
 
+  if(optimizing) {
+    return <CalendarSolver
+      apiKey={props.apiKey}
+      onHide={() => setOptimizing(false)}
+    />
+  }
+
   return <>
     <FullCalendar
       ref={calendarRef}
       plugins={[timeGridPlugin, interactionPlugin]}
+      customButtons={{
+        optimize: {
+          text: 'Optimize',
+          click: () => setOptimizing(true)
+        }
+      }}
       headerToolbar={{
         left: 'prev,next today',
-        center: '',
+        center: 'optimize',
         right: 'timeGridDay,timeGridWeek',
       }}
       initialView='timeGridWeek'

@@ -4,18 +4,19 @@ import { Col, Row } from 'react-bootstrap';
 import { Line } from 'react-chartjs-2';
 import moment from 'moment';
 import TimePicker from '../components/TimePicker';
-import { setHrMin } from '../utils/utils';
+import { setHrMin, INT_MAX } from '../utils/utils';
 import getHours from 'date-fns/getHours'
 import getMinutes from 'date-fns/getMinutes'
-
-
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import 'react-day-picker/lib/style.css';
 import 'chartjs-plugin-dragdata';
 
+const scale = 100;
+
 type UtilityPickerProps = {
   startTime: number,
-  duration: number,
+  mutable:boolean,
+  endTime: number,
   points: { x: number, y: number }[],
   setPoints: (points: { x: number, y: number }[]) => void
 }
@@ -23,13 +24,13 @@ type UtilityPickerProps = {
 function noTimePrefTUF(start: number, end: number) {
   return [{
     x: (start + end) / 2,
-    y: 1
+    y: scale
   }]
 }
 
 function UtilityPicker(props: UtilityPickerProps) {
   const [start, setStart] = React.useState(props.startTime);
-  const [end, setEnd] = React.useState(props.startTime + props.duration);
+  const [end, setEnd] = React.useState(props.endTime);
 
   // Had problems with stale closures
   const pointsRef = React.useRef(props.points);
@@ -37,8 +38,9 @@ function UtilityPicker(props: UtilityPickerProps) {
 
   const lineOptions = {
     type: 'scatter',
-    dragData: true,
-    dragX: true,
+    dragData: props.mutable ,
+    dragX: props.mutable,
+    dragDataRound: 0,
     tooltips: { enabled: true },
     scales: {
       xAxes: [{
@@ -51,7 +53,7 @@ function UtilityPicker(props: UtilityPickerProps) {
       }],
       yAxes: [{
         ticks: {
-          max: 1,
+          max: scale,
           min: 0
         }
       }]
@@ -92,22 +94,22 @@ function UtilityPicker(props: UtilityPickerProps) {
   return <>
     <Row>
       <Col>
-        Date:
+        <div> Date: </div>
         <DayPickerInput value={new Date(start)} onDayChange={day => {
           setStart(setHrMin(day, getHours(start), getMinutes(start)).valueOf());
           setEnd(setHrMin(day, getHours(end), getMinutes(end)).valueOf());
         }} />
       </Col>
-      <Col>
-        From:
+      <Col sm={3}>
+        <div>From:</div>
         <TimePicker time={start} setTime={(t: number) => setStart(t)} maxTime={end} />
       </Col>
-      <Col>
-        To:
+      <Col sm={3}>
+        <div>To:</div>
         <TimePicker time={end} setTime={(t: number) => setEnd(t)} minTime={start} />
       </Col>
-      <Col>
-        Utility Distribution
+      <Col hidden={!props.mutable}>
+        <div>Utility Distribution</div>
         <Select
           isClearable={false}
           defaultValue={{ value: "", label: "Select" }}
@@ -126,7 +128,7 @@ function UtilityPicker(props: UtilityPickerProps) {
               case "deadline": {
                 props.setPoints([{
                   x: t - 1,
-                  y: 1
+                  y: scale
                 }, {
                   x: t + 1,
                   y: 0
@@ -139,10 +141,10 @@ function UtilityPicker(props: UtilityPickerProps) {
                   y: 0
                 }, {
                   x: t - 1000000,
-                  y: 1
+                  y: scale
                 }, {
                   x: t + 1000000,
-                  y: 1
+                  y: scale
                 }, {
                   x: t + 1000001,
                   y: 0

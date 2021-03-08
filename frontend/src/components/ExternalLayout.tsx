@@ -79,7 +79,6 @@ class ExternalHeader extends React.Component<ExternalHeaderProps, ExternalHeader
               id="navbarSupportedContent">
               <div className="navbar-nav ml-auto">
                 <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/instructions">Instructions</a>
-                <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/terms_of_service">Terms of Service</a>
                 <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/dashboard">Login</a>
                 <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/register">Register</a>
               </div>
@@ -90,8 +89,7 @@ class ExternalHeader extends React.Component<ExternalHeaderProps, ExternalHeader
     );
   }
 }
-/* <a style={linkStyle} className="nav-item nav-link font-weight-bold" href="">Home</a>
-<a style={linkStyle} className="nav-item nav-link font-weight-bold" href="/todo_list">Todo List</a>*/
+
 interface ExternalLayoutProps {
   fixed: boolean;
   transparentTop: boolean;
@@ -119,8 +117,6 @@ class ExternalLayout extends React.Component<ExternalLayoutProps> {
         </Navbar.Brand>
           <Nav className="mr-auto">
             <Nav.Link>&copy; todo-app, 2021</Nav.Link>
-            <Nav.Link href="/terms_of_service">Terms of Service</Nav.Link>
-            <Nav.Link href="/terms_of_service#cookie_policy">Cookie Policy</Nav.Link>
           </Nav>
         </Navbar>
       </>
