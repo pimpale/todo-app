@@ -28,6 +28,7 @@
     "date-fns": "^2.18.0",
     "formik": "^2.2.6",
     "jquery": "^3.6.0",
+    "moment": "^2.29.1",
     "popper.js": "^1.16.1",
     "react": "^17.0.1",
     "react-async": "^10.0.1",
