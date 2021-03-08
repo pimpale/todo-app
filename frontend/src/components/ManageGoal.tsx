@@ -1,16 +1,17 @@
 import React from 'react';
-import { Form, Button, Table } from 'react-bootstrap'; import Loader from '../components/Loader';
+import { Card, Form, Button, Table } from 'react-bootstrap';
+import Loader from '../components/Loader';
 import { Async, AsyncProps } from 'react-async';
 import DisplayModal from '../components/DisplayModal';
 import UtilityPicker from '../components/UtilityPicker';
-import { viewTimeUtilityFunctionPoint, viewGoalData, newGoalData, isApiErrorCode} from '../utils/utils';
-import { Edit, Cancel, Unarchive} from '@material-ui/icons';
+import { viewTimeUtilityFunctionPoint, newTimeUtilityFunction, viewGoalData, newGoalData, isApiErrorCode } from '../utils/utils';
+import { Edit, Cancel, Unarchive } from '@material-ui/icons';
 import { Formik, FormikHelpers } from 'formik'
-import format from 'date-fns/format';
 
 
 type EditGoalProps = {
   goalData: GoalData,
+  tuf: TimeUtilityFunctionPoint[],
   apiKey: ApiKey,
   postSubmit: () => void
 };
@@ -20,22 +21,57 @@ function EditGoal(props: EditGoalProps) {
   type EditGoalValue = {
     name: string,
     description: string,
-    startTime: number|null,
-    duration: number|null,
+    startTime: number | null,
+    duration: number | null,
+    points: { x: number, y: number }[]
   }
 
   const onSubmit = async (values: EditGoalValue,
     fprops: FormikHelpers<EditGoalValue>) => {
 
-    const maybeGoalData  = await newGoalData({
+    // TODO: check if utility function has been changed before creating a new one
+    // this will be more efficient
+    const maybeTimeUtilFunction = await newTimeUtilityFunction({
+      startTimes: values.points.map(p => p.x),
+      utils: values.points.map(p => p.y),
+      apiKey: props.apiKey.key,
+    })
+
+    if (isApiErrorCode(maybeTimeUtilFunction)) {
+      switch (maybeTimeUtilFunction) {
+        case "API_KEY_NONEXISTENT": {
+          fprops.setStatus({
+            failureResult: "You have been automatically logged out. Please relogin.",
+            successResult: ""
+          });
+          break;
+        }
+        case "TIME_UTILITY_FUNCTION_NOT_VALID": {
+          fprops.setErrors({
+            points: "Utility function is invalid."
+          });
+          break;
+        }
+        default: {
+          fprops.setStatus({
+            failureResult: "An unknown or network error has occured while trying to create utility function.",
+            successResult: ""
+          });
+          break;
+        }
+      }
+      return;
+    }
+
+    const maybeGoalData = await newGoalData({
       goalId: props.goalData.goal.goalId,
       name: values.name,
       description: values.description,
-      durationEstimate:props.goalData.durationEstimate,
-      timeUtilityFunctionId: props.goalData.timeUtilityFunction.timeUtilityFunctionId,
+      durationEstimate: props.goalData.durationEstimate,
+      timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
       scheduled: values.startTime !== null && values.duration !== null,
       startTime: values.startTime ?? 0,
-      duration:values.duration ?? 0,
+      duration: values.duration ?? 0,
       status: props.goalData.status,
       apiKey: props.apiKey.key,
     });
@@ -90,7 +126,8 @@ function EditGoal(props: EditGoalProps) {
         name: props.goalData.name,
         description: props.goalData.description,
         startTime: props.goalData.startTime,
-        duration: props.goalData.duration
+        duration: props.goalData.duration,
+        points: props.tuf.map(p => ({ x: p.startTime, y: p.utils }))
       }}
       initialStatus={{
         failureResult: "",
@@ -127,6 +164,20 @@ function EditGoal(props: EditGoalProps) {
               />
               <Form.Control.Feedback type="invalid">{fprops.errors.description}</Form.Control.Feedback>
             </Form.Group>
+            <Form.Group>
+              <Card>
+                <Card.Body>
+                  <UtilityPicker
+                    startTime={Math.min(...props.tuf.map(p => p.startTime)) - 100000}
+                    endTime={Math.max(...props.tuf.map(p => p.startTime)) + 100000}
+                    points={fprops.values.points}
+                    setPoints={p => fprops.setFieldValue("points", p)}
+                    mutable
+                  />
+                </Card.Body>
+              </Card>
+              <Form.Text className="text-danger">{fprops.errors.points}</Form.Text>
+            </Form.Group>
             <Button type="submit">Submit</Button>
             <br />
             <Form.Text className="text-danger">{fprops.status.failureResult}</Form.Text>
@@ -151,19 +202,18 @@ function CancelGoal(props: CancelGoalProps) {
   const onSubmit = async (_: CancelGoalValue,
     fprops: FormikHelpers<CancelGoalValue>) => {
 
-    const maybeGoalData  = await newGoalData({
+    const maybeGoalData = await newGoalData({
       goalId: props.goalData.goal.goalId,
       apiKey: props.apiKey.key,
       name: props.goalData.name,
       description: props.goalData.description,
-      durationEstimate:props.goalData.durationEstimate,
+      durationEstimate: props.goalData.durationEstimate,
       timeUtilityFunctionId: props.goalData.timeUtilityFunction.timeUtilityFunctionId,
       scheduled: props.goalData.scheduled,
       startTime: props.goalData.startTime ?? 0,
       duration: props.goalData.duration ?? 0,
       status: "CANCEL",
     });
-
 
     if (isApiErrorCode(maybeGoalData)) {
       switch (maybeGoalData) {
@@ -241,7 +291,7 @@ type ManageGoalData = {
   tuf: TimeUtilityFunctionPoint[],
 }
 
-const loadManageGoalData = async (props: AsyncProps<ManageGoalData >) => {
+const loadManageGoalData = async (props: AsyncProps<ManageGoalData>) => {
   const maybeGoalData = await viewGoalData({
     goalId: props.goalId,
     onlyRecent: true,
@@ -264,8 +314,8 @@ const loadManageGoalData = async (props: AsyncProps<ManageGoalData >) => {
   }
 
   return {
-   goalData,
-   tuf: maybeTuf
+    goalData,
+    tuf: maybeTuf
   };
 }
 
@@ -309,7 +359,7 @@ const ManageGoal = (props: {
                 <UtilityPicker
                   startTime={Math.min(...mgd.tuf.map(p => p.startTime)) - 100000}
                   endTime={Math.max(...mgd.tuf.map(p => p.startTime)) + 100000}
-                  points={mgd.tuf.map(p => ({x: p.startTime, y: p.utils}))}
+                  points={mgd.tuf.map(p => ({ x: p.startTime, y: p.utils }))}
                   setPoints={() => null}
                   mutable={false}
                 />
@@ -319,9 +369,9 @@ const ManageGoal = (props: {
         </Table>
         <Button variant="secondary" onClick={_ => setShowEditGoal(true)}>Edit <Edit /></Button>
 
-        { mgd.goalData.status !== "CANCEL"
-            ? <Button variant="danger" onClick={_ => setShowCancelGoal(true)}>Cancel <Cancel /></Button>
-            : <> </>
+        {mgd.goalData.status !== "CANCEL"
+          ? <Button variant="danger" onClick={_ => setShowCancelGoal(true)}>Cancel <Cancel /></Button>
+          : <> </>
         }
 
         <DisplayModal
@@ -331,6 +381,7 @@ const ManageGoal = (props: {
         >
           <EditGoal
             goalData={mgd.goalData}
+            tuf={mgd.tuf}
             apiKey={props.apiKey}
             postSubmit={() => {
               setShowEditGoal(false);
