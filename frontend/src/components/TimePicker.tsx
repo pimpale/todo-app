@@ -4,6 +4,7 @@ import setHours from 'date-fns/setHours';
 import getHours from 'date-fns/getHours';
 import getMinutes from 'date-fns/getMinutes';
 import setMinutes from 'date-fns/setMinutes';
+import format from 'date-fns/format'
 
 type TimePickerProps = {
   time: number,
@@ -31,7 +32,8 @@ function TimePicker(props: TimePickerProps) {
       if( props.maxTime && props.maxTime <= setHrMin(props.time, hr, min).valueOf()) {
           continue;
       }
-      options.push({ value: setHrMin(props.time, hr, min), label: `${hr}:${min}` });
+      // options.push({ value: setHrMin(props.time, hr, min), label: `${hr}:${min}` });
+      options.push({ value: setHrMin(props.time, hr, min), label: format(setHrMin(props.time, hr, min), 'p') });
     }
   }
 
@@ -42,7 +44,8 @@ function TimePicker(props: TimePickerProps) {
     <Select<OptionType>
       className={props.className}
       options={options}
-      defaultValue={{value: new Date(props.time), label: `${defaultHr}:${defaultMin}`}}
+      // defaultValue={{value: new Date(props.time), label: `${defaultHr}:${defaultMin}`}}
+      defaultValue={{value: new Date(props.time), label: format(new Date(props.time), 'p')}}
       isClearable={false}
       onChange={o => props.setTime(o!.value.valueOf())}
     />
