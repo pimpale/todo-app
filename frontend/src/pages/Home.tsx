@@ -26,10 +26,11 @@ function Home() {
         <h1 className="text-light">{APP_SLOGAN}</h1>
       </Jumbotron>
       <Container>
-        <Section id="welcome" name={"Welcome to *InsertAppNameHere*"}>
+        <Section id="welcome" name={`Welcome to ${APP_NAME}`}>
           <div>
-            Welcome to *InsertAppNameHere*, an application built for a class project, but an application designed for the busiest of people. As students at UCLA, we know how
-            frustrasting it is to schedule classes, clubs, and homework so we made this application to help all kinds of people efficiently plan their schedule. 
+            Welcome to 4cast, an application built for a class project, but an application designed for the busiest of people. As students at UCLA, we know how frustrasting
+            it is to schedule classes, clubs, and homework so we made this application to help all kinds of people efficiently plan their schedule. We invite you to join us
+            and be prepared for what the day has in store.
             <a href="/register">Register</a>
           </div>
         </Section>
@@ -45,13 +46,13 @@ function Home() {
         </Section>
         <Section id="aboutCreators" name="About the Creators">
           <div>
-            Govind Pimpale
+            Govind Pimpale: I am a 1st year Computer Science major who is interested in working for startup companies after school
             <br />
             Edmund Yim
             <br />
             Brandon Le
             <br />
-            Edgar Hukassian
+            Edgar Hukassian: I am a 3rd Year Computer Science Major.
             <br />
             Warren Pagsuguiron: I am a 4th year Electrical Engineering major who is also passionate about Computer Science. After UCLA, I plan on working on robotics.
             <a href="/register">Register</a>
