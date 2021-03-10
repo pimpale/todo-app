@@ -28,7 +28,7 @@ function Home() {
       <Container>
         <Section id="welcome" name={`Welcome to ${APP_NAME}`}>
           <div>
-            Welcome to 4cast, an application built for a class project, but an application designed for the busiest of people. As students at UCLA, we know how frustrasting
+            Welcome to {APP_NAME}, an application built for a class project, but an application designed for the busiest of people. As students at UCLA, we know how frustrasting
             it is to schedule classes, clubs, and homework so we made this application to help all kinds of people efficiently plan their schedule. We invite you to join us
             and be prepared for what the day has in store.
             <a href="/register">Register</a>
@@ -41,21 +41,19 @@ function Home() {
             <br />
             With all your events in one place, our application gives you a simple TO-DO feed to see what is upcoming in your schedule, allowing you to take a quick glance and
             go back to working efficiently.
-            <a href="/register">Register</a>
           </div>
         </Section>
         <Section id="aboutCreators" name="About the Creators">
           <div>
             Govind Pimpale: I am a 1st year Computer Science major who is interested in working for startup companies after school
             <br />
-            Edmund Yim: I am a "insertYear" Computer Science and Engineering major interested in working as a software engineer after UCLA.
+            Edmund Yim: I am a 3rd year Computer Science and Engineering major interested in working as a software engineer after UCLA.
             <br />
-            Brandon Le
+            Brandon Le: TODO
             <br />
             Edgar Hukassian: I am a 3rd Year Computer Science Major interested in working as a software engineer after school.
             <br />
             Warren Pagsuguiron: I am a 4th year Electrical Engineering major who is also passionate about Computer Science. After UCLA, I plan on working on robotics.
-            <a href="/register">Register</a>
           </div>
         </Section>
         <Section id="specialThanks" name="Special Thanks">
