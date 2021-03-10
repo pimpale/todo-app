@@ -48,11 +48,11 @@ function Home() {
           <div>
             Govind Pimpale: I am a 1st year Computer Science major who is interested in working for startup companies after school
             <br />
-            Edmund Yim
+            Edmund Yim: I am a "insertYear" Computer Science and Engineering major interested in working as a software engineer after UCLA.
             <br />
             Brandon Le
             <br />
-            Edgar Hukassian: I am a 3rd Year Computer Science Major.
+            Edgar Hukassian: I am a 3rd Year Computer Science Major interested in working as a software engineer after school.
             <br />
             Warren Pagsuguiron: I am a 4th year Electrical Engineering major who is also passionate about Computer Science. After UCLA, I plan on working on robotics.
             <a href="/register">Register</a>
