@@ -1,9 +1,9 @@
-import React from 'react';
-
 import { Jumbotron, Container} from 'react-bootstrap';
 
 import ExternalLayout from '../components/ExternalLayout';
 import Section from '../components/Section';
+
+import {APP_NAME, APP_SLOGAN} from '../utils/utils';
 
 function Home() {
 
@@ -23,17 +23,17 @@ function Home() {
   return (
     <ExternalLayout fixed={true} transparentTop={true}>
       <Jumbotron fluid style={jumboStyle}>
-        <h1 className="text-light"> Academics, Achievement, Career first. </h1>
+        <h1 className="text-light">{APP_SLOGAN}</h1>
       </Jumbotron>
       <Container>
-        <Section id="welcome" name="Welcome to *InsertAppNameHere*">
+        <Section id="welcome" name={"Welcome to *InsertAppNameHere*"}>
           <div>
             Welcome to *InsertAppNameHere*, an application built for a class project, but an application designed for the busiest of people. As students at UCLA, we know how
             frustrasting it is to schedule classes, clubs, and homework so we made this application to help all kinds of people efficiently plan their schedule. 
             <a href="/register">Register</a>
           </div>
         </Section>
-        <Section id="whyUs" name="Our Application">
+        <Section id="why_us" name="Our Application">
           <div>
             A scheduling app shouldn't have to take more than a few minutes to arrange the multiple events of your day; therefore, we use an algorithm modeled after simulated
             annealing to choose the best fit for certain events around your Commitments (immovable events such as classes, interviews, work, etc.).

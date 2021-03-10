@@ -1,11 +1,12 @@
 import React from 'react';
-import { Menu } from '@material-ui/icons'
-import { Navbar, Nav } from 'react-bootstrap'
+import { Menu } from '@material-ui/icons';
+import { Navbar, Nav } from 'react-bootstrap';
+import { APP_NAME } from '../utils/utils';
 
 // Bootstrap CSS & JS
-import '../style/dashboard.scss'
-import 'bootstrap/dist/js/bootstrap.js'
-import 'popper.js/dist/popper.js'
+import '../style/dashboard.scss';
+import 'bootstrap/dist/js/bootstrap.js';
+import 'popper.js/dist/popper.js';
 
 import innexgo_logo from '../img/innexgo_transparent_icon.png';
 
@@ -102,12 +103,12 @@ class ExternalLayout extends React.Component<ExternalLayoutProps> {
 
     return (
       <>
-        <ExternalHeader fixed={this.props.fixed} transparentTop={this.props.transparentTop} title="todo-app" />
+        <ExternalHeader fixed={this.props.fixed} transparentTop={this.props.transparentTop} title={APP_NAME} />
         {this.props.children}
         <Navbar bg="dark" variant="dark">
           <Navbar.Brand href="#home">
             <img
-              alt="todo-app Logo"
+              alt={`${APP_NAME} Logo`}
               src={innexgo_logo}
               width="30"
               height="30"
@@ -116,7 +117,7 @@ class ExternalLayout extends React.Component<ExternalLayoutProps> {
         todo-app
         </Navbar.Brand>
           <Nav className="mr-auto">
-            <Nav.Link>&copy; todo-app, 2021</Nav.Link>
+            <Nav.Link>&copy; {APP_NAME}, 2021</Nav.Link>
           </Nav>
         </Navbar>
       </>
