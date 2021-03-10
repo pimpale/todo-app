@@ -138,11 +138,19 @@ function ICalendarSolver(props: ICalendarSolverProps) {
         stop: {
           text: iterating ? 'Stop' : 'Start',
           click: () => setIterating(iterating => !iterating)
+        },
+        commit: {
+          text: 'Commit Changes',
+          click: () => setIterating(false)
+        },
+        cancel: {
+          text: 'Cancel Changes',
+          click: props.onHide
         }
       }}
       headerToolbar={{
         left: 'prev,next today',
-        center: 'stop',
+        center: iterating ? 'stop' : 'stop commit cancel',
         right: 'timeGridDay,timeGridWeek',
       }}
       initialView='timeGridWeek'

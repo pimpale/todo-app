@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowForward } from '@material-ui/icons';
 import { Container, Row, Col } from 'react-bootstrap';
+import {APP_NAME} from '../utils/utils';
 
 import TransparentLogoIcon from "../img/innexgo_transparent_icon.png"
 
@@ -11,7 +12,7 @@ class SimpleLayout extends React.Component {
         <Row style={{ minHeight: "100vh" }}>
           <Col md="2" className="px-3 py-3" style={{ backgroundColor: '#990000ff' }}>
             <a href="/"><img src={TransparentLogoIcon} alt="Application Icon" /></a>
-            <h4 className="text-light">todo-app</h4>
+            <h4 className="text-light">{APP_NAME}</h4>
             <a href="/" className="text-light">
               <ArrowForward />Home
             </a>
@@ -42,11 +43,4 @@ class SimpleLayout extends React.Component {
   }
 }
 
-/*
-<br />
-<a href="/todo_list" className="text-light">
-  <ArrowForward />Todo List
-</a>
-<br />
-*/
 export default SimpleLayout;

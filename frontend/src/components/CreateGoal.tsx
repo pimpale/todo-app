@@ -6,8 +6,7 @@ import UtilityPicker from "../components/UtilityPicker"
 
 
 type CreateGoalProps = {
-  startTime: number;
-  duration: number;
+  span?: [startTime: number, endTime: number];
   apiKey: ApiKey;
   postSubmit: () => void;
 }
@@ -16,8 +15,6 @@ function CreateGoal(props: CreateGoalProps) {
   type CreateGoalValue = {
     name: string,
     description: string,
-    startTime: number,
-    duration: number,
     points: { x: number, y: number }[]
   }
 
@@ -71,14 +68,18 @@ function CreateGoal(props: CreateGoalProps) {
       return;
     }
 
+    const duration = props.span
+      ? props.span[1] - props.span[0]
+      : 0;
+
     const maybeGoalData = await newGoal({
       name: values.name,
       description: values.description,
-      durationEstimate: values.duration,
+      durationEstimate: duration,
       timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
-      scheduled: true,
-      startTime: values.startTime,
-      duration: values.duration,
+      scheduled: props.span !== null,
+      startTime: props.span?.[0] ?? 0,
+      duration: duration,
       apiKey: props.apiKey.key,
     });
 
@@ -116,8 +117,6 @@ function CreateGoal(props: CreateGoalProps) {
       initialValues={{
         name: "",
         description: "",
-        startTime: props.startTime,
-        duration: props.duration,
         points: [],
       }}
       initialStatus={{
@@ -134,8 +133,7 @@ function CreateGoal(props: CreateGoalProps) {
               <Card>
                 <Card.Body>
                   <UtilityPicker
-                    startTime={props.startTime}
-                    endTime={props.startTime + props.duration}
+                    span={props.span}
                     points={fprops.values.points}
                     setPoints={p => fprops.setFieldValue("points", p)}
                     mutable

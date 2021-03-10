@@ -6,7 +6,7 @@ import DashboardLayout from '../components/DashboardLayout';
 import CalendarSolver from '../components/CalendarSolver';
 import CalendarCard, { pastEventDataToEvent, goalDataToEvent } from '../components/CalendarCard';
 
-import { Tab, Tabs, Popover, Container, } from 'react-bootstrap';
+import { Table, Row, Col, Tab, Tabs, Popover, Container, } from 'react-bootstrap';
 import { newPastEventData, newGoalData, viewPastEventData, viewGoalData, isApiErrorCode } from '../utils/utils';
 
 import UtilityWrapper from '../components/UtilityWrapper';
@@ -30,8 +30,8 @@ function EventCalendar(props: EventCalendarProps) {
   const [optimizing, setOptimizing] = React.useState(false);
 
   // Closing it should also unselect anything using it
-  const [selectedSpan, setSelectedSpanRaw] = React.useState<{ start: number, duration: number } | null>(null);
-  const setSelectedSpan = (a: { start: number, duration: number } | null) => {
+  const [selectedSpan, setSelectedSpanRaw] = React.useState<[number, number] | null>(null);
+  const setSelectedSpan = (a: [number, number] | null) => {
     setSelectedSpanRaw(a)
     if (!a && calendarRef.current != null) {
       calendarRef.current.getApi().unselect();
@@ -140,61 +140,66 @@ function EventCalendar(props: EventCalendarProps) {
     }
   }
 
-  if(optimizing) {
+  if (optimizing) {
     return <CalendarSolver
       apiKey={props.apiKey}
       onHide={() => setOptimizing(false)}
     />
   }
 
-  return <>
-    <FullCalendar
-      ref={calendarRef}
-      plugins={[timeGridPlugin, interactionPlugin]}
-      customButtons={{
-        optimize: {
-          text: 'Optimize',
-          click: () => setOptimizing(true)
-        }
-      }}
-      headerToolbar={{
-        left: 'prev,next today',
-        center: 'optimize',
-        right: 'timeGridDay,timeGridWeek',
-      }}
-      initialView='timeGridWeek'
-      height={"auto"}
-      datesSet={({ view }) => /* Keeps window size in sync */view.calendar.updateSize()}
-      allDaySlot={false}
-      slotDuration="00:30:00"
-      nowIndicator={true}
-      editable={true}
-      selectable={true}
-      selectMirror={true}
-      events={eventSource}
-      eventContent={CalendarCard}
-      unselectCancel=".modal-content"
-      eventClick={clickHandler}
-      eventOverlap={false}
-      eventResize={(era) => changeHandler(era.event, era.oldEvent, era.revert)}
-      eventDrop={(eda) => changeHandler(eda.event, eda.oldEvent, eda.revert)}
-      unselect={() => {
-        setSelectedSpan(null);
-      }}
-      select={(dsa: DateSelectArg) => {
-        // only open modal if this date is in the future
-        if (dsa.start.valueOf() > Date.now()) {
-          setSelectedSpan({
-            start: dsa.start.valueOf(),
-            duration: dsa.end.valueOf() - dsa.start.valueOf()
-          });
-        } else {
-          if (calendarRef.current != null) {
-            calendarRef.current.getApi().unselect();
+  return <Row>
+    <Col>
+      <div id='draggable-el' data-event='{ "title": "my event", "duration": "02:00" }'>drag me</div>
+    </Col>
+    <Col>
+      <FullCalendar
+        ref={calendarRef}
+        plugins={[timeGridPlugin, interactionPlugin]}
+        customButtons={{
+          optimize: {
+            text: 'Optimize',
+            click: () => setOptimizing(true)
           }
-        }
-      }}
-    />
+        }}
+        headerToolbar={{
+          left: 'prev,next today',
+          center: 'optimize',
+          right: 'timeGridDay,timeGridWeek',
+        }}
+        initialView='timeGridWeek'
+        height={"auto"}
+        datesSet={({ view }) => /* Keeps window size in sync */view.calendar.updateSize()}
+        allDaySlot={false}
+        slotDuration="00:30:00"
+        nowIndicator={true}
+        editable={true}
+        selectable={true}
+        selectMirror={true}
+        events={eventSource}
+        eventContent={CalendarCard}
+        unselectCancel=".modal-content"
+        eventClick={clickHandler}
+        eventOverlap={false}
+        eventResize={(era) => changeHandler(era.event, era.oldEvent, era.revert)}
+        eventDrop={(eda) => changeHandler(eda.event, eda.oldEvent, eda.revert)}
+        unselect={() => {
+          setSelectedSpan(null);
+        }}
+        select={(dsa: DateSelectArg) => {
+          // only open modal if this date is in the future
+          if (dsa.start.valueOf() > Date.now()) {
+            setSelectedSpan([
+              dsa.start.valueOf(),
+              dsa.end.valueOf()
+            ]);
+          } else {
+            if (calendarRef.current != null) {
+              calendarRef.current.getApi().unselect();
+            }
+          }
+        }}
+      />
+    </Col>
 
 
     {selectedSpan === null ? <> </> :
@@ -207,16 +212,15 @@ function EventCalendar(props: EventCalendarProps) {
           <Tab eventKey="task" title="Create Task">
             <CreateGoal
               apiKey={props.apiKey}
-              startTime={selectedSpan.start}
-              duration={selectedSpan.duration}
+              span={selectedSpan}
               postSubmit={() => setSelectedSpan(null)}
             />
           </Tab>
           <Tab eventKey="event" title="Create Event">
             <CreatePastEvent
               apiKey={props.apiKey}
-              startTime={selectedSpan.start}
-              duration={selectedSpan.duration}
+              startTime={selectedSpan[0]}
+              duration={selectedSpan[1] - selectedSpan[0]}
               postSubmit={() => setSelectedSpan(null)}
             />
           </Tab>
@@ -238,10 +242,24 @@ function EventCalendar(props: EventCalendarProps) {
         show={selectedManageGoalData !== null}
         onClose={() => setSelectedManageGoalData(null)}
       >
-        <ManageGoal goalId={selectedManageGoalData.goal.goalId} apiKey={props.apiKey} />
+        <Table hover bordered>
+          <thead>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Utility</th>
+            <th>Actions</th>
+          </thead>
+          <tr>
+            <ManageGoal
+              goalId={selectedManageGoalData.goal.goalId}
+              apiKey={props.apiKey}
+              onChange={() => null}
+            />
+          </tr>
+        </Table>
       </DisplayModal>
     }
-  </>
+  </Row>
 }
 
 function CalendarWidget(props: AuthenticatedComponentProps) {

@@ -4,9 +4,10 @@ import { Col, Row } from 'react-bootstrap';
 import { Line } from 'react-chartjs-2';
 import moment from 'moment';
 import TimePicker from '../components/TimePicker';
-import { setHrMin, INT_MAX } from '../utils/utils';
+import { setHrMin} from '../utils/utils';
 import getHours from 'date-fns/getHours'
 import getMinutes from 'date-fns/getMinutes'
+import addHours from "date-fns/addHours";
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import 'react-day-picker/lib/style.css';
 import 'chartjs-plugin-dragdata';
@@ -14,11 +15,10 @@ import 'chartjs-plugin-dragdata';
 const scale = 100;
 
 type UtilityPickerProps = {
-  startTime: number,
-  mutable:boolean,
-  endTime: number,
+  span?: [startTime:number, endTime:number];
+  mutable: boolean,
   points: { x: number, y: number }[],
-  setPoints: (points: { x: number, y: number }[]) => void
+  setPoints: (points: { x: number, y: number }[]) => void,
 }
 
 function noTimePrefTUF(start: number, end: number) {
@@ -29,8 +29,8 @@ function noTimePrefTUF(start: number, end: number) {
 }
 
 function UtilityPicker(props: UtilityPickerProps) {
-  const [start, setStart] = React.useState(props.startTime);
-  const [end, setEnd] = React.useState(props.endTime);
+  const [start, setStart] = React.useState(props.span?.[0] ?? Date.now());
+  const [end, setEnd] = React.useState(props.span?.[1] ?? addHours(new Date(), 3).valueOf());
 
   // Had problems with stale closures
   const pointsRef = React.useRef(props.points);
@@ -38,7 +38,7 @@ function UtilityPicker(props: UtilityPickerProps) {
 
   const lineOptions = {
     type: 'scatter',
-    dragData: props.mutable ,
+    dragData: props.mutable,
     dragX: props.mutable,
     dragDataRound: 0,
     tooltips: { enabled: true },
@@ -49,6 +49,7 @@ function UtilityPicker(props: UtilityPickerProps) {
         ticks: {
           min: start,
           max: end,
+          maxTicksLimit: 10
         }
       }],
       yAxes: [{

@@ -59,14 +59,14 @@ class ExternalHeader extends React.Component<ExternalHeaderProps, ExternalHeader
     const navStyle = topTransparent ? {
       transitionDuration: "0.4s"
     } : {
-        transitionDuration: "0.4s",
-        backgroundColor: "#fff"
-      };
+      transitionDuration: "0.4s",
+      backgroundColor: "#fff"
+    };
     const linkStyle = topTransparent ? {
       color: "white",
     } : {
-        color: "#000"
-      }
+      color: "#000"
+    }
 
     return (
       <header>
@@ -114,8 +114,8 @@ class ExternalLayout extends React.Component<ExternalLayoutProps> {
               height="30"
               className="d-inline-block align-top"
             />{' '}
-        todo-app
-        </Navbar.Brand>
+            {APP_NAME}
+          </Navbar.Brand>
           <Nav className="mr-auto">
             <Nav.Link>&copy; {APP_NAME}, 2021</Nav.Link>
           </Nav>

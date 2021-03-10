@@ -1,5 +1,5 @@
 import React from 'react'
-import { Table, Button, Container, Card, Form, Tabs, Tab } from 'react-bootstrap';
+import { Table, Button, Container, Form, Row, Col } from 'react-bootstrap';
 
 import DashboardLayout from '../components/DashboardLayout';
 import ManageGoal from '../components/ManageGoal';
@@ -108,12 +108,29 @@ function Search(props: AuthenticatedComponentProps) {
     <Container fluid className="py-4 px-4">
       <SearchForm
         apiKey={props.apiKey}
-        postSubmit={setSearch} />
-      {search.map(d =>
-        <Card key={d.goalDataId}>
-          <ManageGoal goalId={d.goal.goalId} apiKey={props.apiKey} />
-        </Card>
-      )}
+        postSubmit={setSearch}
+      />
+      <Row className="justify-content-md-center">
+        <Col md={8}>
+          <Table hover bordered>
+            <thead>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Utility</th>
+              <th>Actions</th>
+            </thead>
+            {search.map(d =>
+              <tr>
+                <ManageGoal
+                  goalId={d.goal.goalId}
+                  apiKey={props.apiKey}
+                  onChange={() => null}
+                />
+              </tr>
+            )}
+          </Table>
+        </Col>
+      </Row>
     </Container>
   </DashboardLayout>
 }
