@@ -7,7 +7,7 @@ import CalendarSolver from '../components/CalendarSolver';
 import CalendarCard, { pastEventDataToEvent, goalDataToEvent } from '../components/CalendarCard';
 
 import { Table, Row, Col, Tab, Tabs, Popover, Container, } from 'react-bootstrap';
-import { newPastEventData, newGoalData, viewPastEventData, viewGoalData, isApiErrorCode } from '../utils/utils';
+import { newPastEventData, newScheduledGoalData, viewPastEventData, viewGoalData, isApiErrorCode } from '../utils/utils';
 
 import UtilityWrapper from '../components/UtilityWrapper';
 
@@ -122,13 +122,12 @@ function EventCalendar(props: EventCalendarProps) {
       }
       case "GoalData": {
         const ogd = oldEvent.extendedProps.goalData;
-        const maybeGoalData = await newGoalData({
+        const maybeGoalData = await newScheduledGoalData({
           goalId: ogd.goal.goalId,
           name: ogd.name,
           description: ogd.description,
           durationEstimate: ogd.durationEstimate,
           timeUtilityFunctionId: ogd.timeUtilityFunction.timeUtilityFunctionId,
-          scheduled: true,
           startTime: event.start!.valueOf(),
           duration: event.end!.valueOf() - event.start!.valueOf(),
           status: ogd.status,

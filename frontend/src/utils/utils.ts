@@ -234,7 +234,7 @@ export type NewScheduledGoalDataProps = {
   apiKey: string
 }
 
-export async function newScheduledGoalData(props: NewGoalDataProps): Promise<GoalDataScheduled | ApiErrorCode> {
+export async function newScheduledGoalData(props: NewScheduledGoalDataProps): Promise<GoalDataScheduled | ApiErrorCode> {
   return await fetchApi("goalData/newScheduled/", getFormData(props));
 }
 

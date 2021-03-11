@@ -1,7 +1,7 @@
 import React from "react"
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Card, Button, Form } from "react-bootstrap";
-import { newScheduledGoal,newGoal, newTimeUtilityFunction, isApiErrorCode } from "../utils/utils";
+import { newScheduledGoal, newGoal, newTimeUtilityFunction, isApiErrorCode } from "../utils/utils";
 import UtilityPicker from "../components/UtilityPicker"
 
 
@@ -69,10 +69,8 @@ function CreateGoal(props: CreateGoalProps) {
       return;
     }
 
-    let maybeGoalData:GoalData|ApiErrorCode;
-
-    if(props.span !== undefined) {
-      maybeGoalData = await newScheduledGoal({
+    let maybeGoalData = props.span !== undefined
+      ? await newScheduledGoal({
         name: values.name,
         description: values.description,
         durationEstimate: values.durationEstimate,
@@ -80,16 +78,14 @@ function CreateGoal(props: CreateGoalProps) {
         startTime: props.span[0],
         duration: props.span[1] - props.span[0],
         apiKey: props.apiKey.key,
-      });
-    } else {
-      maybeGoalData = await newGoal({
+      })
+      : await newGoal({
         name: values.name,
         description: values.description,
         durationEstimate: values.durationEstimate,
         timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
         apiKey: props.apiKey.key,
       });
-    }
 
 
     if (isApiErrorCode(maybeGoalData)) {

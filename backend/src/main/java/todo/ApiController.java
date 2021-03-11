@@ -559,6 +559,7 @@ public class ApiController {
       return Errors.API_KEY_NONEXISTENT.getResponse();
     }
 
+
     Goal goal = new Goal();
     goal.creationTime = System.currentTimeMillis();
     goal.creatorUserId = key.creatorUserId;
@@ -593,6 +594,14 @@ public class ApiController {
     ApiKey key = getApiKeyIfValid(apiKey);
     if (key == null) {
       return Errors.API_KEY_NONEXISTENT.getResponse();
+    }
+
+    if(duration <= 0 || duration >= Utils.INT_MAX) {
+        return Errors.NEGATIVE_DURATION.getResponse();
+    }
+
+    if(startTime <= 0 || startTime >= Utils.INT_MAX) {
+        return Errors.NEGATIVE_START_TIME.getResponse();
     }
 
     Goal goal = new Goal();
@@ -682,6 +691,14 @@ public class ApiController {
 
     if (goal.creatorUserId != key.creatorUserId) {
       return Errors.API_KEY_UNAUTHORIZED.getResponse();
+    }
+
+    if(duration <= 0 || duration >= Utils.INT_MAX) {
+        return Errors.NEGATIVE_DURATION.getResponse();
+    }
+
+    if(startTime <= 0 || startTime >= Utils.INT_MAX) {
+        return Errors.NEGATIVE_START_TIME.getResponse();
     }
 
     GoalData goalData = new GoalData();

@@ -6,7 +6,7 @@ import FullCalendar, { EventInput, DateSelectArg, EventClickArg } from '@fullcal
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import CalendarCard from '../components/CalendarCard';
-import { viewTimeUtilityFunctionPoint, viewGoalData, newGoalData, newTimeUtilityFunction, isApiErrorCode, assert, INT_MAX, findLastIndex } from '../utils/utils';
+import { viewTimeUtilityFunctionPoint, viewGoalData, newScheduledGoalData, newTimeUtilityFunction, isApiErrorCode, assert, INT_MAX, findLastIndex } from '../utils/utils';
 
 
 type SolverDataPoint = {
@@ -145,13 +145,12 @@ function ICalendarSolver(props: ICalendarSolverProps) {
                 continue;
               }
 
-              const maybeGoalData = await newGoalData({
+              const maybeGoalData = await newScheduledGoalData({
                 goalId: sgd.data.goal.goalId,
                 name: sgd.data.name,
                 description: sgd.data.description,
                 durationEstimate: sgd.data.durationEstimate,
                 timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
-                scheduled: true,
                 startTime: sgd.startTime,
                 duration: sgd.duration,
                 status: "PENDING",

@@ -4,9 +4,10 @@ import Loader from '../components/Loader';
 import { Async, AsyncProps } from 'react-async';
 import DisplayModal from '../components/DisplayModal';
 import UtilityPicker from '../components/UtilityPicker';
-import { viewTimeUtilityFunctionPoint, newTimeUtilityFunction, viewGoalData, newGoalData, isApiErrorCode } from '../utils/utils';
+import { viewTimeUtilityFunctionPoint, newTimeUtilityFunction, viewGoalData, newGoalData, newScheduledGoalData, isApiErrorCode } from '../utils/utils';
 import { Edit, Cancel, } from '@material-ui/icons';
 import { Formik, FormikHelpers } from 'formik'
+import format from 'date-fns/format';
 
 
 type EditGoalProps = {
@@ -63,18 +64,27 @@ function EditGoal(props: EditGoalProps) {
       return;
     }
 
-    const maybeGoalData = await newGoalData({
-      goalId: props.goalData.goal.goalId,
-      name: values.name,
-      description: values.description,
-      durationEstimate: props.goalData.durationEstimate,
-      timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
-      scheduled: values.startTime !== null && values.duration !== null,
-      startTime: values.startTime ?? 0,
-      duration: values.duration ?? 0,
-      status: props.goalData.status,
-      apiKey: props.apiKey.key,
-    });
+    const maybeGoalData = values.startTime !== null && values.duration !== null
+      ? await newScheduledGoalData({
+        goalId: props.goalData.goal.goalId,
+        name: values.name,
+        description: values.description,
+        durationEstimate: props.goalData.durationEstimate,
+        timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
+        startTime: values.startTime,
+        duration: values.duration,
+        status: props.goalData.status,
+        apiKey: props.apiKey.key,
+      })
+      : await newGoalData({
+        goalId: props.goalData.goal.goalId,
+        name: values.name,
+        description: values.description,
+        durationEstimate: props.goalData.durationEstimate,
+        timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
+        status: props.goalData.status,
+        apiKey: props.apiKey.key,
+      })
 
     if (isApiErrorCode(maybeGoalData)) {
       switch (maybeGoalData) {
@@ -204,18 +214,27 @@ function CancelGoal(props: CancelGoalProps) {
   const onSubmit = async (_: CancelGoalValue,
     fprops: FormikHelpers<CancelGoalValue>) => {
 
-    const maybeGoalData = await newGoalData({
-      goalId: props.goalData.goal.goalId,
-      apiKey: props.apiKey.key,
-      name: props.goalData.name,
-      description: props.goalData.description,
-      durationEstimate: props.goalData.durationEstimate,
-      timeUtilityFunctionId: props.goalData.timeUtilityFunction.timeUtilityFunctionId,
-      scheduled: props.goalData.scheduled,
-      startTime: props.goalData.startTime ?? 0,
-      duration: props.goalData.duration ?? 0,
-      status: "CANCEL",
-    });
+    const maybeGoalData = props.goalData.scheduled
+      ? await newScheduledGoalData({
+        goalId: props.goalData.goal.goalId,
+        apiKey: props.apiKey.key,
+        name: props.goalData.name,
+        description: props.goalData.description,
+        durationEstimate: props.goalData.durationEstimate,
+        timeUtilityFunctionId: props.goalData.timeUtilityFunction.timeUtilityFunctionId,
+        startTime: props.goalData.startTime,
+        duration: props.goalData.duration,
+        status: "CANCEL",
+      })
+      : await newGoalData({
+        goalId: props.goalData.goal.goalId,
+        apiKey: props.apiKey.key,
+        name: props.goalData.name,
+        description: props.goalData.description,
+        durationEstimate: props.goalData.durationEstimate,
+        timeUtilityFunctionId: props.goalData.timeUtilityFunction.timeUtilityFunctionId,
+        status: "CANCEL",
+      });
 
     if (isApiErrorCode(maybeGoalData)) {
       switch (maybeGoalData) {
@@ -345,6 +364,9 @@ const ManageGoal = (props: {
           {mgd.goalData.name}
           <br />
           <small>{mgd.goalData.status}</small>
+        </td>
+        <td>
+          {mgd.goalData.scheduled ? format(mgd.goalData.startTime, "p EEE, MMM do") : "NOT SCHEDULED"}
         </td>
         <td>{mgd.goalData.description}</td>
         <td>

@@ -11,6 +11,7 @@ import java.security.SecureRandom;
 public class Utils {
 
   public static final ZoneId TIMEZONE = ZoneId.of("America/Los_Angeles");
+  public static final long INT_MAX = 999999999999999l;
 
   // note that we use bcrypt for passwords
   static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
