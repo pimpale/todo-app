@@ -571,7 +571,7 @@ public class ApiController {
     goalData.creatorUserId = key.creatorUserId;
     goalData.name = name;
     goalData.description = description;
-    goalData.duration = durationEstimate;
+    goalData.durationEstimate = durationEstimate;
     goalData.timeUtilityFunctionId = timeUtilityFunctionId;
     goalData.scheduled = false;
     goalData.duration = 0;
@@ -615,7 +615,7 @@ public class ApiController {
     goalData.creatorUserId = key.creatorUserId;
     goalData.name = name;
     goalData.description = description;
-    goalData.duration = durationEstimate;
+    goalData.durationEstimate = durationEstimate;
     goalData.timeUtilityFunctionId = timeUtilityFunctionId;
     goalData.scheduled = true;
     goalData.duration = duration;
@@ -656,7 +656,7 @@ public class ApiController {
     goalData.creatorUserId = key.creatorUserId;
     goalData.name = name;
     goalData.description = description;
-    goalData.duration = durationEstimate;
+    goalData.durationEstimate = durationEstimate;
     goalData.timeUtilityFunctionId = timeUtilityFunctionId;
     goalData.scheduled = false;
     goalData.duration = 0;
@@ -707,7 +707,7 @@ public class ApiController {
     goalData.creatorUserId = key.creatorUserId;
     goalData.name = name;
     goalData.description = description;
-    goalData.duration = durationEstimate;
+    goalData.durationEstimate = durationEstimate;
     goalData.timeUtilityFunctionId = timeUtilityFunctionId;
     goalData.scheduled = true;
     goalData.duration = duration;

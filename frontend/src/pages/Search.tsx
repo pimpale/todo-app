@@ -1,10 +1,8 @@
 import React from 'react'
-import { Table, Button, Container, Form, Row, Col } from 'react-bootstrap';
-
+import { Button, Container, Form, Row, Col } from 'react-bootstrap';
 import DashboardLayout from '../components/DashboardLayout';
-import ManageGoal from '../components/ManageGoal';
-import { viewGoalData, isApiErrorCode, viewPastEventData } from '../utils/utils';
-import format from "date-fns/format";
+import ManageGoalTable from '../components/ManageGoalTable';
+import { viewGoalData, isApiErrorCode } from '../utils/utils';
 
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 
@@ -102,7 +100,6 @@ function SearchForm(props: SearchProps) {
 }
 
 function Search(props: AuthenticatedComponentProps) {
-
   const [search, setSearch] = React.useState<GoalData[]>([]);
   return <DashboardLayout {...props}>
     <Container fluid className="py-4 px-4">
@@ -112,23 +109,13 @@ function Search(props: AuthenticatedComponentProps) {
       />
       <Row className="justify-content-md-center">
         <Col md={8}>
-          <Table hover bordered>
-            <thead>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Utility</th>
-              <th>Actions</th>
-            </thead>
-            {search.map(d =>
-              <tr>
-                <ManageGoal
-                  goalId={d.goal.goalId}
-                  apiKey={props.apiKey}
-                  onChange={() => null}
-                />
-              </tr>
-            )}
-          </Table>
+          <ManageGoalTable
+            goalIds={search.map(d => d.goal.goalId)}
+            apiKey={props.apiKey}
+            reload={() => setSearch(search)}
+            addable={false}
+            mutable
+          />
         </Col>
       </Row>
     </Container>

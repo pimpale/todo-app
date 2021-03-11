@@ -14,7 +14,7 @@ import UtilityWrapper from '../components/UtilityWrapper';
 import CreatePastEvent from '../components/CreatePastEvent';
 import CreateGoal from '../components/CreateGoal';
 import ManagePastEvent from '../components/ManagePastEvent';
-import ManageGoal from '../components/ManageGoal';
+import ManageGoalTable from '../components/ManageGoalTable';
 import DisplayModal from '../components/DisplayModal';
 
 type EventCalendarProps = {
@@ -243,21 +243,13 @@ function EventCalendar(props: EventCalendarProps) {
         show={selectedManageGoalData !== null}
         onClose={() => setSelectedManageGoalData(null)}
       >
-        <Table hover bordered>
-          <thead>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Utility</th>
-            <th>Actions</th>
-          </thead>
-          <tr>
-            <ManageGoal
-              goalId={selectedManageGoalData.goal.goalId}
-              apiKey={props.apiKey}
-              onChange={() => null}
-            />
-          </tr>
-        </Table>
+        <ManageGoalTable
+          goalIds={[selectedManageGoalData.goal.goalId]}
+          apiKey={props.apiKey}
+          reload={() => null}
+          mutable
+          addable={false}
+        />
       </DisplayModal>
     }
   </Row>
