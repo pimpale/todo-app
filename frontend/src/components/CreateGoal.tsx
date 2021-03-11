@@ -1,8 +1,11 @@
 import React from "react"
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
-import { Card, Button, Form } from "react-bootstrap";
+import { Col, Row, Card, Button, Form } from "react-bootstrap";
 import { newScheduledGoal, newGoal, newTimeUtilityFunction, isApiErrorCode } from "../utils/utils";
 import UtilityPicker from "../components/UtilityPicker"
+import parseDuration from 'parse-duration';
+import formatDuration from 'date-fns/formatDuration';
+import intervalToDuration from 'date-fns/intervalToDuration';
 
 
 type CreateGoalProps = {
@@ -14,7 +17,7 @@ type CreateGoalProps = {
 function CreateGoal(props: CreateGoalProps) {
   type CreateGoalValue = {
     name: string,
-    durationEstimate: number,
+    durationEstimate: string,
     description: string,
     points: { x: number, y: number }[]
   }
@@ -29,6 +32,13 @@ function CreateGoal(props: CreateGoalProps) {
     let hasError = false;
     if (values.name === "") {
       errors.name = "Please enter an event name";
+      hasError = true;
+    }
+
+    const durationEstimate = parseDuration(values.durationEstimate);
+
+    if(durationEstimate === null) {
+      errors.durationEstimate = "Invalid duration estimate";
       hasError = true;
     }
 
@@ -69,11 +79,12 @@ function CreateGoal(props: CreateGoalProps) {
       return;
     }
 
-    let maybeGoalData = props.span !== undefined
+
+    let maybeGoalData = props.span
       ? await newScheduledGoal({
         name: values.name,
         description: values.description,
-        durationEstimate: values.durationEstimate,
+        durationEstimate: durationEstimate!,
         timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
         startTime: props.span[0],
         duration: props.span[1] - props.span[0],
@@ -82,7 +93,7 @@ function CreateGoal(props: CreateGoalProps) {
       : await newGoal({
         name: values.name,
         description: values.description,
-        durationEstimate: values.durationEstimate,
+        durationEstimate: durationEstimate!,
         timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
         apiKey: props.apiKey.key,
       });
@@ -122,7 +133,16 @@ function CreateGoal(props: CreateGoalProps) {
       initialValues={{
         name: "",
         description: "",
-        durationEstimate: 10000,
+        durationEstimate: formatDuration(
+          props.span
+            ? intervalToDuration({
+              start: props.span[0],
+              end: props.span[1]
+            })
+            : {
+              minutes: 30,
+            }
+        ),
         points: [],
       }}
       initialStatus={{
@@ -148,19 +168,32 @@ function CreateGoal(props: CreateGoalProps) {
               </Card>
               <Form.Text className="text-danger">{fprops.errors.points}</Form.Text>
             </Form.Group>
-
-            <Form.Group >
-              <Form.Control
-                name="name"
-                type="text"
-                placeholder="Goal Name"
-                as="input"
-                value={fprops.values.name}
-                onChange={e => fprops.setFieldValue("name", e.target.value)}
-                isInvalid={!!fprops.errors.name}
-              />
-              <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
-            </Form.Group>
+            <Row>
+              <Form.Group as={Col}>
+                <Form.Control
+                  name="name"
+                  type="text"
+                  placeholder="Goal Name"
+                  as="input"
+                  value={fprops.values.name}
+                  onChange={e => fprops.setFieldValue("name", e.target.value)}
+                  isInvalid={!!fprops.errors.name}
+                />
+                <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
+              </Form.Group>
+              <Form.Group as={Col}>
+                <Form.Control
+                  name="durationEstimate"
+                  type="text"
+                  placeholder="Estimated Duration"
+                  as="input"
+                  value={fprops.values.durationEstimate}
+                  onChange={e => fprops.setFieldValue("durationEstimate", e.target.value)}
+                  isInvalid={!!fprops.errors.durationEstimate}
+                />
+                <Form.Control.Feedback type="invalid">{fprops.errors.durationEstimate}</Form.Control.Feedback>
+              </Form.Group>
+            </Row>
             <Form.Group >
               <Form.Control
                 name="description"

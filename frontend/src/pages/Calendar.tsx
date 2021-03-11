@@ -1,12 +1,14 @@
 import React from 'react'
-import FullCalendar, { EventApi, DateSelectArg, EventClickArg } from '@fullcalendar/react'
+import Loader from '../components/Loader';
+import FullCalendar, { EventApi, EventInput, DateSelectArg, EventClickArg } from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
-import interactionPlugin from '@fullcalendar/interaction'
+import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
 import DashboardLayout from '../components/DashboardLayout';
 import CalendarSolver from '../components/CalendarSolver';
 import CalendarCard, { pastEventDataToEvent, goalDataToEvent } from '../components/CalendarCard';
 
-import { Table, Row, Col, Tab, Tabs, Popover, Container, } from 'react-bootstrap';
+import { Async, AsyncProps } from 'react-async';
+import { Row, Col, Tab, Tabs, Popover, Container, } from 'react-bootstrap';
 import { newPastEventData, newScheduledGoalData, viewPastEventData, viewGoalData, isApiErrorCode } from '../utils/utils';
 
 import UtilityWrapper from '../components/UtilityWrapper';
@@ -16,6 +18,71 @@ import CreateGoal from '../components/CreateGoal';
 import ManagePastEvent from '../components/ManagePastEvent';
 import ManageGoalTable from '../components/ManageGoalTable';
 import DisplayModal from '../components/DisplayModal';
+
+
+type UnscheduledGoalCardProps = {
+  onChange: () => void;
+  goalData: GoalDataUnscheduled;
+}
+
+function UnscheduledGoalCard(props: UnscheduledGoalCardProps) {
+  let elRef = React.useRef<HTMLDivElement>(null);
+
+  const event = {
+    id: `GoalData:${props.goalData.goalDataId}`,
+    duration: props.goalData.durationEstimate,
+    color: "#00000000",
+    borderColor: "#00000000",
+    goalData: props.goalData
+  };
+
+  React.useEffect(() => {
+    let draggable = new Draggable(elRef.current!, {
+      eventData: event
+    });
+
+    // a cleanup function
+    return () => draggable.destroy();
+  }, []);
+
+  return (
+    <div
+      ref={elRef}
+      className="fc-event fc-h-event mb-1 fc-daygrid-event fc-daygrid-block-event p-2"
+      data-custom={JSON.stringify({ goalData: props.goalData })}
+      title={props.goalData.name}
+      style={{
+        cursor: "pointer"
+      }}
+    >
+      <div className="fc-event-main">
+        <div>
+          {props.goalData.name}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+const loadUnscheduledGoalData = async (props: AsyncProps<GoalDataUnscheduled[]>) => {
+  const maybeGoalData = await viewGoalData({
+    creatorUserId: props.apiKey.creator.userId,
+    onlyRecent: true,
+    scheduled: false,
+    status: "PENDING",
+    apiKey: props.apiKey.key,
+  });
+
+  if (isApiErrorCode(maybeGoalData)) {
+    throw Error;
+  }
+
+  return maybeGoalData
+    .filter((x): x is GoalDataUnscheduled => !x.scheduled);
+}
+
+
 
 type EventCalendarProps = {
   apiKey: ApiKey,
@@ -101,10 +168,10 @@ function EventCalendar(props: EventCalendarProps) {
     }
   }
 
-  const changeHandler = async (event: EventApi, oldEvent: EventApi, revert: () => void) => {
+  const changeHandler = async (event: EventApi, oldEventProps: Record<string, any>, revert: () => void) => {
     switch (event.id.split(':')[0]) {
       case "PastEventData": {
-        const oped = oldEvent.extendedProps.pastEventData;
+        const oped = oldEventProps.pastEventData;
         const maybePastEventData = await newPastEventData({
           pastEventId: oped.pastEvent.pastEventId,
           name: oped.name,
@@ -121,7 +188,7 @@ function EventCalendar(props: EventCalendarProps) {
         break;
       }
       case "GoalData": {
-        const ogd = oldEvent.extendedProps.goalData;
+        const ogd = oldEventProps.goalData;
         const maybeGoalData = await newScheduledGoalData({
           goalId: ogd.goal.goalId,
           name: ogd.name,
@@ -137,6 +204,11 @@ function EventCalendar(props: EventCalendarProps) {
           revert();
         }
         event.setExtendedProp("goalData", maybeGoalData);
+        break;
+      }
+      default: {
+        revert();
+        break;
       }
     }
   }
@@ -150,7 +222,26 @@ function EventCalendar(props: EventCalendarProps) {
 
   return <Row>
     <Col lg={2}>
-      <div id='draggable-el' data-event='{ "title": "my event", "duration": "02:00" }'>drag me</div>
+      <Async
+        promiseFn={loadUnscheduledGoalData}
+        apiKey={props.apiKey} >
+        {({ reload }) => <>
+          <Async.Pending><Loader /></Async.Pending>
+          <Async.Rejected>
+            <span className="text-danger">An unknown error has occured.</span>
+          </Async.Rejected>
+          <Async.Fulfilled<GoalDataUnscheduled[]>>{gdus =>
+            gdus.map(gdu =>
+              <UnscheduledGoalCard
+                key={gdu.goalDataId}
+                goalData={gdu}
+                onChange={reload}
+              />
+            )
+          }
+          </Async.Fulfilled>
+        </>}
+      </Async>
     </Col>
     <Col xl={10}>
       <FullCalendar
@@ -181,8 +272,17 @@ function EventCalendar(props: EventCalendarProps) {
         unselectCancel=".modal-content"
         eventClick={clickHandler}
         eventOverlap={false}
-        eventResize={(era) => changeHandler(era.event, era.oldEvent, era.revert)}
-        eventDrop={(eda) => changeHandler(eda.event, eda.oldEvent, eda.revert)}
+        eventResize={(era) => changeHandler(era.event, era.oldEvent.extendedProps, era.revert)}
+        eventDrop={(eda) => changeHandler(eda.event, eda.oldEvent.extendedProps, eda.revert)}
+        eventReceive={(era) => {
+          // hide event
+          era.draggedEl.hidden = true;
+          changeHandler(
+            era.event,
+            JSON.parse(era.draggedEl.getAttribute("data-custom")!),
+            era.revert
+          )
+        }}
         unselect={() => {
           setSelectedSpan(null);
         }}
@@ -246,7 +346,7 @@ function EventCalendar(props: EventCalendarProps) {
         <ManageGoalTable
           goalIds={[selectedManageGoalData.goal.goalId]}
           apiKey={props.apiKey}
-          reload={() => null}
+          reload={() => setSelectedManageGoalData(null)}
           mutable
           addable={false}
         />

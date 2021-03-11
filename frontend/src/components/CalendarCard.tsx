@@ -24,15 +24,14 @@ export function pastEventDataToEvent(ped: PastEventData): EventInput {
   }
 }
 
-
-function GoalCard(props: { goalData: GoalData }) {
+export function GoalCard(props: { goalData: GoalData }) {
   return <Card className="px-1 py-1 h-100 w-100 bg-primary text-light overflow-hidden">
     {props.goalData.name}
   </Card>
 }
 
 // PastEvent
-function PastEventCard(props: {
+export function PastEventCard(props: {
   pastEventData: PastEventData
 }) {
   return (

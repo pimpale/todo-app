@@ -132,9 +132,10 @@ function ICalendarSolver(props: ICalendarSolverProps) {
         commit: {
           text: 'Commit Changes',
           click: async () => {
-            for (const sgd of dataRef.current) {
+            // for each element in the middle of the array:
+            for (const sgd of dataRef.current.slice(1, -1)) {
               const maybeTimeUtilFunction = await newTimeUtilityFunction({
-                startTimes: sgd.tuf.map(p => p.startTime),
+                startTimes: sgd.tuf.map(p => Math.floor(p.startTime)),
                 utils: sgd.tuf.map(p => p.utils),
                 apiKey: props.apiKey.key,
               })
@@ -149,10 +150,10 @@ function ICalendarSolver(props: ICalendarSolverProps) {
                 goalId: sgd.data.goal.goalId,
                 name: sgd.data.name,
                 description: sgd.data.description,
-                durationEstimate: sgd.data.durationEstimate,
+                durationEstimate: Math.floor(sgd.data.durationEstimate),
                 timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
-                startTime: sgd.startTime,
-                duration: sgd.duration,
+                startTime: Math.floor(sgd.startTime),
+                duration: Math.floor(sgd.duration),
                 status: "PENDING",
                 apiKey: props.apiKey.key,
               });

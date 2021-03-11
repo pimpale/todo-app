@@ -1,15 +1,11 @@
 import React from 'react'
-import { Table, Row, Container, Col, Form, Tabs, Tab } from 'react-bootstrap';
+import { Row, Container, Col, Form} from 'react-bootstrap';
 import { Async, AsyncProps } from 'react-async';
 import Section from '../components/Section';
 import DashboardLayout from '../components/DashboardLayout';
 import ManageGoalTable from '../components/ManageGoalTable';
-import DisplayModal from '../components/DisplayModal';
-import { Add } from '@material-ui/icons'
 import Loader from '../components/Loader';
-import ManageGoal from '../components/ManageGoal';
-import CreateGoal from '../components/CreateGoal';
-import { viewGoalData, isApiErrorCode, viewPastEventData } from '../utils/utils';
+import { viewGoalData, isApiErrorCode} from '../utils/utils';
 
 type DashboardData = {
   goalData: GoalData

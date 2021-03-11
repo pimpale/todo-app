@@ -1,12 +1,15 @@
 import React from 'react';
-import { Card, Form, Button } from 'react-bootstrap';
+import { Col, Row, Card, Form, Button } from 'react-bootstrap';
 import Loader from '../components/Loader';
 import { Async, AsyncProps } from 'react-async';
 import DisplayModal from '../components/DisplayModal';
 import UtilityPicker from '../components/UtilityPicker';
 import { viewTimeUtilityFunctionPoint, newTimeUtilityFunction, viewGoalData, newGoalData, newScheduledGoalData, isApiErrorCode } from '../utils/utils';
 import { Edit, Cancel, } from '@material-ui/icons';
-import { Formik, FormikHelpers } from 'formik'
+import { Formik, FormikHelpers, FormikErrors } from 'formik'
+import parseDuration from 'parse-duration';
+import formatDuration from 'date-fns/formatDuration';
+import intervalToDuration from 'date-fns/intervalToDuration';
 import format from 'date-fns/format';
 
 
@@ -22,6 +25,7 @@ function EditGoal(props: EditGoalProps) {
   type EditGoalValue = {
     name: string,
     description: string,
+    durationEstimate: string,
     startTime: number | null,
     duration: number | null,
     points: { x: number, y: number }[]
@@ -29,6 +33,26 @@ function EditGoal(props: EditGoalProps) {
 
   const onSubmit = async (values: EditGoalValue,
     fprops: FormikHelpers<EditGoalValue>) => {
+
+    let hasError = false;
+    let errors: FormikErrors<EditGoalValue> = {};
+
+    if (values.name === "") {
+      errors.name = "Please enter an event name";
+      hasError = true;
+    }
+
+    const durationEstimate = parseDuration(values.durationEstimate);
+
+    if(durationEstimate === null || durationEstimate < 1) {
+      errors.durationEstimate = "Invalid duration estimate";
+      hasError = true;
+    }
+
+    fprops.setErrors(errors);
+    if (hasError) {
+      return;
+    }
 
     // TODO: check if utility function has been changed before creating a new one
     // this will be more efficient
@@ -69,7 +93,7 @@ function EditGoal(props: EditGoalProps) {
         goalId: props.goalData.goal.goalId,
         name: values.name,
         description: values.description,
-        durationEstimate: props.goalData.durationEstimate,
+        durationEstimate: durationEstimate!,
         timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
         startTime: values.startTime,
         duration: values.duration,
@@ -80,7 +104,7 @@ function EditGoal(props: EditGoalProps) {
         goalId: props.goalData.goal.goalId,
         name: values.name,
         description: values.description,
-        durationEstimate: props.goalData.durationEstimate,
+        durationEstimate: durationEstimate!,
         timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
         status: props.goalData.status,
         apiKey: props.apiKey.key,
@@ -135,8 +159,14 @@ function EditGoal(props: EditGoalProps) {
       initialValues={{
         name: props.goalData.name,
         description: props.goalData.description,
-        startTime: props.goalData.startTime,
-        duration: props.goalData.duration,
+        startTime: props.goalData.scheduled ? props.goalData.startTime : null,
+        duration: props.goalData.scheduled ? props.goalData.duration : null,
+        durationEstimate: formatDuration(
+          intervalToDuration({
+            start: 0,
+            end: props.goalData.durationEstimate
+          })
+        ),
         points: props.tuf.map(p => ({ x: p.startTime, y: p.utils }))
       }}
       initialStatus={{
@@ -149,19 +179,34 @@ function EditGoal(props: EditGoalProps) {
           noValidate
           onSubmit={fprops.handleSubmit} >
           <div hidden={fprops.status.successResult !== ""}>
-            <Form.Group >
-              <Form.Label>Goal Name</Form.Label>
-              <Form.Control
-                name="name"
-                type="text"
-                placeholder="Goal Name"
-                as="input"
-                value={fprops.values.name}
-                onChange={e => fprops.setFieldValue("name", e.target.value)}
-                isInvalid={!!fprops.errors.name}
-              />
-              <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
-            </Form.Group>
+            <Row>
+              <Form.Group as={Col}>
+                <Form.Label>Name</Form.Label>
+                <Form.Control
+                  name="name"
+                  type="text"
+                  placeholder="Goal Name"
+                  as="input"
+                  value={fprops.values.name}
+                  onChange={e => fprops.setFieldValue("name", e.target.value)}
+                  isInvalid={!!fprops.errors.name}
+                />
+                <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
+              </Form.Group>
+              <Form.Group as={Col}>
+                <Form.Label>Estimated Duration</Form.Label>
+                <Form.Control
+                  name="durationEstimate"
+                  type="text"
+                  placeholder="Estimated Duration"
+                  as="input"
+                  value={fprops.values.durationEstimate}
+                  onChange={e => fprops.setFieldValue("durationEstimate", e.target.value)}
+                  isInvalid={!!fprops.errors.durationEstimate}
+                />
+                <Form.Control.Feedback type="invalid">{fprops.errors.durationEstimate}</Form.Control.Feedback>
+              </Form.Group>
+            </Row>
             <Form.Group >
               <Form.Label >Goal Description</Form.Label>
               <Form.Control
@@ -367,6 +412,13 @@ const ManageGoal = (props: {
         </td>
         <td>
           {mgd.goalData.scheduled ? format(mgd.goalData.startTime, "p EEE, MMM do") : "NOT SCHEDULED"}
+          <br />
+          <small>Estimate: {
+            formatDuration(intervalToDuration({
+              start: 0,
+              end: mgd.goalData.durationEstimate
+            }))
+          }</small>
         </td>
         <td>{mgd.goalData.description}</td>
         <td>
