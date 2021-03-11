@@ -1,6 +1,6 @@
 import React from 'react'
 import Loader from '../components/Loader';
-import FullCalendar, { EventApi, EventInput, DateSelectArg, EventClickArg } from '@fullcalendar/react'
+import FullCalendar, { EventApi, DateSelectArg, EventClickArg } from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
 import DashboardLayout from '../components/DashboardLayout';
@@ -43,7 +43,7 @@ function UnscheduledGoalCard(props: UnscheduledGoalCardProps) {
 
     // a cleanup function
     return () => draggable.destroy();
-  }, []);
+  });
 
   return (
     <div
@@ -282,6 +282,12 @@ function EventCalendar(props: EventCalendarProps) {
             JSON.parse(era.draggedEl.getAttribute("data-custom")!),
             era.revert
           )
+          // delete the current event (it'll be reloaded when we fetch scheduled events)
+          era.event.remove();
+          // force reload to get the new scheduled event
+          if (calendarRef.current != null) {
+            calendarRef.current.getApi().refetchEvents();
+          }
         }}
         unselect={() => {
           setSelectedSpan(null);
