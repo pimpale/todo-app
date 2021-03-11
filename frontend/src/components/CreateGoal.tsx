@@ -1,7 +1,7 @@
 import React from "react"
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Card, Button, Form } from "react-bootstrap";
-import { newGoal, newTimeUtilityFunction, isApiErrorCode } from "../utils/utils";
+import { newScheduledGoal,newGoal, newTimeUtilityFunction, isApiErrorCode } from "../utils/utils";
 import UtilityPicker from "../components/UtilityPicker"
 
 
@@ -14,6 +14,7 @@ type CreateGoalProps = {
 function CreateGoal(props: CreateGoalProps) {
   type CreateGoalValue = {
     name: string,
+    durationEstimate: number,
     description: string,
     points: { x: number, y: number }[]
   }
@@ -68,20 +69,28 @@ function CreateGoal(props: CreateGoalProps) {
       return;
     }
 
-    const duration = props.span
-      ? props.span[1] - props.span[0]
-      : 0;
+    let maybeGoalData:GoalData|ApiErrorCode;
 
-    const maybeGoalData = await newGoal({
-      name: values.name,
-      description: values.description,
-      durationEstimate: duration,
-      timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
-      scheduled: props.span !== null,
-      startTime: props.span?.[0] ?? 0,
-      duration: duration,
-      apiKey: props.apiKey.key,
-    });
+    if(props.span !== undefined) {
+      maybeGoalData = await newScheduledGoal({
+        name: values.name,
+        description: values.description,
+        durationEstimate: values.durationEstimate,
+        timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
+        startTime: props.span[0],
+        duration: props.span[1] - props.span[0],
+        apiKey: props.apiKey.key,
+      });
+    } else {
+      maybeGoalData = await newGoal({
+        name: values.name,
+        description: values.description,
+        durationEstimate: values.durationEstimate,
+        timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
+        apiKey: props.apiKey.key,
+      });
+    }
+
 
     if (isApiErrorCode(maybeGoalData)) {
       switch (maybeGoalData) {
@@ -117,6 +126,7 @@ function CreateGoal(props: CreateGoalProps) {
       initialValues={{
         name: "",
         description: "",
+        durationEstimate: 10000,
         points: [],
       }}
       initialStatus={{

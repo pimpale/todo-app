@@ -553,9 +553,6 @@ public class ApiController {
       @RequestParam String description, //
       @RequestParam long durationEstimate, //
       @RequestParam long timeUtilityFunctionId, //
-      @RequestParam boolean scheduled, //
-      @RequestParam long startTime, //
-      @RequestParam long duration, //
       @RequestParam String apiKey) {
     ApiKey key = getApiKeyIfValid(apiKey);
     if (key == null) {
@@ -575,7 +572,43 @@ public class ApiController {
     goalData.description = description;
     goalData.duration = durationEstimate;
     goalData.timeUtilityFunctionId = timeUtilityFunctionId;
-    goalData.scheduled = scheduled;
+    goalData.scheduled = false;
+    goalData.duration = 0;
+    goalData.startTime = 0;
+    goalData.status = GoalDataStatusKind.PENDING;
+    goalDataService.add(goalData);
+
+    return new ResponseEntity<>(fillGoalData(goalData), HttpStatus.OK);
+  }
+
+  @RequestMapping("/goal/newScheduled/")
+  public ResponseEntity<?> newGoalScheduled( //
+      @RequestParam String name, //
+      @RequestParam String description, //
+      @RequestParam long durationEstimate, //
+      @RequestParam long timeUtilityFunctionId, //
+      @RequestParam long duration, //
+      @RequestParam long startTime, //
+      @RequestParam String apiKey) {
+    ApiKey key = getApiKeyIfValid(apiKey);
+    if (key == null) {
+      return Errors.API_KEY_NONEXISTENT.getResponse();
+    }
+
+    Goal goal = new Goal();
+    goal.creationTime = System.currentTimeMillis();
+    goal.creatorUserId = key.creatorUserId;
+    goalService.add(goal);
+
+    GoalData goalData = new GoalData();
+    goalData.goalId = goal.goalId;
+    goalData.creationTime = System.currentTimeMillis();
+    goalData.creatorUserId = key.creatorUserId;
+    goalData.name = name;
+    goalData.description = description;
+    goalData.duration = durationEstimate;
+    goalData.timeUtilityFunctionId = timeUtilityFunctionId;
+    goalData.scheduled = true;
     goalData.duration = duration;
     goalData.startTime = startTime;
     goalData.status = GoalDataStatusKind.PENDING;
@@ -584,6 +617,7 @@ public class ApiController {
     return new ResponseEntity<>(fillGoalData(goalData), HttpStatus.OK);
   }
 
+
   @RequestMapping("/goalData/new/")
   public ResponseEntity<?> newGoalData( //
       @RequestParam long goalId, //
@@ -591,7 +625,47 @@ public class ApiController {
       @RequestParam String description, //
       @RequestParam long durationEstimate, //
       @RequestParam long timeUtilityFunctionId, //
-      @RequestParam boolean scheduled, //
+      @RequestParam GoalDataStatusKind status, //
+      @RequestParam String apiKey) {
+    ApiKey key = getApiKeyIfValid(apiKey);
+    if (key == null) {
+      return Errors.API_KEY_NONEXISTENT.getResponse();
+    }
+
+    Goal goal = goalService.getByGoalId(goalId);
+    if (goal == null) {
+      return Errors.GOAL_NONEXISTENT.getResponse();
+    }
+
+    if (goal.creatorUserId != key.creatorUserId) {
+      return Errors.API_KEY_UNAUTHORIZED.getResponse();
+    }
+
+    GoalData goalData = new GoalData();
+    goalData.goalId = goal.goalId;
+    goalData.creationTime = System.currentTimeMillis();
+    goalData.creatorUserId = key.creatorUserId;
+    goalData.name = name;
+    goalData.description = description;
+    goalData.duration = durationEstimate;
+    goalData.timeUtilityFunctionId = timeUtilityFunctionId;
+    goalData.scheduled = false;
+    goalData.duration = 0;
+    goalData.startTime = 0;
+    goalData.status = status;
+    goalDataService.add(goalData);
+
+    return new ResponseEntity<>(fillGoalData(goalData), HttpStatus.OK);
+  }
+
+
+  @RequestMapping("/goalData/newScheduled/")
+  public ResponseEntity<?> newGoalDataScheduled( //
+      @RequestParam long goalId, //
+      @RequestParam String name, //
+      @RequestParam String description, //
+      @RequestParam long durationEstimate, //
+      @RequestParam long timeUtilityFunctionId, //
       @RequestParam long startTime, //
       @RequestParam long duration, //
       @RequestParam GoalDataStatusKind status, //
@@ -618,7 +692,7 @@ public class ApiController {
     goalData.description = description;
     goalData.duration = durationEstimate;
     goalData.timeUtilityFunctionId = timeUtilityFunctionId;
-    goalData.scheduled = scheduled;
+    goalData.scheduled = true;
     goalData.duration = duration;
     goalData.startTime = startTime;
     goalData.status = status;
@@ -626,6 +700,7 @@ public class ApiController {
 
     return new ResponseEntity<>(fillGoalData(goalData), HttpStatus.OK);
   }
+
 
   @Transactional
   @RequestMapping("/timeUtilityFunction/new/")

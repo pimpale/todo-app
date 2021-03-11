@@ -6,7 +6,7 @@ import FullCalendar, { EventInput, DateSelectArg, EventClickArg } from '@fullcal
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import CalendarCard from '../components/CalendarCard';
-import { viewTimeUtilityFunctionPoint, viewGoalData, isApiErrorCode, INT_MAX, findLastIndex } from '../utils/utils';
+import { viewTimeUtilityFunctionPoint, viewGoalData, newGoalData, newTimeUtilityFunction, isApiErrorCode, assert, INT_MAX, findLastIndex } from '../utils/utils';
 
 
 type SolverDataPoint = {
@@ -18,6 +18,7 @@ type SolverGoalData = {
   data: GoalDataScheduled,
   tuf: SolverDataPoint[],
   startTime: number,
+  duration: number,
 }
 
 type CalendarSolverProps = {
@@ -38,6 +39,11 @@ const lerp = (a: SolverDataPoint, b: SolverDataPoint, startTime: number) => {
 const sgdValue = (sgd: SolverGoalData) => {
   let sum = 0;
   // TODO use binary search for finding beginning index
+  assert(sgd.startTime > Math.min(...sgd.tuf.map(p=>p.startTime)),
+    "sgd's start time must be greater than at least one point in tuf")
+
+  assert(sgd.startTime + sgd.duration < Math.max(...sgd.tuf.map(p=>p.startTime)),
+    "sgd's end time must be less than at least one point in tuf")
 
   // here, we interpolate a point we can begin integrating at
   const fi = sgd.tuf.findIndex(p => p.startTime > sgd.startTime)
@@ -47,7 +53,7 @@ const sgdValue = (sgd: SolverGoalData) => {
   };
 
   // here, we interpolate the last point to integrate at
-  const sgdEnd = sgd.startTime + sgd.data.duration;
+  const sgdEnd = sgd.startTime + sgd.duration;
   const li = findLastIndex(sgd.tuf, p => p.startTime < sgdEnd);
   const ltr = {
     startTime: sgdEnd,
@@ -71,14 +77,15 @@ const sgdValue = (sgd: SolverGoalData) => {
 // sum of all the sgd values
 const expectedValue = (sgds: SolverGoalData[]) =>
   sgds
-    .map(sgdValue)
-    .reduce((accumulator, currentValue) => accumulator + currentValue)
+    .map(s => {console.log(s); return sgdValue(s)})
+    .reduce((accumulator, currentValue) => accumulator + currentValue, 0)
 
 const neighbor = (sgds: SolverGoalData[]) => {
   const index = Math.floor(Math.random() * sgds.length);
   return sgds.map((gd, i) => ({
     data: gd.data,
     tuf: gd.tuf,
+    duration: gd.duration,
     startTime: i === index
       ? gd.startTime + (Math.random() - 0.5) * 10000000
       : gd.startTime
@@ -91,57 +98,68 @@ const pAccept = (ev: number, ev_new: number) => {
 }
 
 function ICalendarSolver(props: ICalendarSolverProps) {
-  const calendarRef = React.useRef<FullCalendar | null>(null);
-  // the current iteration we're on
   const [iteration, setIteration] = React.useState(0);
-  // is true as long as we're iterating
   const [iterating, setIterating] = React.useState(false);
-  // our calendar data
-  const [data, setData] = React.useState<SolverGoalData[]>(props.data);
 
+  React.useEffect(() => {
+    if (iterating) {
+      setTimeout(() => setIteration(iteration + 1), 100);
+    }
+  }, [iteration, iterating]);
 
-  const data_new = neighbor(data);
-  if (pAccept(expectedValue(data), expectedValue(data_new))) {
-    setData(data_new);
+  // had problems with react going into infinite loops when using state
+  // therefore we're using ref again. later we might want to look into this.
+  // it works for now though
+  const dataRef = React.useRef<SolverGoalData[]>(props.data);
+
+  const data_new = neighbor(dataRef.current);
+  if (pAccept(expectedValue(dataRef.current), expectedValue(data_new))) {
+    dataRef.current = data_new;
   }
 
-  React.useEffect(
-    () => {
-      let timer = setTimeout(() => {
-        // only callback if iterating
-        if (iterating) {
-          setIteration(iteration => iteration + 1)
-        }
-      }, 100);
-
-      // this will clear Timeout
-      // when component unmount like in willComponentUnmount
-      // and show will not change to true
-      return () => {
-        clearTimeout(timer);
-      };
-    },
-    // useEffect will run only one time with empty []
-    // if you pass a value to array,
-    // like this - [data]
-    // than clearTimeout will run every time
-    // this value changes (useEffect re-run)
-    [iteration, iterating]
-  );
-
   return <>
-    {iteration}
     <FullCalendar
-      ref={calendarRef}
       plugins={[timeGridPlugin, interactionPlugin]}
       customButtons={{
         stop: {
-          text: iterating ? 'Stop' : 'Start',
-          click: () => setIterating(iterating => !iterating)
+          text: "Stop",
+          click: () => setIterating(false)
+        },
+        start: {
+          text: "Start",
+          click: () => setIterating(true)
         },
         commit: {
           text: 'Commit Changes',
-          click: () => setIterating(false)
+          click: async () => {
+            for (const sgd of dataRef.current) {
+              const maybeTimeUtilFunction = await newTimeUtilityFunction({
+                startTimes: sgd.tuf.map(p => p.startTime),
+                utils: sgd.tuf.map(p => p.utils),
+                apiKey: props.apiKey.key,
+              })
+
+              // do better error handling later
+              if (isApiErrorCode(maybeTimeUtilFunction)) {
+                console.log(maybeTimeUtilFunction);
+                continue;
+              }
+
+              const maybeGoalData = await newGoalData({
+                goalId: sgd.data.goal.goalId,
+                name: sgd.data.name,
+                description: sgd.data.description,
+                durationEstimate: sgd.data.durationEstimate,
+                timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
+                scheduled: true,
+                startTime: sgd.startTime,
+                duration: sgd.duration,
+                status: "PENDING",
+                apiKey: props.apiKey.key,
+              });
+            }
+            props.onHide();
+          }
         },
         cancel: {
           text: 'Cancel Changes',
@@ -150,7 +168,7 @@ function ICalendarSolver(props: ICalendarSolverProps) {
       }}
       headerToolbar={{
         left: 'prev,next today',
-        center: iterating ? 'stop' : 'stop commit cancel',
+        center: iterating ? 'stop' : 'start commit cancel',
         right: 'timeGridDay,timeGridWeek',
       }}
       initialView='timeGridWeek'
@@ -161,16 +179,15 @@ function ICalendarSolver(props: ICalendarSolverProps) {
       nowIndicator={true}
       editable={false}
       selectable={false}
-      events={data.map(gd => ({
+      events={dataRef.current.map(gd => ({
         id: `GoalData:${gd.data.goal.goalId}`,
         start: new Date(gd.startTime),
-        end: new Date(gd.startTime + gd.data.duration),
+        end: new Date(gd.startTime + gd.duration),
         color: "#00000000",
         borderColor: "#00000000",
         goalData: gd.data
       }))}
       eventContent={CalendarCard}
-      unselectCancel=".modal-content"
     />
   </>
 }
@@ -181,6 +198,7 @@ const loadSolverData = async (props: AsyncProps<SolverGoalData[]>) => {
   const maybeGoalData = await viewGoalData({
     creatorUserId: props.apiKey.creator.userId,
     onlyRecent: true,
+    scheduled: true,
     status: "PENDING",
     apiKey: props.apiKey.key
   });
@@ -217,6 +235,7 @@ const loadSolverData = async (props: AsyncProps<SolverGoalData[]>) => {
           return {
             data: goal,
             startTime: goal.startTime,
+            duration: goal.durationEstimate,
             tuf: [
               {
                 startTime: 0,
@@ -243,9 +262,9 @@ function CalendarSolver(props: CalendarSolverProps) {
       <Async.Rejected>
         <span className="text-danger">An unknown error has occured.</span>
       </Async.Rejected>
-      <Async.Fulfilled<SolverGoalData[]>>
-        {sgds => <ICalendarSolver data={sgds} {...props} />}
-      </Async.Fulfilled>
+      <Async.Fulfilled<SolverGoalData[]>>{sgds =>
+        <ICalendarSolver data={sgds} {...props} />
+      }</Async.Fulfilled>
     </>
     }
   </Async>

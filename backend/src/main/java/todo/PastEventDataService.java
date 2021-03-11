@@ -87,7 +87,7 @@ public class PastEventDataService {
             + (creationTime         == null ? "" : " AND ped.creation_time = " + creationTime)
             + (minCreationTime      == null ? "" : " AND ped.creation_time > " + minCreationTime)
             + (maxCreationTime      == null ? "" : " AND ped.creation_time < " + maxCreationTime)
-            + (creatorUserId        == null ? "" : " AND ped.creator_id = " + creatorUserId)
+            + (creatorUserId        == null ? "" : " AND ped.creator_user_id = " + creatorUserId)
             + (pastEventId          == null ? "" : " AND ped.past_event_id = " + pastEventId)
             + (name                 == null ? "" : " AND ped.name = " + Utils.escape(name))
             + (partialName          == null ? "" : " AND ped.name LIKE " + Utils.escape("%"+partialName+"%"))

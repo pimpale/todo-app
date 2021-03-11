@@ -21,16 +21,16 @@ type UtilityPickerProps = {
   setPoints: (points: { x: number, y: number }[]) => void,
 }
 
-function noTimePrefTUF(start: number, end: number) {
+function noTimePrefTUF(start: Date, end: Date) {
   return [{
-    x: (start + end) / 2,
+    x: (start.valueOf() + end.valueOf()) / 2,
     y: scale
   }]
 }
 
 function UtilityPicker(props: UtilityPickerProps) {
-  const [start, setStart] = React.useState(props.span?.[0] ?? Date.now());
-  const [end, setEnd] = React.useState(props.span?.[1] ?? addHours(new Date(), 3).valueOf());
+  const [start, setStart] = React.useState(new Date(props.span?.[0] ?? Date.now()));
+  const [end, setEnd] = React.useState(new Date(props.span?.[1] ?? addHours(new Date(), 3).valueOf()));
 
   // Had problems with stale closures
   const pointsRef = React.useRef(props.points);
@@ -96,18 +96,18 @@ function UtilityPicker(props: UtilityPickerProps) {
     <Row>
       <Col>
         <div> Date: </div>
-        <DayPickerInput value={new Date(start)} onDayChange={day => {
-          setStart(setHrMin(day, getHours(start), getMinutes(start)).valueOf());
-          setEnd(setHrMin(day, getHours(end), getMinutes(end)).valueOf());
+        <DayPickerInput value={start} onDayChange={day => {
+          setStart(setHrMin(day, getHours(start), getMinutes(start)));
+          setEnd(setHrMin(day, getHours(end), getMinutes(end)));
         }} />
       </Col>
       <Col sm={3}>
         <div>From:</div>
-        <TimePicker time={start} setTime={(t: number) => setStart(t)} maxTime={end} />
+        <TimePicker time={start} setTime={t => setStart(t)} maxTime={end} />
       </Col>
       <Col sm={3}>
         <div>To:</div>
-        <TimePicker time={end} setTime={(t: number) => setEnd(t)} minTime={start} />
+        <TimePicker time={end} setTime={t => setEnd(t)} minTime={start} />
       </Col>
       <Col hidden={!props.mutable}>
         <div>Utility Distribution</div>
@@ -120,7 +120,7 @@ function UtilityPicker(props: UtilityPickerProps) {
             { value: "interval", label: "Interval" },
           ]}
           onChange={o => {
-            const t = (start + end) / 2;
+            const t = (start.valueOf() + end.valueOf()) / 2;
             switch (o!.value) {
               case "constant": {
                 props.setPoints(noTimePrefTUF(start, end));

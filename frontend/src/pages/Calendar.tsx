@@ -54,6 +54,7 @@ function EventCalendar(props: EventCalendarProps) {
     }) => {
 
     const maybePastEventData = await viewPastEventData({
+      creatorUserId: props.apiKey.creator.userId,
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
       onlyRecent: true,
@@ -62,6 +63,7 @@ function EventCalendar(props: EventCalendarProps) {
     });
 
     const maybeGoalData = await viewGoalData({
+      creatorUserId: props.apiKey.creator.userId,
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
       onlyRecent: true,
@@ -148,10 +150,10 @@ function EventCalendar(props: EventCalendarProps) {
   }
 
   return <Row>
-    <Col>
+    <Col lg={2}>
       <div id='draggable-el' data-event='{ "title": "my event", "duration": "02:00" }'>drag me</div>
     </Col>
-    <Col>
+    <Col xl={10}>
       <FullCalendar
         ref={calendarRef}
         plugins={[timeGridPlugin, interactionPlugin]}

@@ -187,14 +187,25 @@ export type NewGoalProps = {
   description: string, //
   durationEstimate: number, //
   timeUtilityFunctionId: number, //
-  scheduled: boolean, //
+  apiKey: string
+}
+
+export async function newGoal(props: NewGoalProps): Promise<GoalDataUnscheduled | ApiErrorCode> {
+  return await fetchApi("goal/new/", getFormData(props));
+}
+
+export type NewScheduledGoalProps = {
+  name: string, //
+  description: string, //
+  durationEstimate: number, //
+  timeUtilityFunctionId: number, //
   startTime: number, //
   duration: number, //
   apiKey: string
 }
 
-export async function newGoal(props: NewGoalProps): Promise<GoalData | ApiErrorCode> {
-  return await fetchApi("goal/new/", getFormData(props));
+export async function newScheduledGoal(props: NewScheduledGoalProps): Promise<GoalDataScheduled | ApiErrorCode> {
+  return await fetchApi("goal/newScheduled/", getFormData(props));
 }
 
 export type NewGoalDataProps = {
@@ -203,9 +214,6 @@ export type NewGoalDataProps = {
   description: string, //
   durationEstimate: number, //
   timeUtilityFunctionId: number, //
-  scheduled: boolean, //
-  startTime: number, //
-  duration: number, //
   status: GoalDataStatusKind, //
   apiKey: string
 }
@@ -213,6 +221,23 @@ export type NewGoalDataProps = {
 export async function newGoalData(props: NewGoalDataProps): Promise<GoalDataUnscheduled | ApiErrorCode> {
   return await fetchApi("goalData/new/", getFormData(props));
 }
+
+export type NewScheduledGoalDataProps = {
+  goalId: number, //
+  name: string, //
+  description: string, //
+  durationEstimate: number, //
+  timeUtilityFunctionId: number, //
+  startTime: number, //
+  duration: number, //
+  status: GoalDataStatusKind, //
+  apiKey: string
+}
+
+export async function newScheduledGoalData(props: NewGoalDataProps): Promise<GoalDataScheduled | ApiErrorCode> {
+  return await fetchApi("goalData/newScheduled/", getFormData(props));
+}
+
 
 export type NewTimeUtilityFunctionProps = {
   startTimes: number[], //
@@ -488,3 +513,9 @@ export function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: n
     return -1;
 }
 
+
+export function assert(val:boolean, msg:string) {
+  if(!val) {
+      throw new Error(msg);
+  }
+}
