@@ -28,8 +28,9 @@ function Home() {
       <Container>
         <Section id="welcome" name={`Welcome to ${APP_NAME}`}>
           <div>
-            Welcome to {APP_NAME}, an application built for a class project, but an application designed for the busiest of people. As students at UCLA, we know how frustrasting
-            it is to schedule classes, clubs, and homework so we made this application to help all kinds of people efficiently plan their schedule. We invite you to join us
+            Welcome to {APP_NAME}, an application built for a class project, but an application designed for the
+            busiest of people. As students at UCLA, we know how frustrating it is to schedule classes,
+            clubs, and homework so we made this application to help all kinds of people efficiently plan their schedule. We invite you to join us
             and be prepared for what the day has in store.
             <a href="/register">Register</a>
           </div>

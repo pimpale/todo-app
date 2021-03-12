@@ -2,7 +2,7 @@ import React from 'react'
 import Loader from '../components/Loader';
 import { Async, AsyncProps } from 'react-async';
 
-import FullCalendar, { EventInput, DateSelectArg, EventClickArg } from '@fullcalendar/react'
+import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import CalendarCard from '../components/CalendarCard';

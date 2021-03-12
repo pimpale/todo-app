@@ -5,11 +5,8 @@ import UtilityWrapper from '../components/UtilityWrapper';
 
 import DashboardLayout from '../components/DashboardLayout';
 import CreatePassword from '../components/CreatePassword';
-import CreateSubscription from '../components/CreateSubscription';
-
 
 function Settings(props: AuthenticatedComponentProps) {
-
   // TODO actually add backend components to handle changing the name properly
   // Also, make the name and email and password changes into one box initially
   // Then, when you click on them to change, a modal should pop up
@@ -28,19 +25,6 @@ function Settings(props: AuthenticatedComponentProps) {
           }
         </UtilityWrapper>
       </div>
-
-      <div className="mx-3 my-3">
-        <UtilityWrapper title="Manage Subscription">
-          <Popover id="information-tooltip"> Purchase a premium subscription that permits you to manage classes and schools. </Popover>
-          <>
-            {subscribeSuccess
-              ? <Form.Text className="text-success">Subscription Created Successfully</Form.Text>
-              : <CreateSubscription apiKey={props.apiKey} onSuccess={() => setSubscribeSuccess(true)} />
-            }
-          </>
-        </UtilityWrapper>
-      </div>
-
     </Container>
   </DashboardLayout>
 }
