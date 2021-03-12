@@ -254,7 +254,7 @@ function EventCalendar(props: EventCalendarProps) {
           }
         }}
         headerToolbar={{
-          left: 'prev,next today',
+          left: 'title prev,next today',
           center: 'optimize',
           right: 'timeGridDay,timeGridWeek',
         }}

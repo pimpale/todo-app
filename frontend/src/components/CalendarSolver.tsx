@@ -167,7 +167,7 @@ function ICalendarSolver(props: ICalendarSolverProps) {
         }
       }}
       headerToolbar={{
-        left: 'prev,next today',
+        left: 'title prev,next today',
         center: iterating ? 'stop' : 'start commit cancel',
         right: 'timeGridDay,timeGridWeek',
       }}
