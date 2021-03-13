@@ -17,6 +17,7 @@ function Instructions() {
         Simply fill out the bozes that require your email and password that was created and you are ready to use 4cast.
       </p>
       <br />
+      <br />
       <h2>The Sidebar</h2>
       <p>
         Inside the app, we can see a gray bar with 6 icons: Expand, Dashboard, Calendar, Search, Settings, and Log Out.
@@ -27,10 +28,29 @@ function Instructions() {
           - Settings is where we can change our password.
       </p>
       <br />
+      <br />
       <h2>The Dashboard</h2>
       <p>
-        
+        Looking at the Dashboard page we can see attributes of our Goals/Tasks, as well as a plus button to add them.
       </p>
+      <br />
+        <h4>Adding a Task</h4>
+        <p>
+          Click the plus button opens up a form for us to fill out attributes about our Goal/Task.
+          At the top, we can see fields for the Date, Start and End Times, as well as a Utility Distribution.
+            - The Utility Distribution can handle three diffent types: No Time Preference, Deadline, Interval.
+              - No Time Preference: something like watching a movie can be done no matter what day it is or time
+              - Deadline: something like finishing a homework assignment that has a no late policy restriction
+              - Interval: something like an interview, or a metting, or even a class.
+            - After choosing a distribution, you can move the little vertices of the graph to adhere to how important that particular goal is around certain times of the day.
+              - for example, an interval distribution for a hw that has a late policy. Now the graph doesn't necesarily have to be a hard deadline but have a finite negative slope.
+          At the bottom, we can see fields for inputting the Goal Name, Duration, and an optional Goal Desciption.
+          Submitting the form, make the Goal/Task, but notice that it will say "Not Scheduled".
+          To actually schedule the Goal/Task that was just made, we will need to head over to the Calendar Page and schedule it.
+        </p>
+      <br />
+      <br />
+      <h2>The Calendar</h2>
     </section>
   </SimpleLayout>
 }
