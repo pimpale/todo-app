@@ -51,6 +51,37 @@ function Instructions() {
       <br />
       <br />
       <h2>The Calendar</h2>
+      <p>
+        Lookin at the Calendar page, we can see a few things. At the top, we see buttons to scroll through the calendar, an optimize button, and a perspective changer in the form
+        of "day" or "week"
+      </p>
+      <br />
+        <h4>Adding a Goal/Task</h4>
+        <p>
+          If we have made Goals and Tasks through the Dashboard, we noticed that they were "Not Scheduled". 
+          To schedule them, we will need to click-and-drag them to their appropriate time slots.
+          Looking at the top left corner, we should see the Goals and Tasks we created through the Dashboard. 
+          If we click on the places Goals, we can see that Time attribute will reflect what time you set it at.
+          
+          Adding a Goal/Task directly through the Calendar automatically schedules it for where you set it.
+          Simply click and drag an empty spot on the calendar and fill out a form similar to how we added a Goal/Task through the Dashboard.
+        </p>
+        <br />
+        <h4>Editing a Goal/Task</h4>
+        <p>
+          To edit a task through the Calendar, simply click on the task and "Manage Event" window will pop up.
+          On the right, there is a column called "Actions" where we can choose to edit (clicking on the pencil) or delete (clicking on the x) the task.
+          Clicking the edit button will bring out a form similar to making that task while clicking the delete button will bring a pop-up asking if you want to delete the event.
+        </p>
+        <h4>Optimizing Your Schedule</h4>
+        <p>
+          Now that we have task(s) on our calendar, we can optimize them!
+          Clicking on the "optimize" button at the top brings out a new calendar view that shows us the taskts that can be optimized.
+            - In this view we can see three new buttons: Start, Commit Changes, and Cancel Changes
+          By choosing start, 4cast will automatically move your tasks around based on their utility distributions to find the best spot.
+            (Note: this process will continue forever, so the user has to manually stop the optimization when they are satisfied with the results)
+          Cicking on "Commit Changes" will reflect what was optimized to your regular calendar.
+        </p>
     </section>
   </SimpleLayout>
 }
