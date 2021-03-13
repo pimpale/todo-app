@@ -82,6 +82,21 @@ function Instructions() {
             (Note: this process will continue forever, so the user has to manually stop the optimization when they are satisfied with the results)
           Cicking on "Commit Changes" will reflect what was optimized to your regular calendar.
         </p>
+    <br />
+    <br />
+    <h2>The Search</h2>
+    <p>
+      By clicking the magnifying glass on the sidebar, we are brought to the Search Page.
+      At the top, you can see a search bar and can query for an exact task or tasks that have the same name. 
+      After typing in what you want to look for, simply click "search" and 4cast will display the tasks with the keywords you searched for. 
+      Like with the Calendar and Dashboard, you can edit and delete the tasks that pop up on this page.
+    </p>
+    <br />
+    <br />
+    <h2>Settings</h2>
+    <p>
+      The settings page allows you to change your password and is similar to other "change password" forms
+    </p>
     </section>
   </SimpleLayout>
 }
