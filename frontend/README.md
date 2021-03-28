@@ -31,7 +31,7 @@ It is designed as a Typescript React App.
     # replace ~/workspace with your own path if you chose to install somewhere different
     cd ~/workspace/todo-app/frontend
     ```
-2. Start the development server:
+3. Start the development server:
     ```
     yarn start
     ```
@@ -39,8 +39,8 @@ It is designed as a Typescript React App.
     you make changes.
     However, it may take a while to start up, so be patient.
 
-3. Visit http://localhost:3000 to see your app in action.
-4. To close the server, you can press Ctrl-C
+4. Visit http://localhost:3000 to see your app in action.
+5. To close the server, you can press Ctrl-C
 
 ## Create React App Boilerplate
 
