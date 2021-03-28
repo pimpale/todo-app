@@ -50,7 +50,7 @@ function Home() {
             <br />
             Edmund Yim: I am a 3rd year Computer Science and Engineering major interested in working as a software engineer after UCLA.
             <br />
-            Brandon Le: TODO
+            Brandon Le: I am a 3rd year Computer Science major interested in working as a software engineer after graduating.
             <br />
             Edgar Hukassian: I am a 3rd Year Computer Science Major interested in working as a software engineer after school.
             <br />
