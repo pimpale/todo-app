@@ -257,4 +257,11 @@ Congrats! You're done with setting up!
     source env-vars.sh
     ./gradlew bootrun
     ```
+    When you run the server using `./gradlew`, the command will hang at 80% or 75% executing. 
+    This is ok and not a bug, it happens because Gradle treats the server as a task to be 
+    completed, and since the server needs to keep running, it doesn't complete.
+    You'll know that the server has started when you see a large ascii `SPRING` logo.
+
+    In order to use the website, you will need to start the frontend server as well.
+    See [the frontend documentation](../frontend/README.md) for instructions
 3. To kill the server, press Ctrl-C.

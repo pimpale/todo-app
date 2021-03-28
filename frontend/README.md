@@ -5,16 +5,42 @@ It will only work if you have pointed it at a functioning todo-app backend.
 This can be done by altering the `proxy` field of package.json.
 It is designed as a Typescript React App.
 
-## Setup Instructions
+# Setup Instructions
 
-Once you have cloned the repository, run `yarn`. 
-This will automatically install all dependencies.
+1. First, we have to set up our environment. Check out [the backend guide](../backend/README.md), 
+     steps 1-6 for instructions.
+2. Now, we'll install dependencies for the frontend project.
 
-## Run Instructions
+    Instructions:
+    1. Ensure you're in the right directory:
+        ```
+        # replace ~/workspace with your own path if you chose to install somewhere different
+        cd ~/workspace/todo-app/frontend
+        ```
+    2. Execute the following instruction to install all dependencies:
+        ```
+        yarn
+        ```
+3. Congrats! You've set up your frontend development environment.
 
-Run `yarn start` to start the frontend. 
-It will compile and automatically start a local server where you can view your code.
+# Run Instructions
 
+1. Ensure that the backend server is started. 
+2. Ensure that you are in the right directory:
+    ```
+    # replace ~/workspace with your own path if you chose to install somewhere different
+    cd ~/workspace/todo-app/frontend
+    ```
+2. Start the development server:
+    ```
+    yarn start
+    ```
+    This starts a compilation server that should automatically recompile the app whenever 
+    you make changes.
+    However, it may take a while to start up, so be patient.
+
+3. Visit http://localhost:3000 to see your app in action.
+4. To close the server, you can press Ctrl-C
 
 ## Create React App Boilerplate
 
