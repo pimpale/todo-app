@@ -1,5 +1,9 @@
 # todo-app
 
+This branch represents the project when it had a monolith architecture.
+We moved to the microservices architecture in order to better share work between subteams.
+The new architecture can be found on the main branch.
+
 # Setup
 
 In order to run the backend, refer to [the backend guide](./backend/README.md).
