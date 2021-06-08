@@ -1,8 +1,0 @@
-[package]
-name = "life-event-loop"
-version = "0.1.0"
-authors = ["gpi <gpimpale29@gmail.com>"]
-edition = "2018"
-
-[dependencies]
-iced = "0.2.0"
