@@ -9,6 +9,8 @@ fn next_id(con: &Connection) -> Result<i64, rusqlite::Error> {
   con.query_row(sql, [], |row| row.get(0)).map(|v: i64| v + 1)
 }
 
+// TODO need to fix
+
 impl TryFrom<&rusqlite::Row<'_>> for GoalData {
   type Error = rusqlite::Error;
 
@@ -29,10 +31,13 @@ impl TryFrom<&rusqlite::Row<'_>> for GoalData {
   }
 }
 
+// TODO we need to figure out a way to make scheduled and unscheduled goals work better
 pub fn add(
   con: &mut Savepoint,
   creator_user_id: i64,
-  goal_id: String,
+  scheduled: bool,
+  start_time: i64,
+  duration: i64,
   goal_data: todo_app_service_api::request::GoalDataNewProps,
 ) -> Result<GoalData, rusqlite::Error> {
   let sp = con.savepoint()?;
@@ -52,10 +57,10 @@ pub fn add(
       goal_data.description,
       goal_data.duration_estimate,
       goal_data.time_utility_function_id,
-      goal_data.scheduled,
-      goal_data.start_time,
-      goal_data.duration,
-      goal_data.status as u8
+      scheduled,
+      start_time,
+      duration,
+      goal_data.status.clone() as u8
     ],
   )?;
 
@@ -67,21 +72,29 @@ pub fn add(
     goal_data_id,
     creation_time,
     creator_user_id,
-    goal_id,
-    goal_data_kind,
+    goal_id: goal_data.goal_id,
+    name: goal_data.name,
+    description: goal_data.description,
+    duration_estimate: goal_data.duration_estimate,
+    time_utility_function_id: goal_data.time_utility_function_id,
+    scheduled,
+    start_time,
     duration,
+    status: goal_data.status,
   })
 }
 
-pub fn get_by_goal_id(
+pub fn get_by_goal_data_id(
   con: &Connection,
   goal_id: &str,
 ) -> Result<Option<GoalData>, rusqlite::Error> {
-  let sql = "SELECT * FROM goal_data WHERE goal_id=? ORDER BY goal_data_id DESC LIMIT 1";
+  let sql = "SELECT * FROM goal_data WHERE goal_data_id=? ORDER BY goal_data_id DESC LIMIT 1";
   con
     .query_row(sql, params![goal_id], |row| row.try_into())
     .optional()
 }
+
+// TODO need to fix
 
 pub fn query(
   con: &Connection,
