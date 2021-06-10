@@ -1,0 +1,16 @@
+[package]
+name = "todo-app-service"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rusqlite = { version = "^0.25", features = ["bundled"] }
+warp ="^0.3"
+clap = "3.0.0-beta.2"
+tokio = { version = "1", features=["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+mail-service-api = {version = "*", git = "https://github.com/innexgo/mail-service-api", features=["client"]}
+auth-service-api = {version = "*", git = "https://github.com/innexgo/auth-service-api", features=["client"]}
