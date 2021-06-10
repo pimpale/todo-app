@@ -3,11 +3,11 @@ use super::utils;
 use super::Config;
 use super::Db;
 use super::SERVICE_NAME;
-use todo_app_service_api::response::TodoAppError;
-use mail_service_api::client::MailService;
+use auth_service_api::client::AuthService;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::future::Future;
+use todo_app_service_api::response::TodoAppError;
 use warp::http::StatusCode;
 use warp::Filter;
 
@@ -15,95 +15,102 @@ use warp::Filter;
 pub fn api(
   config: Config,
   db: Db,
-  mail_service: MailService,
+  auth_service: AuthService,
 ) -> impl Filter<Extract = impl warp::Reply, Error = Infallible> + Clone {
   // public API
   api_info()
     .or(adapter(
       config.clone(),
       db.clone(),
-      mail_service.clone(),
+      auth_service.clone(),
       warp::path!("public" / "goal" / "new"),
       todo_app_handlers::goal_new,
     ))
     .or(adapter(
       config.clone(),
       db.clone(),
-      mail_service.clone(),
+      auth_service.clone(),
       warp::path!("public" / "goal" / "new_scheduled"),
       todo_app_handlers::goal_new_scheduled,
     ))
     .or(adapter(
       config.clone(),
       db.clone(),
-      mail_service.clone(),
+      auth_service.clone(),
       warp::path!("public" / "goal_data" / "new"),
       todo_app_handlers::goal_data_new,
     ))
     .or(adapter(
       config.clone(),
       db.clone(),
-      mail_service.clone(),
+      auth_service.clone(),
       warp::path!("public" / "goal_data" / "new_scheduled"),
       todo_app_handlers::goal_data_new_scheduled,
     ))
     .or(adapter(
       config.clone(),
       db.clone(),
-      mail_service.clone(),
+      auth_service.clone(),
       warp::path!("public" / "time_utility_function" / "new"),
       todo_app_handlers::time_utility_function_new,
     ))
     .or(adapter(
       config.clone(),
       db.clone(),
-      mail_service.clone(),
+      auth_service.clone(),
       warp::path!("public" / "past_event" / "new"),
       todo_app_handlers::past_event_new,
     ))
     .or(adapter(
       config.clone(),
       db.clone(),
-      mail_service.clone(),
+      auth_service.clone(),
       warp::path!("public" / "past_event_data" / "new"),
       todo_app_handlers::past_event_data_new,
     ))
     .or(adapter(
       config.clone(),
       db.clone(),
-      mail_service.clone(),
+      auth_service.clone(),
       warp::path!("public" / "goal" / "view"),
       todo_app_handlers::goal_view,
     ))
     .or(adapter(
       config.clone(),
       db.clone(),
-      mail_service.clone(),
+      auth_service.clone(),
       warp::path!("public" / "goal_data" / "view"),
       todo_app_handlers::goal_data_view,
     ))
     .or(adapter(
       config.clone(),
       db.clone(),
-      mail_service.clone(),
+      auth_service.clone(),
       warp::path!("public" / "past_event" / "view"),
       todo_app_handlers::past_event_view,
     ))
     .or(adapter(
       config.clone(),
       db.clone(),
-      mail_service.clone(),
+      auth_service.clone(),
       warp::path!("public" / "past_event_data" / "view"),
       todo_app_handlers::past_event_data_view,
     ))
     .or(adapter(
       config.clone(),
       db.clone(),
-      mail_service.clone(),
-      warp::path!("public" / "api_key" / "view"),
-      todo_app_handlers::api_key_view,
+      auth_service.clone(),
+      warp::path!("public" / "time_utility_function" / "view"),
+      todo_app_handlers::time_utility_function_view,
     ))
-      .recover(handle_rejection)
+    .or(adapter(
+      config.clone(),
+      db.clone(),
+      auth_service.clone(),
+      warp::path!("public" / "time_utility_function_point" / "view"),
+      todo_app_handlers::time_utility_function_point_view,
+    ))
+    .recover(handle_rejection)
 }
 
 fn api_info() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
@@ -118,9 +125,9 @@ fn api_info() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection
 fn adapter<PropsType, ResponseType, F>(
   config: Config,
   db: Db,
-  mail_service: MailService,
+  auth_service: AuthService,
   filter: impl Filter<Extract = (), Error = warp::Rejection> + Clone,
-  handler: fn(Config, Db, MailService, PropsType) -> F,
+  handler: fn(Config, Db, AuthService, PropsType) -> F,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone
 where
   F: Future<Output = Result<ResponseType, TodoAppError>> + Send,
@@ -135,10 +142,10 @@ where
   filter
     .and(with(config))
     .and(with(db))
-    .and(with(mail_service))
+    .and(with(auth_service))
     .and(warp::body::json())
-    .and_then(async move |config, db, mail_service, props| {
-      handler(config, db, mail_service, props)
+    .and_then(async move |config, db, auth_service, props| {
+      handler(config, db, auth_service, props)
         .await
         .map_err(todo_app_error)
     })

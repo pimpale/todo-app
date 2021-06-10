@@ -11,9 +11,9 @@ mod utils;
 use auth_service_api::client::AuthService;
 
 // db web stuff
+mod goal_service;
 mod goal_data_service;
 mod goal_dependency_service;
-mod goal_service;
 mod past_event_data_service;
 mod past_event_service;
 mod time_utility_function_point_service;
@@ -54,10 +54,14 @@ async fn main() {
 
   let db: Db = Arc::new(Mutex::new(Connection::open(database_url).unwrap()));
 
-  let api = todo_app_api::api(db);
-
   // open connection to auth service
-  let api = todo_app_api::api(Config { site_external_url }, db, auth_service);
+  let auth_service = AuthService::new(&auth_service_url).await;
+
+  let api = todo_app_api::api(
+      Config { site_external_url },
+      db,
+      auth_service
+  );
 
   warp::serve(api).run(([127, 0, 0, 1], port)).await;
 }

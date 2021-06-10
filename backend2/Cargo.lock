@@ -1261,8 +1261,19 @@ dependencies = [
  "rusqlite",
  "serde",
  "serde_json",
+ "todo-app-service-api",
  "tokio",
  "warp",
+]
+
+[[package]]
+name = "todo-app-service-api"
+version = "0.0.1"
+source = "git+https://github.com/pimpale/todo-app-service-api#1ca1554d78723f966edc67a94caa2757a0437a23"
+dependencies = [
+ "auth-service-api",
+ "serde",
+ "strum",
 ]
 
 [[package]]
