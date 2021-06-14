@@ -105,7 +105,8 @@ pub fn query(
     "SELECT gd.* FROM goal_data gd",
     " JOIN goal g ON gd.goal_id = g.goal_id",
     if props.only_recent {
-        " INNER JOIN (SELECT max(goal_data_id) id FROM goal_data GROUP BY goal_id) maxids ON maxids.id = a.goal_data_id"
+        " INNER JOIN (SELECT max(goal_data_id) id FROM goal_data GROUP BY goal_id) maxids
+        ON maxids.id = gd.goal_data_id"
     } else {
         ""
     },

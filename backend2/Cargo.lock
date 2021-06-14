@@ -1269,7 +1269,7 @@ dependencies = [
 [[package]]
 name = "todo-app-service-api"
 version = "0.0.1"
-source = "git+https://github.com/pimpale/todo-app-service-api#c1ecd25f97c52bb82d0d73f4a5e091de153026db"
+source = "git+https://github.com/pimpale/todo-app-service-api#84b6d38834352d9511e0dc84934e10036719f562"
 dependencies = [
  "auth-service-api",
  "serde",

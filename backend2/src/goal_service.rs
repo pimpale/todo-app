@@ -77,6 +77,8 @@ pub fn query(
     .query(named_params! {
         "goal_id": props.goal_id,
         "creation_time": props.creation_time,
+        "min_creation_time": props.min_creation_time,
+        "max_creation_time": props.max_creation_time,
         "creator_user_id": props.creator_user_id,
         "goal_intent_id": props.goal_intent_id,
         "offset": props.offset,

@@ -86,24 +86,25 @@ pub fn query(
   // TODO prevent getting meaningless duration
 
   let sql = [
-    "SELECT gd.* FROM goal_intent_data gd",
-    " JOIN goal g ON gd.goal_intent_id = g.goal_intent_id",
+    "SELECT gdi.* FROM goal_intent_data gdi",
     if props.only_recent {
-        " INNER JOIN (SELECT max(goal_intent_data_id) id FROM goal_intent_data GROUP BY goal_intent_id) maxids ON maxids.id = a.goal_intent_data_id"
+      " INNER JOIN
+          (SELECT max(goal_intent_data_id) id FROM goal_intent_data GROUP BY goal_intent_id) maxids
+          ON maxids.id = gdi.goal_intent_data_id"
     } else {
-        ""
+      ""
     },
     " WHERE 1 = 1",
-    " AND (:goal_intent_data_id   == NULL OR gd.goal_intent_data_id = :goal_intent_data_id)",
-    " AND (:creation_time         == NULL OR gd.creation_time = :creation_time)",
-    " AND (:creation_time         == NULL OR gd.creation_time >= :min_creation_time)",
-    " AND (:creation_time         == NULL OR gd.creation_time <= :max_creation_time)",
-    " AND (:creator_user_id       == NULL OR gd.creator_user_id = :creator_user_id)",
-    " AND (:goal_intent_id        == NULL OR gd.goal_intent_id = :goal_intent_id)",
-    " AND (:name                  == NULL OR gd.name = :name)",
-    " AND (:partial_name          == NULL OR gd.partial_name LIKE CONCAT('%',:partial_name,'%'))",
-    " AND (:active                == NULL OR gd.active = :active)",
-    " ORDER BY gd.goal_intent_data_id",
+    " AND (:goal_intent_data_id   == NULL OR gdi.goal_intent_data_id = :goal_intent_data_id)",
+    " AND (:creation_time         == NULL OR gdi.creation_time = :creation_time)",
+    " AND (:creation_time         == NULL OR gdi.creation_time >= :min_creation_time)",
+    " AND (:creation_time         == NULL OR gdi.creation_time <= :max_creation_time)",
+    " AND (:creator_user_id       == NULL OR gdi.creator_user_id = :creator_user_id)",
+    " AND (:goal_intent_id        == NULL OR gdi.goal_intent_id = :goal_intent_id)",
+    " AND (:name                  == NULL OR gdi.name = :name)",
+    " AND (:partial_name          == NULL OR gdi.partial_name LIKE CONCAT('%',:partial_name,'%'))",
+    " AND (:active                == NULL OR gdi.active = :active)",
+    " ORDER BY gdi.goal_intent_data_id",
     " LIMIT :offset, :count",
   ]
   .join("");
