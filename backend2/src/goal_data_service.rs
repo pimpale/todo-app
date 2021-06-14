@@ -3,14 +3,6 @@ use super::utils::current_time_millis;
 use rusqlite::{named_params, params, Connection, OptionalExtension, Savepoint};
 use std::convert::{TryFrom, TryInto};
 
-// returns the max goal_data id and adds 1 to it
-fn next_id(con: &Connection) -> Result<i64, rusqlite::Error> {
-  let sql = "SELECT IFNULL(MAX(goal_data_id), -1) FROM goal_data";
-  con.query_row(sql, [], |row| row.get(0)).map(|v: i64| v + 1)
-}
-
-// TODO need to fix
-
 impl TryFrom<&rusqlite::Row<'_>> for GoalData {
   type Error = rusqlite::Error;
 
@@ -21,12 +13,15 @@ impl TryFrom<&rusqlite::Row<'_>> for GoalData {
       creation_time: row.get(1)?,
       creator_user_id: row.get(2)?,
       goal_id: row.get(3)?,
-      // means that there's a mismatch between the values of the enum and the value stored in the column
-      goal_data_kind: row
-        .get::<_, u8>(4)?
+      name: row.get(4)?,
+      duration_estimate: row.get(5)?,
+      time_utility_function_id: row.get(6)?,
+      parent_goal_id: row.get(7)?,
+      status: row
+        .get::<_, u8>(8)?
         .try_into()
+        // means that there's a mismatch between the values of the enum and the value stored in the column
         .map_err(|x| rusqlite::Error::IntegralValueOutOfRange(4, x as i64))?,
-      duration: row.get(5)?,
     })
   }
 }
@@ -41,28 +36,35 @@ pub fn add(
   goal_data: todo_app_service_api::request::GoalDataNewProps,
 ) -> Result<GoalData, rusqlite::Error> {
   let sp = con.savepoint()?;
-  let goal_data_id = next_id(&sp)?;
   let creation_time = current_time_millis();
 
-  let sql = "INSERT INTO goal_data values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+  let sql = "INSERT INTO
+    goal_data(
+        creation_time,
+        creator_user_id,
+        goal_id,
+        name,
+        duration_estimate,
+        time_utility_function_id,
+        parent_goal_id,
+        status
+    ) values (?, ?, ?, ?, ?, ?, ?, ?)";
 
   sp.execute(
     sql,
     params![
-      goal_data_id,
       creation_time,
       creator_user_id,
       goal_data.goal_id,
       goal_data.name,
-      goal_data.description,
       goal_data.duration_estimate,
       goal_data.time_utility_function_id,
-      scheduled,
-      start_time,
-      duration,
+      goal_data.parent_goal_id,
       goal_data.status.clone() as u8
     ],
   )?;
+
+  let goal_data_id = sp.last_insert_rowid();
 
   // commit savepoint
   sp.commit()?;
@@ -74,12 +76,9 @@ pub fn add(
     creator_user_id,
     goal_id: goal_data.goal_id,
     name: goal_data.name,
-    description: goal_data.description,
     duration_estimate: goal_data.duration_estimate,
     time_utility_function_id: goal_data.time_utility_function_id,
-    scheduled,
-    start_time,
-    duration,
+    parent_goal_id: goal_data.parent_goal_id,
     status: goal_data.status,
   })
 }
@@ -103,23 +102,30 @@ pub fn query(
   // TODO prevent getting meaningless duration
 
   let sql = [
-    "SELECT a.* FROM goal_data a",
+    "SELECT gd.* FROM goal_data gd",
+    " JOIN goal g ON gd.goal_id = g.goal_id",
     if props.only_recent {
         " INNER JOIN (SELECT max(goal_data_id) id FROM goal_data GROUP BY goal_id) maxids ON maxids.id = a.goal_data_id"
     } else {
         ""
     },
     " WHERE 1 = 1",
-    " AND (:goal_data_id      == NULL OR a.goal_data_id = :goal_data_id)",
-    " AND (:creation_time   == NULL OR a.creation_time = :creation_time)",
-    " AND (:creation_time   == NULL OR a.creation_time >= :min_creation_time)",
-    " AND (:creation_time   == NULL OR a.creation_time <= :max_creation_time)",
-    " AND (:creator_user_id == NULL OR a.creator_user_id = :creator_user_id)",
-    " AND (:duration        == NULL OR a.duration = :duration)",
-    " AND (:duration        == NULL OR a.duration >= :min_duration)",
-    " AND (:duration        == NULL OR a.duration <= :max_duration)",
-    " AND (:goal_data_kind    == NULL OR a.goal_data_kind = :goal_data_kind)",
-    " ORDER BY a.goal_data_id",
+    " AND (:goal_data_id             == NULL OR gd.goal_data_id = :goal_data_id)",
+    " AND (:creation_time            == NULL OR gd.creation_time = :creation_time)",
+    " AND (:creation_time            == NULL OR gd.creation_time >= :min_creation_time)",
+    " AND (:creation_time            == NULL OR gd.creation_time <= :max_creation_time)",
+    " AND (:creator_user_id          == NULL OR gd.creator_user_id = :creator_user_id)",
+    " AND (:goal_id                  == NULL OR gd.goal_id = :goal_id)",
+    " AND (:name                     == NULL OR gd.name = :name)",
+    " AND (:partial_name             == NULL OR gd.partial_name LIKE CONCAT('%',:partial_name,'%'))",
+    " AND (:duration_estimate        == NULL OR gd.duration_estimate = :duration_estimate)",
+    " AND (:duration_estimate        == NULL OR gd.duration_estimate >= :min_duration_estimate)",
+    " AND (:duration_estimate        == NULL OR gd.duration_estimate <= :max_duration_estimate)",
+    " AND (:time_utility_function_id == NULL OR gd.time_utility_function_id = :time_utility_function_id)",
+    " AND (:parent_goal_id           == NULL OR gd.parent_goal_id = :parent_goal_id)",
+    " AND (:status                   == NULL OR gd.status = :status)",
+    " AND (:goal_intent_id           == NULL OR g.goal_intent_id = :goal_intent_id)",
+    " ORDER BY gd.goal_data_id",
     " LIMIT :offset, :count",
   ]
   .join("");
@@ -129,14 +135,20 @@ pub fn query(
   let results = stmnt
     .query(named_params! {
         "goal_data_id": props.goal_data_id,
-        "creator_user_id": props.creator_user_id,
         "creation_time": props.creation_time,
         "min_creation_time": props.min_creation_time,
         "max_creation_time": props.max_creation_time,
-        "duration": props.duration,
-        "min_duration": props.min_duration,
-        "max_duration": props.max_duration,
-        "goal_data_kind": props.goal_data_kind.map(|x| x as u8),
+        "creator_user_id": props.creator_user_id,
+        "goal_id": props.goal_id,
+        "name": props.name,
+        "partial_name": props.partial_name,
+        "duration_estimate": props.duration_estimate,
+        "min_duration_estimate": props.min_duration_estimate,
+        "max_duration_estimate": props.max_duration_estimate,
+        "time_utility_function_id": props.time_utility_function_id,
+        "parent_goal_id": props.parent_goal_id,
+        "status": props.status.map(|x| x as u8),
+        "goal_intent_id": props.goal_intent_id,
         "offset": props.offset,
         "count": props.offset,
     })?

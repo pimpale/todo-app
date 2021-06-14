@@ -540,9 +540,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.96"
+version = "0.2.97"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5600b4e6efc5421841a2138a6b082e07fe12f9aaa12783d50e5d13325b26b4fc"
+checksum = "12b8adadd720df158f4d70dfe7ccc6adb0472d7c55ca83445f6a5ab3e36f8fb6"
 
 [[package]]
 name = "libsqlite3-sys"
@@ -691,9 +691,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.7.2"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af8b08b04175473088b46763e51ee54da5f9a164bc162f615b91bc179dbf15a3"
+checksum = "692fcb63b64b1758029e0a96ee63e049ce8c5948587f2f7208df04625e5f6b56"
 
 [[package]]
 name = "opaque-debug"
@@ -1269,7 +1269,7 @@ dependencies = [
 [[package]]
 name = "todo-app-service-api"
 version = "0.0.1"
-source = "git+https://github.com/pimpale/todo-app-service-api#1ca1554d78723f966edc67a94caa2757a0437a23"
+source = "git+https://github.com/pimpale/todo-app-service-api#c1ecd25f97c52bb82d0d73f4a5e091de153026db"
 dependencies = [
  "auth-service-api",
  "serde",

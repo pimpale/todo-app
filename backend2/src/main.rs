@@ -11,10 +11,10 @@ mod utils;
 use auth_service_api::client::AuthService;
 
 // db web stuff
+mod goal_intent_service;
+mod goal_intent_data_service;
 mod goal_service;
 mod goal_data_service;
-mod goal_dependency_service;
-mod past_event_data_service;
 mod past_event_service;
 mod time_utility_function_point_service;
 mod time_utility_function_service;
