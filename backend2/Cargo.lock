@@ -614,9 +614,9 @@ dependencies = [
 
 [[package]]
 name = "mio"
-version = "0.7.11"
+version = "0.7.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf80d3e903b34e0bd7282b218398aec54e082c840d9baf8339e0080a0c542956"
+checksum = "8c2bdb6314ec10835cd3293dd268473a835c02b7b352e788be788b3c6ca6bb16"
 dependencies = [
  "libc",
  "log",
@@ -1269,7 +1269,7 @@ dependencies = [
 [[package]]
 name = "todo-app-service-api"
 version = "0.0.1"
-source = "git+https://github.com/pimpale/todo-app-service-api#84b6d38834352d9511e0dc84934e10036719f562"
+source = "git+https://github.com/pimpale/todo-app-service-api#b7144ee4efcd408a66cbd3c2dc25bdfacf9f5ea0"
 dependencies = [
  "auth-service-api",
  "serde",

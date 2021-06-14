@@ -2,6 +2,7 @@ use super::todo_app_db_types::*;
 use super::utils::current_time_millis;
 use rusqlite::{named_params, params, Connection, OptionalExtension, Savepoint};
 use std::convert::{TryFrom, TryInto};
+use todo_app_service_api::request;
 
 impl TryFrom<&rusqlite::Row<'_>> for GoalData {
   type Error = rusqlite::Error;
@@ -30,10 +31,12 @@ impl TryFrom<&rusqlite::Row<'_>> for GoalData {
 pub fn add(
   con: &mut Savepoint,
   creator_user_id: i64,
-  scheduled: bool,
-  start_time: i64,
-  duration: i64,
-  goal_data: todo_app_service_api::request::GoalDataNewProps,
+  goal_id: i64,
+  name: String,
+  duration_estimate: i64,
+  time_utility_function_id: i64,
+  parent_goal_id: Option<i64>,
+  status: request::GoalDataStatusKind,
 ) -> Result<GoalData, rusqlite::Error> {
   let sp = con.savepoint()?;
   let creation_time = current_time_millis();
@@ -55,12 +58,12 @@ pub fn add(
     params![
       creation_time,
       creator_user_id,
-      goal_data.goal_id,
-      goal_data.name,
-      goal_data.duration_estimate,
-      goal_data.time_utility_function_id,
-      goal_data.parent_goal_id,
-      goal_data.status.clone() as u8
+      goal_id,
+      name,
+      duration_estimate,
+      time_utility_function_id,
+      parent_goal_id,
+      status.clone() as u8
     ],
   )?;
 
@@ -74,12 +77,12 @@ pub fn add(
     goal_data_id,
     creation_time,
     creator_user_id,
-    goal_id: goal_data.goal_id,
-    name: goal_data.name,
-    duration_estimate: goal_data.duration_estimate,
-    time_utility_function_id: goal_data.time_utility_function_id,
-    parent_goal_id: goal_data.parent_goal_id,
-    status: goal_data.status,
+    goal_id,
+    name,
+    duration_estimate,
+    time_utility_function_id,
+    parent_goal_id,
+    status,
   })
 }
 

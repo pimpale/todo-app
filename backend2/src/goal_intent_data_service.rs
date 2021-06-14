@@ -23,10 +23,9 @@ impl TryFrom<&rusqlite::Row<'_>> for GoalIntentData {
 pub fn add(
   con: &mut Savepoint,
   creator_user_id: i64,
-  scheduled: bool,
-  start_time: i64,
-  duration: i64,
-  goal_intent_data: todo_app_service_api::request::GoalIntentDataNewProps,
+  goal_intent_id:i64,
+  name: String,
+  active: bool, 
 ) -> Result<GoalIntentData, rusqlite::Error> {
   let sp = con.savepoint()?;
   let creation_time = current_time_millis();
@@ -45,9 +44,9 @@ pub fn add(
     params![
       creation_time,
       creator_user_id,
-      goal_intent_data.goal_intent_id,
-      goal_intent_data.name,
-      goal_intent_data.active,
+      goal_intent_id,
+      &name,
+      active,
     ],
   )?;
 
@@ -61,9 +60,9 @@ pub fn add(
     goal_intent_data_id,
     creation_time,
     creator_user_id,
-    goal_intent_id: goal_intent_data.goal_intent_id,
-    name: goal_intent_data.name,
-    active: goal_intent_data.active,
+    goal_intent_id,
+    name,
+    active,
   })
 }
 

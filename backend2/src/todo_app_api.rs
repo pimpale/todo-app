@@ -23,15 +23,22 @@ pub fn api(
       config.clone(),
       db.clone(),
       auth_service.clone(),
-      warp::path!("public" / "goal" / "new"),
-      todo_app_handlers::goal_new,
+      warp::path!("public" / "goal_intent" / "new"),
+      todo_app_handlers::goal_intent_new,
     ))
     .or(adapter(
       config.clone(),
       db.clone(),
       auth_service.clone(),
-      warp::path!("public" / "goal" / "new_scheduled"),
-      todo_app_handlers::goal_new_scheduled,
+      warp::path!("public" / "goal_intent_data" / "new"),
+      todo_app_handlers::goal_intent_data_new,
+    ))
+    .or(adapter(
+      config.clone(),
+      db.clone(),
+      auth_service.clone(),
+      warp::path!("public" / "goal" / "new"),
+      todo_app_handlers::goal_new,
     ))
     .or(adapter(
       config.clone(),
@@ -44,13 +51,6 @@ pub fn api(
       config.clone(),
       db.clone(),
       auth_service.clone(),
-      warp::path!("public" / "goal_data" / "new_scheduled"),
-      todo_app_handlers::goal_data_new_scheduled,
-    ))
-    .or(adapter(
-      config.clone(),
-      db.clone(),
-      auth_service.clone(),
       warp::path!("public" / "time_utility_function" / "new"),
       todo_app_handlers::time_utility_function_new,
     ))
@@ -58,16 +58,22 @@ pub fn api(
       config.clone(),
       db.clone(),
       auth_service.clone(),
-      warp::path!("public" / "past_event" / "new"),
-      todo_app_handlers::past_event_new,
+      warp::path!("public" / "task_event" / "new"),
+      todo_app_handlers::task_event_new,
     ))
     .or(adapter(
       config.clone(),
       db.clone(),
       auth_service.clone(),
-      warp::path!("public" / "past_event_data" / "new"),
-      todo_app_handlers::past_event_data_new,
+      warp::path!("public" / "goal_intent" / "view"),
+      todo_app_handlers::goal_intent_view,
     ))
+    .or(adapter(
+      config.clone(),
+      db.clone(),
+      auth_service.clone(),
+      warp::path!("public" / "goal_intent_data" / "view"),
+      todo_app_handlers::goal_intent_data_view, ))
     .or(adapter(
       config.clone(),
       db.clone(),
@@ -86,15 +92,8 @@ pub fn api(
       config.clone(),
       db.clone(),
       auth_service.clone(),
-      warp::path!("public" / "past_event" / "view"),
-      todo_app_handlers::past_event_view,
-    ))
-    .or(adapter(
-      config.clone(),
-      db.clone(),
-      auth_service.clone(),
-      warp::path!("public" / "past_event_data" / "view"),
-      todo_app_handlers::past_event_data_view,
+      warp::path!("public" / "task_event" / "view"),
+      todo_app_handlers::task_event_view,
     ))
     .or(adapter(
       config.clone(),
@@ -103,14 +102,6 @@ pub fn api(
       warp::path!("public" / "time_utility_function" / "view"),
       todo_app_handlers::time_utility_function_view,
     ))
-    .or(adapter(
-      config.clone(),
-      db.clone(),
-      auth_service.clone(),
-      warp::path!("public" / "time_utility_function_point" / "view"),
-      todo_app_handlers::time_utility_function_point_view,
-    ))
-    .recover(handle_rejection)
 }
 
 fn api_info() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
