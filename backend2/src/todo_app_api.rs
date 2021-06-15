@@ -102,6 +102,7 @@ pub fn api(
       warp::path!("public" / "time_utility_function" / "view"),
       todo_app_handlers::time_utility_function_view,
     ))
+    .recover(handle_rejection)
 }
 
 fn api_info() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {

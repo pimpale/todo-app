@@ -21,17 +21,6 @@ use std::error::Error;
 
 use super::Config;
 
-static FIFTEEN_MINUTES: u64 = 15 * 60 * 1000;
-
-fn report_internal_err<E: std::error::Error>(e: E) -> response::TodoAppError {
-  utils::log(utils::Event {
-    msg: e.to_string(),
-    source: e.source().map(|e| e.to_string()),
-    severity: utils::SeverityKind::Error,
-  });
-  response::TodoAppError::Unknown
-}
-
 fn report_rusqlite_err(e: rusqlite::Error) -> response::TodoAppError {
   utils::log(utils::Event {
     msg: e.to_string(),
@@ -46,7 +35,7 @@ fn report_auth_err(e: AuthError) -> response::TodoAppError {
     AuthError::ApiKeyNonexistent => response::TodoAppError::Unauthorized,
     AuthError::ApiKeyUnauthorized => response::TodoAppError::Unauthorized,
     c => {
-      let ae = match e {
+      let ae = match c {
         AuthError::InternalServerError => response::TodoAppError::InternalServerError,
         AuthError::MethodNotAllowed => response::TodoAppError::InternalServerError,
         AuthError::BadRequest => response::TodoAppError::InternalServerError,
@@ -56,7 +45,7 @@ fn report_auth_err(e: AuthError) -> response::TodoAppError {
 
       utils::log(utils::Event {
         msg: ae.as_ref().to_owned(),
-        source: Some(format!("auth service: {}", e.as_ref())),
+        source: Some(format!("auth service: {}", c.as_ref())),
         severity: utils::SeverityKind::Error,
       });
 
@@ -154,20 +143,25 @@ fn fill_goal_data(
 }
 
 fn fill_time_utility_function(
-  _con: &rusqlite::Connection,
+  con: &rusqlite::Connection,
   time_utility_function: TimeUtilityFunction,
 ) -> Result<response::TimeUtilityFunction, response::TodoAppError> {
+  let points =
+    time_utility_function_point_service::query(con, time_utility_function.time_utility_function_id)
+      .map_err(report_rusqlite_err)?;
+
   Ok(response::TimeUtilityFunction {
     time_utility_function_id: time_utility_function.time_utility_function_id,
     creation_time: time_utility_function.creation_time,
     creator_user_id: time_utility_function.creator_user_id,
+    start_time: points.iter().map(|p| p.start_time).collect(),
+    utils: points.iter().map(|p| p.utils).collect(),
   })
 }
 
 fn fill_task_event(
   con: &rusqlite::Connection,
   task_event: TaskEvent,
-  key: Option<String>,
 ) -> Result<response::TaskEvent, response::TodoAppError> {
   Ok(response::TaskEvent {
     task_event_id: task_event.task_event_id,
@@ -240,7 +234,7 @@ pub async fn goal_intent_data_new(
 
   let mut sp = con.savepoint().map_err(report_rusqlite_err)?;
 
-  let goal_intent = goal_intent_service::get_by_goal_intent_id(&mut sp, props.goal_intent_id)
+  let goal_intent = goal_intent_service::get_by_goal_intent_id(&sp, props.goal_intent_id)
     .map_err(report_rusqlite_err)?
     .ok_or(response::TodoAppError::GoalIntentNonexistent)?;
 
@@ -280,7 +274,7 @@ pub async fn goal_new(
 
   // ensure time utility function exists and belongs to you
   let time_utility_function = time_utility_function_service::get_by_time_utility_function_id(
-    &mut sp,
+    &sp,
     props.time_utility_function_id,
   )
   .map_err(report_rusqlite_err)?
@@ -292,7 +286,7 @@ pub async fn goal_new(
 
   // validate that parent exists and belongs to you
   if let Some(parent_goal_id) = props.parent_goal_id {
-    let goal = goal_service::get_by_goal_id(&mut sp, parent_goal_id)
+    let goal = goal_service::get_by_goal_id(&sp, parent_goal_id)
       .map_err(report_rusqlite_err)?
       .ok_or(response::TodoAppError::GoalNonexistent)?;
     // validate intent is owned by correct user
@@ -303,7 +297,7 @@ pub async fn goal_new(
 
   // validate that intent exists and belongs to you
   if let Some(goal_intent_id) = props.goal_intent_id {
-    let goal_intent = goal_intent_service::get_by_goal_intent_id(&mut sp, goal_intent_id)
+    let goal_intent = goal_intent_service::get_by_goal_intent_id(&sp, goal_intent_id)
       .map_err(report_rusqlite_err)?
       .ok_or(response::TodoAppError::GoalIntentNonexistent)?;
     // validate intent is owned by correct user
@@ -339,8 +333,8 @@ pub async fn goal_data_new(
   _config: Config,
   db: Db,
   auth_service: AuthService,
-  props: request::GoalIntentDataNewProps,
-) -> Result<response::GoalIntentData, response::TodoAppError> {
+  props: request::GoalDataNewProps,
+) -> Result<response::GoalData, response::TodoAppError> {
   // validate api key
   let user = get_user_if_api_key_valid(&auth_service, props.api_key).await?;
 
@@ -348,16 +342,50 @@ pub async fn goal_data_new(
 
   let mut sp = con.savepoint().map_err(report_rusqlite_err)?;
 
-  let goal = goal_service::add(&mut sp, user.user_id).map_err(report_rusqlite_err)?;
-
+  // ensure time utility function exists and belongs to you
+  let time_utility_function = time_utility_function_service::get_by_time_utility_function_id(
+    &sp,
+    props.time_utility_function_id,
+  )
+  .map_err(report_rusqlite_err)?
+  .ok_or(response::TodoAppError::TimeUtilityFunctionNonexistent)?;
   // validate intent is owned by correct user
-  if goal.creator_user_id != user.user_id {
-    return Err(response::TodoAppError::GoalIntentNonexistent);
+  if time_utility_function.creator_user_id != user.user_id {
+    return Err(response::TodoAppError::TimeUtilityFunctionNonexistent);
   }
 
-  // now we can update data
-  let goal_data = goal_data_service::add(&mut sp, user.user_id, goal.goal_id, props.name, true)
-    .map_err(report_rusqlite_err)?;
+  // validate that parent exists and belongs to you
+  if let Some(parent_goal_id) = props.parent_goal_id {
+    let goal = goal_service::get_by_goal_id(&sp, parent_goal_id)
+      .map_err(report_rusqlite_err)?
+      .ok_or(response::TodoAppError::GoalNonexistent)?;
+    // validate intent is owned by correct user
+    if goal.creator_user_id != user.user_id {
+      return Err(response::TodoAppError::GoalNonexistent);
+    }
+  }
+
+  // ensure that goal exists and belongs to you
+  let goal = goal_service::get_by_goal_id(&sp, props.goal_id)
+    .map_err(report_rusqlite_err)?
+    .ok_or(response::TodoAppError::GoalNonexistent)?;
+  // validate intent is owned by correct user
+  if goal.creator_user_id != user.user_id {
+    return Err(response::TodoAppError::GoalNonexistent);
+  }
+
+  // create goal data
+  let goal_data = goal_data_service::add(
+    &mut sp,
+    user.user_id,
+    goal.goal_id,
+    props.name,
+    props.duration_estimate,
+    props.time_utility_function_id,
+    props.parent_goal_id,
+    props.status,
+  )
+  .map_err(report_rusqlite_err)?;
 
   sp.commit().map_err(report_rusqlite_err)?;
 
@@ -365,87 +393,87 @@ pub async fn goal_data_new(
   fill_goal_data(con, goal_data)
 }
 
-pub async fn password_new_reset(
+pub async fn time_utility_function_new(
   _config: Config,
   db: Db,
   auth_service: AuthService,
-  props: request::PasswordNewResetProps,
-) -> Result<response::Password, response::TodoAppError> {
-  // no api key verification needed
+  props: request::TimeUtilityFunctionNewProps,
+) -> Result<response::TimeUtilityFunction, response::TodoAppError> {
+  // validate api key
+  let user = get_user_if_api_key_valid(&auth_service, props.api_key).await?;
+
+  // check that utils length == start_times length
+  if props.start_times.len() != props.utils.len() {
+    return Err(response::TodoAppError::TimeUtilityFunctionNotValid);
+  }
 
   let con = &mut *db.lock().await;
 
-  // get password reset
-  let psr = password_reset_service::get_by_password_reset_key_hash(
-    con,
-    &utils::hash_str(&props.password_reset_key),
-  )
-  .map_err(report_rusqlite_err)?
-  .ok_or(response::TodoAppError::PasswordResetNonexistent)?;
-
-  // deny if we alread created a password from this reset
-  if password_service::exists_by_password_reset_key_hash(con, &psr.password_reset_key_hash)
-    .map_err(report_rusqlite_err)?
-  {
-    return Err(response::TodoAppError::PasswordExistent);
-  }
-
-  // deny if timed out
-  if FIFTEEN_MINUTES as i64 + psr.creation_time < utils::current_time_millis() {
-    return Err(response::TodoAppError::PasswordResetTimedOut);
-  }
-
-  // reject insecure passwords
-  if !utils::is_secure_password(&props.new_password) {
-    return Err(response::TodoAppError::PasswordInsecure);
-  }
-
-  // attempt to hash password
-  let new_password_hash = utils::hash_password(&props.new_password).map_err(report_internal_err)?;
-
   let mut sp = con.savepoint().map_err(report_rusqlite_err)?;
 
-  // create password
-  let password = password_service::add(
-    &mut sp,
-    psr.creator_user_id,
-    request::PasswordKind::Reset,
-    new_password_hash,
-    psr.password_reset_key_hash,
-  )
-  .map_err(report_rusqlite_err)?;
+  // create tuf
+  let time_utility_function =
+    time_utility_function_service::add(&mut sp, user.user_id).map_err(report_rusqlite_err)?;
+
+  // create data
+  for (start_time, utils) in props.start_times.into_iter().zip(props.utils.into_iter()) {
+    if start_time < 0 {
+      return Err(response::TodoAppError::NegativeStartTime);
+    }
+
+    // add point
+    time_utility_function_point_service::add(
+      &mut sp,
+      time_utility_function.time_utility_function_id,
+      start_time,
+      utils,
+    )
+    .map_err(report_rusqlite_err)?;
+  }
 
   sp.commit().map_err(report_rusqlite_err)?;
 
-  fill_password(con, password)
+  // return json
+  fill_time_utility_function(con, time_utility_function)
 }
 
-pub async fn password_new_cancel(
+pub async fn task_event_new(
   _config: Config,
   db: Db,
   auth_service: AuthService,
-  props: request::PasswordNewCancelProps,
-) -> Result<response::Password, response::TodoAppError> {
-  let con = &mut *db.lock().await;
+  props: request::TaskEventNewProps,
+) -> Result<response::TaskEvent, response::TodoAppError> {
+  // validate api key
+  let user = get_user_if_api_key_valid(&auth_service, props.api_key).await?;
 
-  // api key verification required
-  let creator_key = get_user_if_api_key_valid(con, &props.api_key)?;
+  let con = &mut *db.lock().await;
 
   let mut sp = con.savepoint().map_err(report_rusqlite_err)?;
 
-  // create password
-  let password = password_service::add(
+  // ensure that goal exists and belongs to you
+  let goal = goal_service::get_by_goal_id(&sp, props.goal_id)
+    .map_err(report_rusqlite_err)?
+    .ok_or(response::TodoAppError::GoalNonexistent)?;
+  // validate intent is owned by correct user
+  if goal.creator_user_id != user.user_id {
+    return Err(response::TodoAppError::GoalNonexistent);
+  }
+
+  // create goal data
+  let task_event = task_event_service::add(
     &mut sp,
-    creator_key.creator_user_id,
-    request::PasswordKind::Cancel,
-    String::new(),
-    String::new(),
+    user.user_id,
+    goal.goal_id,
+    props.start_time,
+    props.duration,
+    props.active,
   )
   .map_err(report_rusqlite_err)?;
 
   sp.commit().map_err(report_rusqlite_err)?;
 
-  fill_password(con, password)
+  // return json
+  fill_task_event(con, task_event)
 }
 
 pub async fn goal_intent_view(
@@ -463,6 +491,7 @@ pub async fn goal_intent_view(
   // return users
   goal_intents
     .into_iter()
+    .filter(|u| u.creator_user_id == user.user_id)
     .map(|u| fill_goal_intent(con, u))
     .collect()
 }
@@ -478,11 +507,12 @@ pub async fn goal_intent_data_view(
 
   let con = &mut *db.lock().await;
   // get users
-  let goal_intent_data = goal_intent_data_service::query(con, props)
-  .map_err(report_rusqlite_err)?;
+  let goal_intent_data =
+    goal_intent_data_service::query(con, props).map_err(report_rusqlite_err)?;
   // return users
   goal_intent_data
     .into_iter()
+    .filter(|u| u.creator_user_id == user.user_id)
     .map(|u| fill_goal_intent_data(con, u))
     .collect()
 }
@@ -500,10 +530,7 @@ pub async fn goal_view(
   // get users
   let goals = goal_service::query(con, props).map_err(report_rusqlite_err)?;
   // return users
-  goals
-    .into_iter()
-    .map(|u| fill_goal(con, u))
-    .collect()
+  goals.into_iter().map(|u| fill_goal(con, u)).collect()
 }
 
 pub async fn goal_data_view(
@@ -517,12 +544,52 @@ pub async fn goal_data_view(
 
   let con = &mut *db.lock().await;
   // get users
-  let goal_data = goal_data_service::query(con, props)
-  .map_err(report_rusqlite_err)?;
+  let goal_data = goal_data_service::query(con, props).map_err(report_rusqlite_err)?;
   // return users
   goal_data
     .into_iter()
+    .filter(|u| u.creator_user_id == user.user_id)
     .map(|u| fill_goal_data(con, u))
     .collect()
 }
 
+pub async fn time_utility_function_view(
+  _config: Config,
+  db: Db,
+  auth_service: AuthService,
+  props: request::TimeUtilityFunctionViewProps,
+) -> Result<Vec<response::TimeUtilityFunction>, response::TodoAppError> {
+  // validate api key
+  let user = get_user_if_api_key_valid(&auth_service, props.api_key.clone()).await?;
+
+  let con = &mut *db.lock().await;
+  // get users
+  let time_utility_function =
+    time_utility_function_service::query(con, props).map_err(report_rusqlite_err)?;
+  // return users
+  time_utility_function
+    .into_iter()
+    .filter(|u| u.creator_user_id == user.user_id)
+    .map(|u| fill_time_utility_function(con, u))
+    .collect()
+}
+
+pub async fn task_event_view(
+  _config: Config,
+  db: Db,
+  auth_service: AuthService,
+  props: request::TaskEventViewProps,
+) -> Result<Vec<response::TaskEvent>, response::TodoAppError> {
+  // validate api key
+  let user = get_user_if_api_key_valid(&auth_service, props.api_key.clone()).await?;
+
+  let con = &mut *db.lock().await;
+  // get users
+  let task_event = task_event_service::query(con, props).map_err(report_rusqlite_err)?;
+  // return users
+  task_event
+    .into_iter()
+    .filter(|u| u.creator_user_id == user.user_id)
+    .map(|u| fill_task_event(con, u))
+    .collect()
+}

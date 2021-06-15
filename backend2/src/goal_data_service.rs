@@ -154,7 +154,7 @@ pub fn query(
         "status": props.status.map(|x| x as u8),
         "goal_intent_id": props.goal_intent_id,
         "offset": props.offset,
-        "count": props.offset,
+        "count": props.count,
     })?
     .and_then(|row| row.try_into())
     .filter_map(|x: Result<GoalData, rusqlite::Error>| x.ok());

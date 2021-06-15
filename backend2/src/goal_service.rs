@@ -82,7 +82,7 @@ pub fn query(
         "creator_user_id": props.creator_user_id,
         "goal_intent_id": props.goal_intent_id,
         "offset": props.offset,
-        "count": props.offset,
+        "count": props.count,
     })?
     .and_then(|row| row.try_into())
     .filter_map(|x: Result<Goal, rusqlite::Error>| x.ok());

@@ -20,14 +20,13 @@ impl TryFrom<&rusqlite::Row<'_>> for TaskEvent {
   }
 }
 
-// TODO we need to figure out a way to make scheduled and unscheduled goals work better
 pub fn add(
   con: &mut Savepoint,
   creator_user_id: i64,
-  scheduled: bool,
+  goal_id: i64,
   start_time: i64,
   duration: i64,
-  task_event: todo_app_service_api::request::TaskEventNewProps,
+  active: bool,
 ) -> Result<TaskEvent, rusqlite::Error> {
   let sp = con.savepoint()?;
   let creation_time = current_time_millis();
@@ -47,10 +46,10 @@ pub fn add(
     params![
       creation_time,
       creator_user_id,
-      task_event.goal_id,
-      task_event.start_time,
-      task_event.duration,
-      task_event.active
+      goal_id,
+      start_time,
+      duration,
+      active
     ],
   )?;
 
@@ -64,10 +63,10 @@ pub fn add(
     task_event_id,
     creation_time,
     creator_user_id,
-    goal_id: task_event.goal_id,
-    start_time: task_event.start_time,
-    duration: task_event.duration,
-    active: task_event.active,
+    goal_id,
+    start_time,
+    duration,
+    active,
   })
 }
 
@@ -87,7 +86,6 @@ pub fn query(
   con: &Connection,
   props: todo_app_service_api::request::TaskEventViewProps,
 ) -> Result<Vec<TaskEvent>, rusqlite::Error> {
-  // TODO prevent getting meaningless duration
 
   let sql = [
     "SELECT te.* FROM task_event te",
@@ -134,7 +132,7 @@ pub fn query(
         "max_duration": props.max_duration,
         "active": props.active,
         "offset": props.offset,
-        "count": props.offset,
+        "count": props.count,
     })?
     .and_then(|row| row.try_into())
     .filter_map(|x: Result<TaskEvent, rusqlite::Error>| x.ok());

@@ -77,7 +77,7 @@ pub fn query(
         "max_creation_time": props.max_creation_time,
         "creator_user_id": props.creator_user_id,
         "offset": props.offset,
-        "count": props.offset,
+        "count": props.count,
     })?
     .and_then(|row| row.try_into())
     .filter_map(|x: Result<TimeUtilityFunction, rusqlite::Error>| x.ok());
