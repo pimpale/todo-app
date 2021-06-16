@@ -32,14 +32,10 @@ create table time_utility_function(
   time_utility_function_id serial primary key,
   creation_time integer not null,
   creator_user_id integer not null
-);
-
--- invariant: There must be at least one distribution point per time_utility_function
-drop table if exists time_utility_function_point;
-create table time_utility_function_point(
-  time_utility_function_point_id serial primary key,
-  start_time integer not null,
-  utils integer not null
+  -- invariant: There must be at least one number in start_times
+  -- invariant: There must be the same number of elements in start_times and utils
+  start_times integer[] not null,
+  utils integer[] not null
 );
 
 -- invariant: goal_id is valid

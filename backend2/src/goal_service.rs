@@ -47,8 +47,8 @@ pub fn add(
 
 pub fn get_by_goal_id(
   con: &mut impl GenericClient,
-  goal_id: &str,
-) -> Result<Option<GoalIntentData>, postgres::Error> {
+  goal_id: i64,
+) -> Result<Option<Goal>, postgres::Error> {
   let result = con
     .query_opt("SELECT * FROM goal WHERE goal_id=$1", &[&goal_id])?
     .map(|x| x.into());

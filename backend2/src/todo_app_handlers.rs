@@ -14,7 +14,6 @@ use super::goal_intent_data_service;
 use super::goal_intent_service;
 use super::goal_service;
 use super::task_event_service;
-use super::time_utility_function_point_service;
 use super::time_utility_function_service;
 
 use std::error::Error;
@@ -55,7 +54,7 @@ fn report_auth_err(e: AuthError) -> response::TodoAppError {
 }
 
 fn fill_goal_intent(
-  _con: &postgres::Connection,
+  _con: &mut postgres::Client,
   goal_intent: GoalIntent,
 ) -> Result<response::GoalIntent, response::TodoAppError> {
   Ok(response::GoalIntent {
@@ -66,113 +65,112 @@ fn fill_goal_intent(
 }
 
 fn fill_goal_intent_data(
-  con: &postgres::Connection,
+  con: &mut postgres::Client,
   goal_intent_data: GoalIntentData,
 ) -> Result<response::GoalIntentData, response::TodoAppError> {
+  let goal_intent =
+    goal_intent_service::get_by_goal_intent_id(con, goal_intent_data.goal_intent_id)
+      .map_err(report_postgres_err)?
+      .ok_or(response::TodoAppError::GoalIntentNonexistent)?;
+
   Ok(response::GoalIntentData {
     goal_intent_data_id: goal_intent_data.goal_intent_data_id,
     creation_time: goal_intent_data.creation_time,
     creator_user_id: goal_intent_data.creator_user_id,
-    goal_intent: fill_goal_intent(
-      con,
-      goal_intent_service::get_by_goal_intent_id(con, goal_intent_data.goal_intent_id)
-        .map_err(report_postgres_err)?
-        .ok_or(response::TodoAppError::GoalIntentNonexistent)?,
-    )?,
+    goal_intent: fill_goal_intent(con, goal_intent)?,
     name: goal_intent_data.name,
     active: goal_intent_data.active,
   })
 }
 
 fn fill_goal(
-  con: &postgres::Connection,
+  con: &mut postgres::Client,
   goal: Goal,
 ) -> Result<response::Goal, response::TodoAppError> {
+  let goal_intent = match goal.goal_intent_id {
+    Some(goal_intent_id) => {
+      let goal_intent = goal_intent_service::get_by_goal_intent_id(con, goal_intent_id)
+        .map_err(report_postgres_err)?
+        .ok_or(response::TodoAppError::GoalIntentNonexistent)?;
+
+      Some(fill_goal_intent(con, goal_intent)?)
+    }
+    _ => None,
+  };
+
   Ok(response::Goal {
     goal_id: goal.goal_id,
     creation_time: goal.creation_time,
     creator_user_id: goal.creator_user_id,
-    intent: match goal.goal_intent_id {
-      Some(goal_intent_id) => Some(fill_goal_intent(
-        con,
-        goal_intent_service::get_by_goal_intent_id(con, goal_intent_id)
-          .map_err(report_postgres_err)?
-          .ok_or(response::TodoAppError::GoalIntentNonexistent)?,
-      )?),
-      _ => None,
-    },
+    intent: goal_intent,
   })
 }
 
 fn fill_goal_data(
-  con: &postgres::Connection,
+  con: &mut postgres::Client,
   goal_data: GoalData,
 ) -> Result<response::GoalData, response::TodoAppError> {
+  let goal = goal_service::get_by_goal_id(con, goal_data.goal_id)
+    .map_err(report_postgres_err)?
+    .ok_or(response::TodoAppError::GoalNonexistent)?;
+
+  let time_utility_function = time_utility_function_service::get_by_time_utility_function_id(
+    con,
+    goal_data.time_utility_function_id,
+  )
+  .map_err(report_postgres_err)?
+  .ok_or(response::TodoAppError::TimeUtilityFunctionNonexistent)?;
+
+  let parent_goal = match goal_data.parent_goal_id {
+    Some(parent_goal_id) => {
+      let goal = goal_service::get_by_goal_id(con, parent_goal_id)
+        .map_err(report_postgres_err)?
+        .ok_or(response::TodoAppError::GoalNonexistent)?;
+
+      Some(fill_goal(con, goal)?)
+    }
+    _ => None,
+  };
+
   Ok(response::GoalData {
     goal_data_id: goal_data.goal_data_id,
     creation_time: goal_data.creation_time,
     creator_user_id: goal_data.creator_user_id,
-    goal: fill_goal(
-      con,
-      goal_service::get_by_goal_id(con, goal_data.goal_id)
-        .map_err(report_postgres_err)?
-        .ok_or(response::TodoAppError::GoalNonexistent)?,
-    )?,
+    goal: fill_goal(con, goal)?,
     name: goal_data.name,
     duration_estimate: goal_data.duration_estimate,
-    time_utility_function: fill_time_utility_function(
-      con,
-      time_utility_function_service::get_by_time_utility_function_id(
-        con,
-        goal_data.time_utility_function_id,
-      )
-      .map_err(report_postgres_err)?
-      .ok_or(response::TodoAppError::TimeUtilityFunctionNonexistent)?,
-    )?,
-    parent_goal: match goal_data.parent_goal_id {
-      Some(parent_goal_id) => Some(fill_goal(
-        con,
-        goal_service::get_by_goal_id(con, parent_goal_id)
-          .map_err(report_postgres_err)?
-          .ok_or(response::TodoAppError::GoalNonexistent)?,
-      )?),
-      _ => None,
-    },
+    time_utility_function: fill_time_utility_function(con, time_utility_function)?,
+    parent_goal,
     status: goal_data.status,
   })
 }
 
 fn fill_time_utility_function(
-  con: &postgres::Connection,
+  _con: &mut postgres::Client,
   time_utility_function: TimeUtilityFunction,
 ) -> Result<response::TimeUtilityFunction, response::TodoAppError> {
-  let points =
-    time_utility_function_point_service::query(con, time_utility_function.time_utility_function_id)
-      .map_err(report_postgres_err)?;
-
   Ok(response::TimeUtilityFunction {
     time_utility_function_id: time_utility_function.time_utility_function_id,
     creation_time: time_utility_function.creation_time,
     creator_user_id: time_utility_function.creator_user_id,
-    start_time: points.iter().map(|p| p.start_time).collect(),
-    utils: points.iter().map(|p| p.utils).collect(),
+    start_time: time_utility_function.start_times,
+    utils: time_utility_function.utils,
   })
 }
 
 fn fill_task_event(
-  con: &postgres::Connection,
+  con: &mut postgres::Client,
   task_event: TaskEvent,
 ) -> Result<response::TaskEvent, response::TodoAppError> {
+  let goal = goal_service::get_by_goal_id(con, task_event.goal_id)
+    .map_err(report_postgres_err)?
+    .ok_or(response::TodoAppError::GoalNonexistent)?;
+
   Ok(response::TaskEvent {
     task_event_id: task_event.task_event_id,
     creation_time: task_event.creation_time,
     creator_user_id: task_event.creator_user_id,
-    goal: fill_goal(
-      con,
-      goal_service::get_by_goal_id(con, task_event.goal_id)
-        .map_err(report_postgres_err)?
-        .ok_or(response::TodoAppError::GoalNonexistent)?,
-    )?,
+    goal: fill_goal(con, goal)?,
     start_time: task_event.start_time,
     duration: task_event.duration,
     active: task_event.active,
@@ -200,7 +198,7 @@ pub async fn goal_intent_new(
 
   let con = &mut *db.lock().await;
 
-  let mut sp = con.savepoint().map_err(report_postgres_err)?;
+  let mut sp = con.transaction().map_err(report_postgres_err)?;
 
   // create intent
   let goal_intent = goal_intent_service::add(&mut sp, user.user_id).map_err(report_postgres_err)?;
@@ -232,9 +230,9 @@ pub async fn goal_intent_data_new(
 
   let con = &mut *db.lock().await;
 
-  let mut sp = con.savepoint().map_err(report_postgres_err)?;
+  let mut sp = con.transaction().map_err(report_postgres_err)?;
 
-  let goal_intent = goal_intent_service::get_by_goal_intent_id(&sp, props.goal_intent_id)
+  let goal_intent = goal_intent_service::get_by_goal_intent_id(&mut sp, props.goal_intent_id)
     .map_err(report_postgres_err)?
     .ok_or(response::TodoAppError::GoalIntentNonexistent)?;
 
@@ -270,11 +268,11 @@ pub async fn goal_new(
 
   let con = &mut *db.lock().await;
 
-  let mut sp = con.savepoint().map_err(report_postgres_err)?;
+  let mut sp = con.transaction().map_err(report_postgres_err)?;
 
   // ensure time utility function exists and belongs to you
   let time_utility_function = time_utility_function_service::get_by_time_utility_function_id(
-    &sp,
+    &mut sp,
     props.time_utility_function_id,
   )
   .map_err(report_postgres_err)?
@@ -286,7 +284,7 @@ pub async fn goal_new(
 
   // validate that parent exists and belongs to you
   if let Some(parent_goal_id) = props.parent_goal_id {
-    let goal = goal_service::get_by_goal_id(&sp, parent_goal_id)
+    let goal = goal_service::get_by_goal_id(&mut sp, parent_goal_id)
       .map_err(report_postgres_err)?
       .ok_or(response::TodoAppError::GoalNonexistent)?;
     // validate intent is owned by correct user
@@ -297,7 +295,7 @@ pub async fn goal_new(
 
   // validate that intent exists and belongs to you
   if let Some(goal_intent_id) = props.goal_intent_id {
-    let goal_intent = goal_intent_service::get_by_goal_intent_id(&sp, goal_intent_id)
+    let goal_intent = goal_intent_service::get_by_goal_intent_id(&mut sp, goal_intent_id)
       .map_err(report_postgres_err)?
       .ok_or(response::TodoAppError::GoalIntentNonexistent)?;
     // validate intent is owned by correct user
@@ -340,11 +338,11 @@ pub async fn goal_data_new(
 
   let con = &mut *db.lock().await;
 
-  let mut sp = con.savepoint().map_err(report_postgres_err)?;
+  let mut sp = con.transaction().map_err(report_postgres_err)?;
 
   // ensure time utility function exists and belongs to you
   let time_utility_function = time_utility_function_service::get_by_time_utility_function_id(
-    &sp,
+    &mut sp,
     props.time_utility_function_id,
   )
   .map_err(report_postgres_err)?
@@ -356,7 +354,7 @@ pub async fn goal_data_new(
 
   // validate that parent exists and belongs to you
   if let Some(parent_goal_id) = props.parent_goal_id {
-    let goal = goal_service::get_by_goal_id(&sp, parent_goal_id)
+    let goal = goal_service::get_by_goal_id(&mut sp, parent_goal_id)
       .map_err(report_postgres_err)?
       .ok_or(response::TodoAppError::GoalNonexistent)?;
     // validate intent is owned by correct user
@@ -366,7 +364,7 @@ pub async fn goal_data_new(
   }
 
   // ensure that goal exists and belongs to you
-  let goal = goal_service::get_by_goal_id(&sp, props.goal_id)
+  let goal = goal_service::get_by_goal_id(&mut sp, props.goal_id)
     .map_err(report_postgres_err)?
     .ok_or(response::TodoAppError::GoalNonexistent)?;
   // validate intent is owned by correct user
@@ -409,29 +407,10 @@ pub async fn time_utility_function_new(
 
   let con = &mut *db.lock().await;
 
-  let mut sp = con.savepoint().map_err(report_postgres_err)?;
-
   // create tuf
   let time_utility_function =
-    time_utility_function_service::add(&mut sp, user.user_id).map_err(report_postgres_err)?;
-
-  // create data
-  for (start_time, utils) in props.start_times.into_iter().zip(props.utils.into_iter()) {
-    if start_time < 0 {
-      return Err(response::TodoAppError::NegativeStartTime);
-    }
-
-    // add point
-    time_utility_function_point_service::add(
-      &mut sp,
-      time_utility_function.time_utility_function_id,
-      start_time,
-      utils,
-    )
-    .map_err(report_postgres_err)?;
-  }
-
-  sp.commit().map_err(report_postgres_err)?;
+    time_utility_function_service::add(con, user.user_id, props.start_times, props.utils)
+      .map_err(report_postgres_err)?;
 
   // return json
   fill_time_utility_function(con, time_utility_function)
@@ -448,10 +427,10 @@ pub async fn task_event_new(
 
   let con = &mut *db.lock().await;
 
-  let mut sp = con.savepoint().map_err(report_postgres_err)?;
+  let mut sp = con.transaction().map_err(report_postgres_err)?;
 
   // ensure that goal exists and belongs to you
-  let goal = goal_service::get_by_goal_id(&sp, props.goal_id)
+  let goal = goal_service::get_by_goal_id(&mut sp, props.goal_id)
     .map_err(report_postgres_err)?
     .ok_or(response::TodoAppError::GoalNonexistent)?;
   // validate intent is owned by correct user

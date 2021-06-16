@@ -10,6 +10,8 @@ impl From<postgres::row::Row> for TimeUtilityFunction {
       time_utility_function_id: row.get("creator_user_id"),
       creation_time: row.get("creator_user_id"),
       creator_user_id: row.get("creator_user_id"),
+      start_times: row.get("start_times"),
+      utils: row.get("utils"),
     }
   }
 }
@@ -17,7 +19,11 @@ impl From<postgres::row::Row> for TimeUtilityFunction {
 pub fn add(
   con: &mut impl GenericClient,
   creator_user_id: i64,
+  start_times: Vec<i64>,
+  utils: Vec<i64>,
 ) -> Result<TimeUtilityFunction, postgres::Error> {
+  assert_eq!(start_times.len(), utils.len());
+
   let creation_time = current_time_millis();
 
   let time_utility_function_id = con
@@ -25,11 +31,13 @@ pub fn add(
       "INSERT INTO
        time_utility_function(
            creation_time,
-           creator_user_id
+           creator_user_id,
+           start_times,
+           utils
        )
-       VALUES($1, $2)
+       VALUES($1, $2, $3, $4)
       ",
-      &[&creation_time, &creator_user_id],
+      &[&creation_time, &creator_user_id, &start_times, &utils],
     )?
     .get(0);
 
@@ -38,6 +46,8 @@ pub fn add(
     time_utility_function_id,
     creation_time,
     creator_user_id,
+    start_times,
+    utils,
   })
 }
 

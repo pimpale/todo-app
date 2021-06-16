@@ -16,7 +16,6 @@ mod goal_intent_data_service;
 mod goal_service;
 mod goal_data_service;
 mod time_utility_function_service;
-mod time_utility_function_point_service;
 mod task_event_service;
 mod todo_app_api;
 mod todo_app_db_types;

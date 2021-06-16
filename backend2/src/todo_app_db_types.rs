@@ -56,12 +56,6 @@ pub struct TimeUtilityFunction {
   pub time_utility_function_id: i64,
   pub creation_time: i64,
   pub creator_user_id: i64,
-}
-
-#[derive(Clone, Debug)]
-pub struct TimeUtilityFunctionPoint {
-  pub time_utility_function_point_id: i64,
-  pub time_utility_function_id: i64,
-  pub start_time: i64,
-  pub utils: i64,
+  pub start_times: Vec<i64>,
+  pub utils: Vec<i64>,
 }

@@ -62,7 +62,7 @@ let goal_intent_data_id =
 
 pub fn get_by_goal_intent_data_id(
   con: &mut impl GenericClient,
-  goal_intent_data_id: &str,
+  goal_intent_data_id: &i64,
 ) -> Result<Option<GoalIntentData>, postgres::Error> {
   let result = con
     .query_opt(
