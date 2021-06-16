@@ -18,13 +18,21 @@ pub fn add(
   con: &mut impl GenericClient,
   creator_user_id: i64,
 ) -> Result<GoalIntent, postgres::Error> {
-
   let creation_time = current_time_millis();
 
-  let sql = "INSERT INTO goal_intent(creation_time, creator_user_id) values (?, ?)";
-  sp.execute(sql, params![creation_time, creator_user_id,])?;
-
-  let goal_intent_id = sp.last_insert_rowid();
+  let goal_intent_id = con
+    .query_one(
+      "INSERT INTO
+       goal_intent(
+           creation_time,
+           creator_user_id
+       )
+       VALUES($1, $2)
+       RETURNING goal_intent_id
+      ",
+      &[&creation_time, &creator_user_id],
+    )?
+    .get(0);
 
   // return goal_intent
   Ok(GoalIntent {
@@ -38,41 +46,44 @@ pub fn get_by_goal_intent_id(
   con: &mut impl GenericClient,
   goal_intent_id: i64,
 ) -> Result<Option<GoalIntent>, postgres::Error> {
-  let sql = "SELECT * FROM goal_intent WHERE goal_intent_id=?";
-  con
-    .query_row(sql, params![goal_intent_id], |row| row.try_into())
-    .optional()
+  let result = con
+    .query_opt(
+      "SELECT * FROM goal_intent WHERE goal_intent_id=$1",
+      &[&goal_intent_id],
+    )?
+    .map(|x| x.into());
+
+  Ok(result)
 }
 
 pub fn query(
   con: &mut impl GenericClient,
   props: request::GoalIntentViewProps,
 ) -> Result<Vec<GoalIntent>, postgres::Error> {
-  let sql = [
-    "SELECT g.* FROM goal_intent g WHERE 1 = 1",
-    " AND (:goal_intent_id         == NULL OR g.goal_intent_id = :goal_intent_id)",
-    " AND (:creation_time   == NULL OR g.creation_time = :creation_time)",
-    " AND (:creation_time   == NULL OR g.creation_time >= :min_creation_time)",
-    " AND (:creation_time   == NULL OR g.creation_time <= :max_creation_time)",
-    " AND (:creator_user_id == NULL OR g.creator_user_id = :creator_user_id)",
-    " ORDER BY g.goal_intent_id",
-    " LIMIT :offset, :count",
-  ]
-  .join("");
+  let results = con
+    .query(
+      " SELECT g.* FROM goal_intent g WHERE 1 = 1,
+        AND ($1 == NULL OR g.goal_intent_id = $1),
+        AND ($2 == NULL OR g.creation_time = $2),
+        AND ($3 == NULL OR g.creation_time >= $3),
+        AND ($4 == NULL OR g.creation_time <= $4),
+        AND ($5 == NULL OR g.creator_user_id = $5),
+        ORDER BY g.goal_intent_id,
+        LIMIT $6, $7,
+      ",
+      &[
+        &props.goal_intent_id,
+        &props.creation_time,
+        &props.min_creation_time,
+        &props.max_creation_time,
+        &props.creator_user_id,
+        &props.offset,
+        &props.count,
+      ],
+    )?
+    .into_iter()
+    .map(|row| row.into())
+    .collect();
 
-  let mut stmnt = con.prepare(&sql)?;
-
-  let results = stmnt
-    .query(named_params! {
-        "goal_intent_id": props.goal_intent_id,
-        "creation_time": props.creation_time,
-        "min_creation_time": props.min_creation_time,
-        "max_creation_time": props.max_creation_time,
-        "creator_user_id": props.creator_user_id,
-        "offset": props.offset,
-        "count": props.count,
-    })?
-    .and_then(|row| row.try_into())
-    .filter_map(|x: Result<GoalIntent, postgres::Error>| x.ok());
-  Ok(results.collect::<Vec<GoalIntent>>())
+  Ok(results)
 }

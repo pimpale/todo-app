@@ -1,7 +1,6 @@
 use super::todo_app_db_types::*;
 use super::utils::current_time_millis;
 use postgres::GenericClient;
-use std::convert::{From, TryInto};
 use todo_app_service_api::request;
 
 impl From<postgres::row::Row> for TimeUtilityFunction {
@@ -19,17 +18,20 @@ pub fn add(
   con: &mut impl GenericClient,
   creator_user_id: i64,
 ) -> Result<TimeUtilityFunction, postgres::Error> {
-  let sp = con.savepoint()?;
-
   let creation_time = current_time_millis();
 
-  let sql = "INSERT INTO time_utility_function(creation_time, creator_user_id) values (?, ?)";
-  sp.execute(sql, params![creation_time, creator_user_id,])?;
-
-  let time_utility_function_id = sp.last_insert_rowid();
-
-  // commit savepoint
-  sp.commit()?;
+  let time_utility_function_id = con
+    .query_one(
+      "INSERT INTO
+       time_utility_function(
+           creation_time,
+           creator_user_id
+       )
+       VALUES($1, $2)
+      ",
+      &[&creation_time, &creator_user_id],
+    )?
+    .get(0);
 
   // return time_utility_function
   Ok(TimeUtilityFunction {
@@ -43,10 +45,11 @@ pub fn get_by_time_utility_function_id(
   con: &mut impl GenericClient,
   time_utility_function_id: i64,
 ) -> Result<Option<TimeUtilityFunction>, postgres::Error> {
-  let sql = "SELECT * FROM time_utility_function WHERE time_utility_function_id=?";
-  con
-    .query_row(sql, params![time_utility_function_id], |row| row.try_into())
-    .optional()
+  let sql = "SELECT * FROM time_utility_function WHERE time_utility_function_id=$1";
+  let result = con
+    .query_opt(sql, &[&time_utility_function_id])?
+    .map(|x| x.into());
+  Ok(result)
 }
 
 pub fn query(
@@ -55,29 +58,34 @@ pub fn query(
 ) -> Result<Vec<TimeUtilityFunction>, postgres::Error> {
   let sql = [
     "SELECT tuf.* FROM time_utility_function tuf WHERE 1 = 1",
-    " AND (:time_utility_function_id  == NULL OR tuf.time_utility_function_id = :time_utility_function_id)",
-    " AND (:creation_time             == NULL OR tuf.creation_time = :creation_time)",
-    " AND (:creation_time             == NULL OR tuf.creation_time >= :min_creation_time)",
-    " AND (:creation_time             == NULL OR tuf.creation_time <= :max_creation_time)",
-    " AND (:creator_user_id           == NULL OR tuf.creator_user_id = :creator_user_id)",
+    " AND ($1 == NULL OR tuf.time_utility_function_id = $1)",
+    " AND ($2 == NULL OR tuf.creation_time = $2)",
+    " AND ($3 == NULL OR tuf.creation_time >= $3)",
+    " AND ($4 == NULL OR tuf.creation_time <= $4)",
+    " AND ($5 == NULL OR tuf.creator_user_id = $5)",
     " ORDER BY tuf.time_utility_function_id",
-    " LIMIT :offset, :count",
+    " LIMIT $6, $7",
   ]
   .join("");
 
   let mut stmnt = con.prepare(&sql)?;
 
-  let results = stmnt
-    .query(named_params! {
-        "time_utility_function_id": props.time_utility_function_id,
-        "creation_time": props.creation_time,
-        "min_creation_time": props.min_creation_time,
-        "max_creation_time": props.max_creation_time,
-        "creator_user_id": props.creator_user_id,
-        "offset": props.offset,
-        "count": props.count,
-    })?
-    .and_then(|row| row.try_into())
-    .filter_map(|x: Result<TimeUtilityFunction, postgres::Error>| x.ok());
-  Ok(results.collect::<Vec<TimeUtilityFunction>>())
+  let results = con
+    .query(
+      &stmnt,
+      &[
+        &props.time_utility_function_id,
+        &props.creation_time,
+        &props.min_creation_time,
+        &props.max_creation_time,
+        &props.creator_user_id,
+        &props.offset,
+        &props.count,
+      ],
+    )?
+    .into_iter()
+    .map(|x| x.into())
+    .collect();
+
+  Ok(results)
 }

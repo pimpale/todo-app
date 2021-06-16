@@ -29,7 +29,7 @@ pub fn add(
 
   sp.execute(
     sql,
-    params![
+    &[
       time_utility_function_id,
       start_time,
       utils,
@@ -53,7 +53,7 @@ pub fn get_by_time_utility_function_point_id(
 ) -> Result<Option<TimeUtilityFunctionPoint>, postgres::Error> {
   let sql = "SELECT * FROM time_utility_function_point WHERE time_utility_function_point_id=?";
   con
-    .query_row(sql, params![time_utility_function_point_id], |row| {
+    .query_one(sql, &[time_utility_function_point_id], |row| {
       row.try_into()
     })
     .optional()
@@ -73,7 +73,7 @@ pub fn query(
   let mut stmnt = con.prepare(&sql)?;
 
   let results = stmnt
-    .query(named_params! {
+    .query(named_& {
         "time_utility_function_id": time_utility_function_id,
     })?
     .and_then(|row| row.try_into())

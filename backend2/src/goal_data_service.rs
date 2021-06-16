@@ -34,33 +34,32 @@ pub fn add(
 ) -> Result<GoalData, postgres::Error> {
   let creation_time = current_time_millis();
 
-  let sql = "INSERT INTO
-    goal_data(
-        creation_time,
-        creator_user_id,
-        goal_id,
-        name,
-        duration_estimate,
-        time_utility_function_id,
-        parent_goal_id,
-        status
-    ) values (?, ?, ?, ?, ?, ?, ?, ?)";
-
-  sp.execute(
-    sql,
-    params![
-      creation_time,
-      creator_user_id,
-      goal_id,
-      name,
-      duration_estimate,
-      time_utility_function_id,
-      parent_goal_id,
-      status.clone() as u8
+  let goal_data_id = con.query_one(
+    "INSERT INTO
+     goal_data(
+         creation_time,
+         creator_user_id,
+         goal_id,
+         name,
+         duration_estimate,
+         time_utility_function_id,
+         parent_goal_id,
+         status
+     )
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     RETURNING goal_data_id
+    ",
+    &[
+      &creation_time,
+      &creator_user_id,
+      &goal_id,
+      &name,
+      &duration_estimate,
+      &time_utility_function_id,
+      &parent_goal_id,
+      &(status.clone() as i64)
     ],
-  )?;
-
-  let goal_data_id = sp.last_insert_rowid();
+  )?.get(0);
 
   // return goal_data
   Ok(GoalData {
@@ -78,12 +77,15 @@ pub fn add(
 
 pub fn get_by_goal_data_id(
   con: &mut impl GenericClient,
-  goal_id: &str,
+  goal_data_id: i64,
 ) -> Result<Option<GoalData>, postgres::Error> {
-  let sql = "SELECT * FROM goal_data WHERE goal_data_id=? ORDER BY goal_data_id DESC LIMIT 1";
-  con
-    .query_row(sql, params![goal_id], |row| row.try_into())
-    .optional()
+  let result = con
+    .query_opt(
+      "SELECT * FROM goal_data WHERE goal_data_id=$1",
+      &[&goal_data_id],
+    )?
+    .map(|x| x.into());
+  Ok(result)
 }
 
 pub fn query(
@@ -122,27 +124,32 @@ pub fn query(
 
   let mut stmnt = con.prepare(&sql)?;
 
-  let results = stmnt
-    .query(named_params! {
-        "goal_data_id": props.goal_data_id,
-        "creation_time": props.creation_time,
-        "min_creation_time": props.min_creation_time,
-        "max_creation_time": props.max_creation_time,
-        "creator_user_id": props.creator_user_id,
-        "goal_id": props.goal_id,
-        "name": props.name,
-        "partial_name": props.partial_name,
-        "duration_estimate": props.duration_estimate,
-        "min_duration_estimate": props.min_duration_estimate,
-        "max_duration_estimate": props.max_duration_estimate,
-        "time_utility_function_id": props.time_utility_function_id,
-        "parent_goal_id": props.parent_goal_id,
-        "status": props.status.map(|x| x as u8),
-        "goal_intent_id": props.goal_intent_id,
-        "offset": props.offset,
-        "count": props.count,
-    })?
-    .and_then(|row| row.try_into())
-    .filter_map(|x: Result<GoalData, postgres::Error>| x.ok());
-  Ok(results.collect::<Vec<GoalData>>())
+  let results = con
+    .query(
+        &stmnt,
+
+        & [
+        &props.goal_data_id,
+        &props.creation_time,
+        &props.min_creation_time,
+        &props.max_creation_time,
+        &props.creator_user_id,
+        &props.goal_id,
+        &props.name,
+        &props.partial_name,
+        &props.duration_estimate,
+        &props.min_duration_estimate,
+        &props.max_duration_estimate,
+        &props.time_utility_function_id,
+        &props.parent_goal_id,
+        &props.status.map(|x| x as i64),
+        &props.goal_intent_id,
+        &props.offset,
+        &props.count,
+    ])?
+    .into_iter()
+    .map(|row| row.into())
+    .collect();
+
+  Ok(results)
 }

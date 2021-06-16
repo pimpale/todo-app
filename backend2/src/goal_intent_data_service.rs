@@ -25,35 +25,31 @@ pub fn add(
   name: String,
   active: bool, 
 ) -> Result<GoalIntentData, postgres::Error> {
-  let sp = con.savepoint()?;
   let creation_time = current_time_millis();
 
-  let sql = "INSERT INTO
+let goal_intent_data_id = 
+  con.query_one(
+    "INSERT INTO
     goal_intent_data(
         creation_time,
         creator_user_id,
         goal_intent_id,
         name,
         active
-    ) values (?, ?, ?, ?, ?)";
-
-  sp.execute(
-    sql,
-    params![
-      creation_time,
-      creator_user_id,
-      goal_intent_id,
+    )
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING goal_intent_data_id
+    ",
+    &[
+      &creation_time,
+      &creator_user_id,
+      &goal_intent_id,
       &name,
-      active,
+      &active,
     ],
-  )?;
+  )?.get(0);
 
-  let goal_intent_data_id = sp.last_insert_rowid();
 
-  // commit savepoint
-  sp.commit()?;
-
-  // return goal_intent_data
   Ok(GoalIntentData {
     goal_intent_data_id,
     creation_time,
@@ -66,12 +62,16 @@ pub fn add(
 
 pub fn get_by_goal_intent_data_id(
   con: &mut impl GenericClient,
-  goal_intent_id: &str,
+  goal_intent_data_id: &str,
 ) -> Result<Option<GoalIntentData>, postgres::Error> {
-  let sql = "SELECT * FROM goal_intent_data WHERE goal_intent_data_id=? ORDER BY goal_intent_data_id DESC LIMIT 1";
-  con
-    .query_row(sql, params![goal_intent_id], |row| row.try_into())
-    .optional()
+  let result = con
+    .query_opt(
+      "SELECT * FROM goal_intent_data WHERE goal_intent_data_id=$1",
+      &[&goal_intent_data_id],
+    )?
+    .map(|x| x.into());
+
+  Ok(result)
 }
 
 // TODO need to fix
@@ -92,37 +92,41 @@ pub fn query(
       ""
     },
     " WHERE 1 = 1",
-    " AND (:goal_intent_data_id   == NULL OR gdi.goal_intent_data_id = :goal_intent_data_id)",
-    " AND (:creation_time         == NULL OR gdi.creation_time = :creation_time)",
-    " AND (:creation_time         == NULL OR gdi.creation_time >= :min_creation_time)",
-    " AND (:creation_time         == NULL OR gdi.creation_time <= :max_creation_time)",
-    " AND (:creator_user_id       == NULL OR gdi.creator_user_id = :creator_user_id)",
-    " AND (:goal_intent_id        == NULL OR gdi.goal_intent_id = :goal_intent_id)",
-    " AND (:name                  == NULL OR gdi.name = :name)",
-    " AND (:partial_name          == NULL OR gdi.partial_name LIKE CONCAT('%',:partial_name,'%'))",
-    " AND (:active                == NULL OR gdi.active = :active)",
+    " AND ($1 == NULL OR gdi.goal_intent_data_id = $1)",
+    " AND ($2 == NULL OR gdi.creation_time = $2)",
+    " AND ($3 == NULL OR gdi.creation_time >= $3)",
+    " AND ($4 == NULL OR gdi.creation_time <= $4)",
+    " AND ($5 == NULL OR gdi.creator_user_id = $5)",
+    " AND ($6 == NULL OR gdi.goal_intent_id = $6)",
+    " AND ($7 == NULL OR gdi.name = $7)",
+    " AND ($8 == NULL OR gdi.partial_name LIKE CONCAT('%',$8,'%'))",
+    " AND ($9 == NULL OR gdi.active = $9)",
     " ORDER BY gdi.goal_intent_data_id",
-    " LIMIT :offset, :count",
+    " LIMIT $10, $11",
   ]
   .join("");
 
-  let mut stmnt = con.prepare(&sql)?;
+  let stmnt = con.prepare(&sql)?;
 
-  let results = stmnt
-    .query(named_params! {
-        "goal_intent_data_id": props.goal_intent_data_id,
-        "creation_time": props.creation_time,
-        "min_creation_time": props.min_creation_time,
-        "max_creation_time": props.max_creation_time,
-        "creator_user_id": props.creator_user_id,
-        "goal_intent_id": props.goal_intent_id,
-        "name": props.name,
-        "partial_name": props.partial_name,
-        "active": props.active,
-        "offset": props.offset,
-        "count": props.offset,
-    })?
-    .and_then(|row| row.try_into())
-    .filter_map(|x: Result<GoalIntentData, postgres::Error>| x.ok());
-  Ok(results.collect::<Vec<GoalIntentData>>())
+  let results = con
+    .query(
+        &stmnt,
+        & [
+        &props.goal_intent_data_id,
+        &props.creation_time,
+        &props.min_creation_time,
+        &props.max_creation_time,
+        &props.creator_user_id,
+        &props.goal_intent_id,
+        &props.name,
+        &props.partial_name,
+        &props.active,
+        &props.offset,
+        &props.offset,
+    ])?
+    .into_iter()
+    .map(|row| row.into())
+    .collect();
+
+  Ok(results)
 }
