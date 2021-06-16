@@ -65,4 +65,3 @@ pub struct TimeUtilityFunctionPoint {
   pub start_time: i64,
   pub utils: i64,
 }
-

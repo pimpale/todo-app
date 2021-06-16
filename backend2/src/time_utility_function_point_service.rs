@@ -1,28 +1,24 @@
 use super::todo_app_db_types::*;
-use rusqlite::{named_params, params, Connection, OptionalExtension, Savepoint};
-use std::convert::{TryFrom, TryInto};
+use postgres::GenericClient;
 
-impl TryFrom<&rusqlite::Row<'_>> for TimeUtilityFunctionPoint {
-  type Error = rusqlite::Error;
-
+impl From<postgres::row::Row> for TimeUtilityFunctionPoint {
   // select * from time_utility_function_point order only, otherwise it will fail
-  fn try_from(row: &rusqlite::Row) -> Result<TimeUtilityFunctionPoint, rusqlite::Error> {
-    Ok(TimeUtilityFunctionPoint {
-      time_utility_function_point_id: row.get(0)?,
-      time_utility_function_id: row.get(1)?,
-      start_time: row.get(2)?,
-      utils: row.get(3)?,
-    })
+  fn from(row: postgres::row::Row) -> TimeUtilityFunctionPoint {
+    TimeUtilityFunctionPoint {
+      time_utility_function_point_id: row.get("time_utility_function_point_id"),
+      time_utility_function_id: row.get("time_utility_function_id"),
+      start_time: row.get("start_time"),
+      utils: row.get("utils"),
+    }
   }
 }
 
 pub fn add(
-  con: &mut Savepoint,
+  con: &mut impl GenericClient,
   time_utility_function_id: i64,
   start_time: i64,
   utils: i64,
-) -> Result<TimeUtilityFunctionPoint, rusqlite::Error> {
-  let sp = con.savepoint()?;
+) -> Result<TimeUtilityFunctionPoint, postgres::Error> {
 
   let sql = "INSERT INTO
   time_utility_function_point(
@@ -42,9 +38,6 @@ pub fn add(
 
   let time_utility_function_point_id = sp.last_insert_rowid();
 
-  // commit savepoint
-  sp.commit()?;
-
   // return time_utility_function_point
   Ok(TimeUtilityFunctionPoint {
     time_utility_function_point_id,
@@ -55,9 +48,9 @@ pub fn add(
 }
 
 pub fn get_by_time_utility_function_point_id(
-  con: &Connection,
+  con: &mut impl GenericClient,
   time_utility_function_point_id: i64,
-) -> Result<Option<TimeUtilityFunctionPoint>, rusqlite::Error> {
+) -> Result<Option<TimeUtilityFunctionPoint>, postgres::Error> {
   let sql = "SELECT * FROM time_utility_function_point WHERE time_utility_function_point_id=?";
   con
     .query_row(sql, params![time_utility_function_point_id], |row| {
@@ -67,9 +60,9 @@ pub fn get_by_time_utility_function_point_id(
 }
 
 pub fn query(
-  con: &Connection,
+  con: &mut impl GenericClient,
   time_utility_function_id: i64,
-) -> Result<Vec<TimeUtilityFunctionPoint>, rusqlite::Error> {
+) -> Result<Vec<TimeUtilityFunctionPoint>, postgres::Error> {
   let sql = [
     "SELECT tufp.* FROM time_utility_function_point tufp WHERE 1 = 1",
     " AND tufp.time_utility_function_id = :time_utility_function_id",
@@ -84,6 +77,6 @@ pub fn query(
         "time_utility_function_id": time_utility_function_id,
     })?
     .and_then(|row| row.try_into())
-    .filter_map(|x: Result<TimeUtilityFunctionPoint, rusqlite::Error>| x.ok());
+    .filter_map(|x: Result<TimeUtilityFunctionPoint, postgres::Error>| x.ok());
   Ok(results.collect::<Vec<TimeUtilityFunctionPoint>>())
 }

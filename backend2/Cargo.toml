@@ -6,9 +6,9 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rusqlite = { version = "^0.25", features = ["bundled"] }
 warp ="^0.3"
 clap = "3.0.0-beta.2"
+postgres = "0.19.1"
 tokio = { version = "1", features=["full"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

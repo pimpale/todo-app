@@ -1,35 +1,29 @@
 use super::todo_app_db_types::*;
 use super::utils::current_time_millis;
-use rusqlite::{named_params, params, Connection, OptionalExtension, Savepoint};
-use std::convert::{TryFrom, TryInto};
+use postgres::GenericClient;
+use std::convert::TryInto;
 use todo_app_service_api::request;
 
-impl TryFrom<&rusqlite::Row<'_>> for GoalData {
-  type Error = rusqlite::Error;
-
+impl From<postgres::row::Row> for GoalData {
   // select * from goal_data order only, otherwise it will fail
-  fn try_from(row: &rusqlite::Row) -> Result<GoalData, rusqlite::Error> {
-    Ok(GoalData {
-      goal_data_id: row.get(0)?,
-      creation_time: row.get(1)?,
-      creator_user_id: row.get(2)?,
-      goal_id: row.get(3)?,
-      name: row.get(4)?,
-      duration_estimate: row.get(5)?,
-      time_utility_function_id: row.get(6)?,
-      parent_goal_id: row.get(7)?,
-      status: row
-        .get::<_, u8>(8)?
-        .try_into()
-        // means that there's a mismatch between the values of the enum and the value stored in the column
-        .map_err(|x| rusqlite::Error::IntegralValueOutOfRange(4, x as i64))?,
-    })
+  fn from(row: postgres::Row) -> GoalData {
+    GoalData {
+      goal_data_id: row.get("goal_data_id"),
+      creation_time: row.get("creation_time"),
+      creator_user_id: row.get("creator_user_id"),
+      goal_id: row.get("goal_id"),
+      name: row.get("name"),
+      duration_estimate: row.get("duration_estimate"),
+      time_utility_function_id: row.get("time_utility_function_id"),
+      parent_goal_id: row.get("parent_goal_id"),
+      status: (row.get::<_, i64>("status") as u8).try_into().unwrap(),
+    }
   }
 }
 
 // TODO we need to figure out a way to make scheduled and unscheduled goals work better
 pub fn add(
-  con: &mut Savepoint,
+  con: &mut impl GenericClient,
   creator_user_id: i64,
   goal_id: i64,
   name: String,
@@ -37,8 +31,7 @@ pub fn add(
   time_utility_function_id: i64,
   parent_goal_id: Option<i64>,
   status: request::GoalDataStatusKind,
-) -> Result<GoalData, rusqlite::Error> {
-  let sp = con.savepoint()?;
+) -> Result<GoalData, postgres::Error> {
   let creation_time = current_time_millis();
 
   let sql = "INSERT INTO
@@ -69,9 +62,6 @@ pub fn add(
 
   let goal_data_id = sp.last_insert_rowid();
 
-  // commit savepoint
-  sp.commit()?;
-
   // return goal_data
   Ok(GoalData {
     goal_data_id,
@@ -87,23 +77,19 @@ pub fn add(
 }
 
 pub fn get_by_goal_data_id(
-  con: &Connection,
+  con: &mut impl GenericClient,
   goal_id: &str,
-) -> Result<Option<GoalData>, rusqlite::Error> {
+) -> Result<Option<GoalData>, postgres::Error> {
   let sql = "SELECT * FROM goal_data WHERE goal_data_id=? ORDER BY goal_data_id DESC LIMIT 1";
   con
     .query_row(sql, params![goal_id], |row| row.try_into())
     .optional()
 }
 
-// TODO need to fix
-
 pub fn query(
-  con: &Connection,
+  con: &mut impl GenericClient,
   props: todo_app_service_api::request::GoalDataViewProps,
-) -> Result<Vec<GoalData>, rusqlite::Error> {
-  // TODO prevent getting meaningless duration
-
+) -> Result<Vec<GoalData>, postgres::Error> {
   let sql = [
     "SELECT gd.* FROM goal_data gd",
     " JOIN goal g ON gd.goal_id = g.goal_id",
@@ -157,6 +143,6 @@ pub fn query(
         "count": props.count,
     })?
     .and_then(|row| row.try_into())
-    .filter_map(|x: Result<GoalData, rusqlite::Error>| x.ok());
+    .filter_map(|x: Result<GoalData, postgres::Error>| x.ok());
   Ok(results.collect::<Vec<GoalData>>())
 }

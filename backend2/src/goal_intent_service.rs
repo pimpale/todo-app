@@ -1,40 +1,30 @@
 use super::todo_app_db_types::*;
 use super::utils::current_time_millis;
-use rusqlite::{named_params, params, Connection, OptionalExtension, Savepoint};
-use std::convert::{TryFrom, TryInto};
+use postgres::GenericClient;
 use todo_app_service_api::request;
 
-impl TryFrom<&rusqlite::Row<'_>> for GoalIntent {
-  type Error = rusqlite::Error;
-
+impl From<postgres::row::Row> for GoalIntent {
   // select * from goal_intent order only, otherwise it will fail
-  fn try_from(row: &rusqlite::Row) -> Result<GoalIntent, rusqlite::Error> {
-    Ok(GoalIntent {
-      goal_intent_id: row.get(0)?,
-      creation_time: row.get(1)?,
-      creator_user_id: row.get(2)?,
-    })
+  fn from(row: postgres::row::Row) -> GoalIntent {
+    GoalIntent {
+      goal_intent_id: row.get("goal_intent_id"),
+      creation_time: row.get("creation_time"),
+      creator_user_id: row.get("creator_user_id"),
+    }
   }
 }
 
 pub fn add(
-  con: &mut Savepoint,
+  con: &mut impl GenericClient,
   creator_user_id: i64,
-) -> Result<GoalIntent, rusqlite::Error> {
-  let sp = con.savepoint()?;
+) -> Result<GoalIntent, postgres::Error> {
 
   let creation_time = current_time_millis();
 
   let sql = "INSERT INTO goal_intent(creation_time, creator_user_id) values (?, ?)";
-  sp.execute(
-    sql,
-    params![creation_time, creator_user_id,],
-  )?;
+  sp.execute(sql, params![creation_time, creator_user_id,])?;
 
   let goal_intent_id = sp.last_insert_rowid();
-
-  // commit savepoint
-  sp.commit()?;
 
   // return goal_intent
   Ok(GoalIntent {
@@ -44,7 +34,10 @@ pub fn add(
   })
 }
 
-pub fn get_by_goal_intent_id(con: &Connection, goal_intent_id: i64) -> Result<Option<GoalIntent>, rusqlite::Error> {
+pub fn get_by_goal_intent_id(
+  con: &mut impl GenericClient,
+  goal_intent_id: i64,
+) -> Result<Option<GoalIntent>, postgres::Error> {
   let sql = "SELECT * FROM goal_intent WHERE goal_intent_id=?";
   con
     .query_row(sql, params![goal_intent_id], |row| row.try_into())
@@ -52,9 +45,9 @@ pub fn get_by_goal_intent_id(con: &Connection, goal_intent_id: i64) -> Result<Op
 }
 
 pub fn query(
-  con: &Connection,
+  con: &mut impl GenericClient,
   props: request::GoalIntentViewProps,
-) -> Result<Vec<GoalIntent>, rusqlite::Error> {
+) -> Result<Vec<GoalIntent>, postgres::Error> {
   let sql = [
     "SELECT g.* FROM goal_intent g WHERE 1 = 1",
     " AND (:goal_intent_id         == NULL OR g.goal_intent_id = :goal_intent_id)",
@@ -80,6 +73,6 @@ pub fn query(
         "count": props.count,
     })?
     .and_then(|row| row.try_into())
-    .filter_map(|x: Result<GoalIntent, rusqlite::Error>| x.ok());
+    .filter_map(|x: Result<GoalIntent, postgres::Error>| x.ok());
   Ok(results.collect::<Vec<GoalIntent>>())
 }

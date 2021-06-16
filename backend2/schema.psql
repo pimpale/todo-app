@@ -1,0 +1,68 @@
+-- Table Structure
+-- Primary Key
+-- Creation Time
+-- Creator User Id (if applicable)
+-- Everything else
+
+drop table if exists goal_intent;
+create table goal_intent(
+  goal_intent_id serial primary key,
+  creation_time integer not null,
+  creator_user_id integer not null
+);
+
+drop table if exists goal_intent_data;
+create table goal_intent_data(
+  goal_intent_data_id serial primary key,
+  creation_time integer not null,
+  creator_user_id integer not null,
+  name varchar(100) not null
+);
+
+drop table if exists goal;
+create table goal(
+  goal_id serial primary key,
+  creation_time integer not null,
+  creator_user_id integer not null,
+  goal_intent integer -- NULLABLE
+);
+
+drop table if exists time_utility_function;
+create table time_utility_function(
+  time_utility_function_id serial primary key,
+  creation_time integer not null,
+  creator_user_id integer not null
+);
+
+-- invariant: There must be at least one distribution point per time_utility_function
+drop table if exists time_utility_function_point;
+create table time_utility_function_point(
+  time_utility_function_point_id serial primary key,
+  start_time integer not null,
+  utils integer not null
+);
+
+-- invariant: goal_id is valid
+drop table if exists goal_data;
+create table goal_data(
+  goal_data_id serial primary key,
+  creation_time integer not null,
+  creator_user_id integer not null,
+  goal_id integer not null,
+  name varchar(100) not null,
+  duration_estimate integer not null,
+  time_utility_function_id integer not null,
+  parent_goal_id integer not null, -- NULLABLE
+  status integer not null -- enum
+);
+
+drop table if exists task_event;
+create table task_event(
+  task_event_id serial primary key,
+  creation_time integer not null,
+  creator_user_id integer not null,
+  goal_id integer not null,
+  start_time integer not null,
+  duration integer not null,
+  active integer not null -- boolean
+);

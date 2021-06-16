@@ -1,7 +1,7 @@
 #![feature(async_closure)]
 #![feature(never_type)]
 use clap::Clap;
-use rusqlite::Connection;
+use postgres::{Client, NoTls};
 use std::sync::Arc;
 
 use tokio::sync::Mutex;
@@ -41,7 +41,7 @@ pub struct Config {
   pub site_external_url: String,
 }
 
-pub type Db = Arc<Mutex<Connection>>;
+pub type Db = Arc<Mutex<Client>>;
 
 #[tokio::main]
 async fn main() {
@@ -52,7 +52,7 @@ async fn main() {
     port,
   } = Opts::parse();
 
-  let db: Db = Arc::new(Mutex::new(Connection::open(database_url).unwrap()));
+  let db: Db = Arc::new(Mutex::new(Client::connect(&database_url, NoTls).unwrap()));
 
   // open connection to auth service
   let auth_service = AuthService::new(&auth_service_url).await;

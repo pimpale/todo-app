@@ -1,26 +1,24 @@
 use super::todo_app_db_types::*;
 use super::utils::current_time_millis;
-use rusqlite::{named_params, params, Connection, OptionalExtension, Savepoint};
-use std::convert::{TryFrom, TryInto};
+use postgres::GenericClient;
+use std::convert::{From, TryInto};
 use todo_app_service_api::request;
 
-impl TryFrom<&rusqlite::Row<'_>> for TimeUtilityFunction {
-  type Error = rusqlite::Error;
-
+impl From<postgres::row::Row> for TimeUtilityFunction {
   // select * from time_utility_function order only, otherwise it will fail
-  fn try_from(row: &rusqlite::Row) -> Result<TimeUtilityFunction, rusqlite::Error> {
-    Ok(TimeUtilityFunction {
-      time_utility_function_id: row.get(0)?,
-      creation_time: row.get(1)?,
-      creator_user_id: row.get(2)?,
-    })
+  fn from(row: postgres::Row) -> TimeUtilityFunction {
+    TimeUtilityFunction {
+      time_utility_function_id: row.get("creator_user_id"),
+      creation_time: row.get("creator_user_id"),
+      creator_user_id: row.get("creator_user_id"),
+    }
   }
 }
 
 pub fn add(
-  con: &mut Savepoint,
+  con: &mut impl GenericClient,
   creator_user_id: i64,
-) -> Result<TimeUtilityFunction, rusqlite::Error> {
+) -> Result<TimeUtilityFunction, postgres::Error> {
   let sp = con.savepoint()?;
 
   let creation_time = current_time_millis();
@@ -42,9 +40,9 @@ pub fn add(
 }
 
 pub fn get_by_time_utility_function_id(
-  con: &Connection,
+  con: &mut impl GenericClient,
   time_utility_function_id: i64,
-) -> Result<Option<TimeUtilityFunction>, rusqlite::Error> {
+) -> Result<Option<TimeUtilityFunction>, postgres::Error> {
   let sql = "SELECT * FROM time_utility_function WHERE time_utility_function_id=?";
   con
     .query_row(sql, params![time_utility_function_id], |row| row.try_into())
@@ -52,9 +50,9 @@ pub fn get_by_time_utility_function_id(
 }
 
 pub fn query(
-  con: &Connection,
+  con: &mut impl GenericClient,
   props: request::TimeUtilityFunctionViewProps,
-) -> Result<Vec<TimeUtilityFunction>, rusqlite::Error> {
+) -> Result<Vec<TimeUtilityFunction>, postgres::Error> {
   let sql = [
     "SELECT tuf.* FROM time_utility_function tuf WHERE 1 = 1",
     " AND (:time_utility_function_id  == NULL OR tuf.time_utility_function_id = :time_utility_function_id)",
@@ -80,6 +78,6 @@ pub fn query(
         "count": props.count,
     })?
     .and_then(|row| row.try_into())
-    .filter_map(|x: Result<TimeUtilityFunction, rusqlite::Error>| x.ok());
+    .filter_map(|x: Result<TimeUtilityFunction, postgres::Error>| x.ok());
   Ok(results.collect::<Vec<TimeUtilityFunction>>())
 }

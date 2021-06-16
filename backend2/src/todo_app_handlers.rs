@@ -21,7 +21,7 @@ use std::error::Error;
 
 use super::Config;
 
-fn report_rusqlite_err(e: rusqlite::Error) -> response::TodoAppError {
+fn report_postgres_err(e: postgres::Error) -> response::TodoAppError {
   utils::log(utils::Event {
     msg: e.to_string(),
     source: e.source().map(|e| e.to_string()),
@@ -55,7 +55,7 @@ fn report_auth_err(e: AuthError) -> response::TodoAppError {
 }
 
 fn fill_goal_intent(
-  _con: &rusqlite::Connection,
+  _con: &postgres::Connection,
   goal_intent: GoalIntent,
 ) -> Result<response::GoalIntent, response::TodoAppError> {
   Ok(response::GoalIntent {
@@ -66,7 +66,7 @@ fn fill_goal_intent(
 }
 
 fn fill_goal_intent_data(
-  con: &rusqlite::Connection,
+  con: &postgres::Connection,
   goal_intent_data: GoalIntentData,
 ) -> Result<response::GoalIntentData, response::TodoAppError> {
   Ok(response::GoalIntentData {
@@ -76,7 +76,7 @@ fn fill_goal_intent_data(
     goal_intent: fill_goal_intent(
       con,
       goal_intent_service::get_by_goal_intent_id(con, goal_intent_data.goal_intent_id)
-        .map_err(report_rusqlite_err)?
+        .map_err(report_postgres_err)?
         .ok_or(response::TodoAppError::GoalIntentNonexistent)?,
     )?,
     name: goal_intent_data.name,
@@ -85,7 +85,7 @@ fn fill_goal_intent_data(
 }
 
 fn fill_goal(
-  con: &rusqlite::Connection,
+  con: &postgres::Connection,
   goal: Goal,
 ) -> Result<response::Goal, response::TodoAppError> {
   Ok(response::Goal {
@@ -96,7 +96,7 @@ fn fill_goal(
       Some(goal_intent_id) => Some(fill_goal_intent(
         con,
         goal_intent_service::get_by_goal_intent_id(con, goal_intent_id)
-          .map_err(report_rusqlite_err)?
+          .map_err(report_postgres_err)?
           .ok_or(response::TodoAppError::GoalIntentNonexistent)?,
       )?),
       _ => None,
@@ -105,7 +105,7 @@ fn fill_goal(
 }
 
 fn fill_goal_data(
-  con: &rusqlite::Connection,
+  con: &postgres::Connection,
   goal_data: GoalData,
 ) -> Result<response::GoalData, response::TodoAppError> {
   Ok(response::GoalData {
@@ -115,7 +115,7 @@ fn fill_goal_data(
     goal: fill_goal(
       con,
       goal_service::get_by_goal_id(con, goal_data.goal_id)
-        .map_err(report_rusqlite_err)?
+        .map_err(report_postgres_err)?
         .ok_or(response::TodoAppError::GoalNonexistent)?,
     )?,
     name: goal_data.name,
@@ -126,14 +126,14 @@ fn fill_goal_data(
         con,
         goal_data.time_utility_function_id,
       )
-      .map_err(report_rusqlite_err)?
+      .map_err(report_postgres_err)?
       .ok_or(response::TodoAppError::TimeUtilityFunctionNonexistent)?,
     )?,
     parent_goal: match goal_data.parent_goal_id {
       Some(parent_goal_id) => Some(fill_goal(
         con,
         goal_service::get_by_goal_id(con, parent_goal_id)
-          .map_err(report_rusqlite_err)?
+          .map_err(report_postgres_err)?
           .ok_or(response::TodoAppError::GoalNonexistent)?,
       )?),
       _ => None,
@@ -143,12 +143,12 @@ fn fill_goal_data(
 }
 
 fn fill_time_utility_function(
-  con: &rusqlite::Connection,
+  con: &postgres::Connection,
   time_utility_function: TimeUtilityFunction,
 ) -> Result<response::TimeUtilityFunction, response::TodoAppError> {
   let points =
     time_utility_function_point_service::query(con, time_utility_function.time_utility_function_id)
-      .map_err(report_rusqlite_err)?;
+      .map_err(report_postgres_err)?;
 
   Ok(response::TimeUtilityFunction {
     time_utility_function_id: time_utility_function.time_utility_function_id,
@@ -160,7 +160,7 @@ fn fill_time_utility_function(
 }
 
 fn fill_task_event(
-  con: &rusqlite::Connection,
+  con: &postgres::Connection,
   task_event: TaskEvent,
 ) -> Result<response::TaskEvent, response::TodoAppError> {
   Ok(response::TaskEvent {
@@ -170,7 +170,7 @@ fn fill_task_event(
     goal: fill_goal(
       con,
       goal_service::get_by_goal_id(con, task_event.goal_id)
-        .map_err(report_rusqlite_err)?
+        .map_err(report_postgres_err)?
         .ok_or(response::TodoAppError::GoalNonexistent)?,
     )?,
     start_time: task_event.start_time,
@@ -200,10 +200,10 @@ pub async fn goal_intent_new(
 
   let con = &mut *db.lock().await;
 
-  let mut sp = con.savepoint().map_err(report_rusqlite_err)?;
+  let mut sp = con.savepoint().map_err(report_postgres_err)?;
 
   // create intent
-  let goal_intent = goal_intent_service::add(&mut sp, user.user_id).map_err(report_rusqlite_err)?;
+  let goal_intent = goal_intent_service::add(&mut sp, user.user_id).map_err(report_postgres_err)?;
 
   // create data
   let goal_intent_data = goal_intent_data_service::add(
@@ -213,9 +213,9 @@ pub async fn goal_intent_new(
     props.name,
     true,
   )
-  .map_err(report_rusqlite_err)?;
+  .map_err(report_postgres_err)?;
 
-  sp.commit().map_err(report_rusqlite_err)?;
+  sp.commit().map_err(report_postgres_err)?;
 
   // return json
   fill_goal_intent_data(con, goal_intent_data)
@@ -232,10 +232,10 @@ pub async fn goal_intent_data_new(
 
   let con = &mut *db.lock().await;
 
-  let mut sp = con.savepoint().map_err(report_rusqlite_err)?;
+  let mut sp = con.savepoint().map_err(report_postgres_err)?;
 
   let goal_intent = goal_intent_service::get_by_goal_intent_id(&sp, props.goal_intent_id)
-    .map_err(report_rusqlite_err)?
+    .map_err(report_postgres_err)?
     .ok_or(response::TodoAppError::GoalIntentNonexistent)?;
 
   // validate intent is owned by correct user
@@ -251,9 +251,9 @@ pub async fn goal_intent_data_new(
     props.name,
     true,
   )
-  .map_err(report_rusqlite_err)?;
+  .map_err(report_postgres_err)?;
 
-  sp.commit().map_err(report_rusqlite_err)?;
+  sp.commit().map_err(report_postgres_err)?;
 
   // return json
   fill_goal_intent_data(con, goal_intent_data)
@@ -270,14 +270,14 @@ pub async fn goal_new(
 
   let con = &mut *db.lock().await;
 
-  let mut sp = con.savepoint().map_err(report_rusqlite_err)?;
+  let mut sp = con.savepoint().map_err(report_postgres_err)?;
 
   // ensure time utility function exists and belongs to you
   let time_utility_function = time_utility_function_service::get_by_time_utility_function_id(
     &sp,
     props.time_utility_function_id,
   )
-  .map_err(report_rusqlite_err)?
+  .map_err(report_postgres_err)?
   .ok_or(response::TodoAppError::TimeUtilityFunctionNonexistent)?;
   // validate intent is owned by correct user
   if time_utility_function.creator_user_id != user.user_id {
@@ -287,7 +287,7 @@ pub async fn goal_new(
   // validate that parent exists and belongs to you
   if let Some(parent_goal_id) = props.parent_goal_id {
     let goal = goal_service::get_by_goal_id(&sp, parent_goal_id)
-      .map_err(report_rusqlite_err)?
+      .map_err(report_postgres_err)?
       .ok_or(response::TodoAppError::GoalNonexistent)?;
     // validate intent is owned by correct user
     if goal.creator_user_id != user.user_id {
@@ -298,7 +298,7 @@ pub async fn goal_new(
   // validate that intent exists and belongs to you
   if let Some(goal_intent_id) = props.goal_intent_id {
     let goal_intent = goal_intent_service::get_by_goal_intent_id(&sp, goal_intent_id)
-      .map_err(report_rusqlite_err)?
+      .map_err(report_postgres_err)?
       .ok_or(response::TodoAppError::GoalIntentNonexistent)?;
     // validate intent is owned by correct user
     if goal_intent.creator_user_id != user.user_id {
@@ -308,7 +308,7 @@ pub async fn goal_new(
 
   // create goal
   let goal =
-    goal_service::add(&mut sp, user.user_id, props.goal_intent_id).map_err(report_rusqlite_err)?;
+    goal_service::add(&mut sp, user.user_id, props.goal_intent_id).map_err(report_postgres_err)?;
 
   // create goal data
   let goal_data = goal_data_service::add(
@@ -321,9 +321,9 @@ pub async fn goal_new(
     props.parent_goal_id,
     request::GoalDataStatusKind::Pending,
   )
-  .map_err(report_rusqlite_err)?;
+  .map_err(report_postgres_err)?;
 
-  sp.commit().map_err(report_rusqlite_err)?;
+  sp.commit().map_err(report_postgres_err)?;
 
   // return json
   fill_goal_data(con, goal_data)
@@ -340,14 +340,14 @@ pub async fn goal_data_new(
 
   let con = &mut *db.lock().await;
 
-  let mut sp = con.savepoint().map_err(report_rusqlite_err)?;
+  let mut sp = con.savepoint().map_err(report_postgres_err)?;
 
   // ensure time utility function exists and belongs to you
   let time_utility_function = time_utility_function_service::get_by_time_utility_function_id(
     &sp,
     props.time_utility_function_id,
   )
-  .map_err(report_rusqlite_err)?
+  .map_err(report_postgres_err)?
   .ok_or(response::TodoAppError::TimeUtilityFunctionNonexistent)?;
   // validate intent is owned by correct user
   if time_utility_function.creator_user_id != user.user_id {
@@ -357,7 +357,7 @@ pub async fn goal_data_new(
   // validate that parent exists and belongs to you
   if let Some(parent_goal_id) = props.parent_goal_id {
     let goal = goal_service::get_by_goal_id(&sp, parent_goal_id)
-      .map_err(report_rusqlite_err)?
+      .map_err(report_postgres_err)?
       .ok_or(response::TodoAppError::GoalNonexistent)?;
     // validate intent is owned by correct user
     if goal.creator_user_id != user.user_id {
@@ -367,7 +367,7 @@ pub async fn goal_data_new(
 
   // ensure that goal exists and belongs to you
   let goal = goal_service::get_by_goal_id(&sp, props.goal_id)
-    .map_err(report_rusqlite_err)?
+    .map_err(report_postgres_err)?
     .ok_or(response::TodoAppError::GoalNonexistent)?;
   // validate intent is owned by correct user
   if goal.creator_user_id != user.user_id {
@@ -385,9 +385,9 @@ pub async fn goal_data_new(
     props.parent_goal_id,
     props.status,
   )
-  .map_err(report_rusqlite_err)?;
+  .map_err(report_postgres_err)?;
 
-  sp.commit().map_err(report_rusqlite_err)?;
+  sp.commit().map_err(report_postgres_err)?;
 
   // return json
   fill_goal_data(con, goal_data)
@@ -409,11 +409,11 @@ pub async fn time_utility_function_new(
 
   let con = &mut *db.lock().await;
 
-  let mut sp = con.savepoint().map_err(report_rusqlite_err)?;
+  let mut sp = con.savepoint().map_err(report_postgres_err)?;
 
   // create tuf
   let time_utility_function =
-    time_utility_function_service::add(&mut sp, user.user_id).map_err(report_rusqlite_err)?;
+    time_utility_function_service::add(&mut sp, user.user_id).map_err(report_postgres_err)?;
 
   // create data
   for (start_time, utils) in props.start_times.into_iter().zip(props.utils.into_iter()) {
@@ -428,10 +428,10 @@ pub async fn time_utility_function_new(
       start_time,
       utils,
     )
-    .map_err(report_rusqlite_err)?;
+    .map_err(report_postgres_err)?;
   }
 
-  sp.commit().map_err(report_rusqlite_err)?;
+  sp.commit().map_err(report_postgres_err)?;
 
   // return json
   fill_time_utility_function(con, time_utility_function)
@@ -448,11 +448,11 @@ pub async fn task_event_new(
 
   let con = &mut *db.lock().await;
 
-  let mut sp = con.savepoint().map_err(report_rusqlite_err)?;
+  let mut sp = con.savepoint().map_err(report_postgres_err)?;
 
   // ensure that goal exists and belongs to you
   let goal = goal_service::get_by_goal_id(&sp, props.goal_id)
-    .map_err(report_rusqlite_err)?
+    .map_err(report_postgres_err)?
     .ok_or(response::TodoAppError::GoalNonexistent)?;
   // validate intent is owned by correct user
   if goal.creator_user_id != user.user_id {
@@ -468,9 +468,9 @@ pub async fn task_event_new(
     props.duration,
     props.active,
   )
-  .map_err(report_rusqlite_err)?;
+  .map_err(report_postgres_err)?;
 
-  sp.commit().map_err(report_rusqlite_err)?;
+  sp.commit().map_err(report_postgres_err)?;
 
   // return json
   fill_task_event(con, task_event)
@@ -487,7 +487,7 @@ pub async fn goal_intent_view(
 
   let con = &mut *db.lock().await;
   // get users
-  let goal_intents = goal_intent_service::query(con, props).map_err(report_rusqlite_err)?;
+  let goal_intents = goal_intent_service::query(con, props).map_err(report_postgres_err)?;
   // return users
   goal_intents
     .into_iter()
@@ -508,7 +508,7 @@ pub async fn goal_intent_data_view(
   let con = &mut *db.lock().await;
   // get users
   let goal_intent_data =
-    goal_intent_data_service::query(con, props).map_err(report_rusqlite_err)?;
+    goal_intent_data_service::query(con, props).map_err(report_postgres_err)?;
   // return users
   goal_intent_data
     .into_iter()
@@ -528,9 +528,13 @@ pub async fn goal_view(
 
   let con = &mut *db.lock().await;
   // get users
-  let goals = goal_service::query(con, props).map_err(report_rusqlite_err)?;
+  let goals = goal_service::query(con, props).map_err(report_postgres_err)?;
   // return users
-  goals.into_iter().map(|u| fill_goal(con, u)).collect()
+  goals
+    .into_iter()
+    .filter(|u| u.creator_user_id == user.user_id)
+    .map(|u| fill_goal(con, u))
+    .collect()
 }
 
 pub async fn goal_data_view(
@@ -544,7 +548,7 @@ pub async fn goal_data_view(
 
   let con = &mut *db.lock().await;
   // get users
-  let goal_data = goal_data_service::query(con, props).map_err(report_rusqlite_err)?;
+  let goal_data = goal_data_service::query(con, props).map_err(report_postgres_err)?;
   // return users
   goal_data
     .into_iter()
@@ -565,7 +569,7 @@ pub async fn time_utility_function_view(
   let con = &mut *db.lock().await;
   // get users
   let time_utility_function =
-    time_utility_function_service::query(con, props).map_err(report_rusqlite_err)?;
+    time_utility_function_service::query(con, props).map_err(report_postgres_err)?;
   // return users
   time_utility_function
     .into_iter()
@@ -585,7 +589,7 @@ pub async fn task_event_view(
 
   let con = &mut *db.lock().await;
   // get users
-  let task_event = task_event_service::query(con, props).map_err(report_rusqlite_err)?;
+  let task_event = task_event_service::query(con, props).map_err(report_postgres_err)?;
   // return users
   task_event
     .into_iter()

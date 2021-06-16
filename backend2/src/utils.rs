@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
+use std::convert::From;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub fn current_time_millis() -> i64 {
@@ -20,7 +20,7 @@ pub enum SeverityKind {
   Fatal,
 }
 
-impl TryFrom<u8> for SeverityKind {
+impl From<u8> for SeverityKind {
   type Error = u8;
   fn try_from(val: u8) -> Result<SeverityKind, u8> {
     match val {

@@ -1,34 +1,32 @@
 use super::todo_app_db_types::*;
 use super::utils::current_time_millis;
-use rusqlite::{named_params, params, Connection, OptionalExtension, Savepoint};
-use std::convert::{TryFrom, TryInto};
+use postgres::GenericClient;
+use std::convert::{From, TryInto};
 
-impl TryFrom<&rusqlite::Row<'_>> for TaskEvent {
-  type Error = rusqlite::Error;
+impl From<postgres::row::Row> for TaskEvent {
 
   // select * from task_event order only, otherwise it will fail
-  fn try_from(row: &rusqlite::Row) -> Result<TaskEvent, rusqlite::Error> {
-    Ok(TaskEvent {
-      task_event_id: row.get(0)?,
-      creation_time: row.get(1)?,
-      creator_user_id: row.get(2)?,
-      goal_id: row.get(3)?,
-      start_time: row.get(4)?,
-      duration: row.get(5)?,
-      active: row.get(6)?,
-    })
+  fn from(row: postgres::row::Row) -> TaskEvent {
+    TaskEvent {
+      task_event_id: row.get("task_event_id"),
+      creation_time: row.get("creation_time"),
+      creator_user_id: row.get("creator_user_id"),
+      goal_id: row.get("goal_id"),
+      start_time: row.get("start_time"),
+      duration: row.get("duration"),
+      active: row.get("active"),
+    }
   }
 }
 
 pub fn add(
-  con: &mut Savepoint,
+  con: &mut impl GenericClient,
   creator_user_id: i64,
   goal_id: i64,
   start_time: i64,
   duration: i64,
   active: bool,
-) -> Result<TaskEvent, rusqlite::Error> {
-  let sp = con.savepoint()?;
+) -> Result<TaskEvent, postgres::Error> {
   let creation_time = current_time_millis();
 
   let sql = "INSERT INTO
@@ -71,9 +69,9 @@ pub fn add(
 }
 
 pub fn get_by_task_event_id(
-  con: &Connection,
+  con: &mut impl GenericClient,
   goal_id: &str,
-) -> Result<Option<TaskEvent>, rusqlite::Error> {
+) -> Result<Option<TaskEvent>, postgres::Error> {
   let sql = "SELECT * FROM task_event WHERE task_event_id=? ORDER BY task_event_id DESC LIMIT 1";
   con
     .query_row(sql, params![goal_id], |row| row.try_into())
@@ -83,9 +81,9 @@ pub fn get_by_task_event_id(
 // TODO need to fix
 
 pub fn query(
-  con: &Connection,
+  con: &mut impl GenericClient,
   props: todo_app_service_api::request::TaskEventViewProps,
-) -> Result<Vec<TaskEvent>, rusqlite::Error> {
+) -> Result<Vec<TaskEvent>, postgres::Error> {
 
   let sql = [
     "SELECT te.* FROM task_event te",
@@ -135,6 +133,6 @@ pub fn query(
         "count": props.count,
     })?
     .and_then(|row| row.try_into())
-    .filter_map(|x: Result<TaskEvent, rusqlite::Error>| x.ok());
+    .filter_map(|x: Result<TaskEvent, postgres::Error>| x.ok());
   Ok(results.collect::<Vec<TaskEvent>>())
 }
