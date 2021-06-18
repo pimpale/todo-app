@@ -1,11 +1,11 @@
 use super::todo_app_db_types::*;
 use super::utils::current_time_millis;
-use postgres::GenericClient;
+use tokio_postgres::GenericClient;
 use todo_app_service_api::request;
 
-impl From<postgres::row::Row> for TimeUtilityFunction {
+impl From<tokio_postgres::row::Row> for TimeUtilityFunction {
   // select * from time_utility_function order only, otherwise it will fail
-  fn from(row: postgres::Row) -> TimeUtilityFunction {
+  fn from(row: tokio_postgres::Row) -> TimeUtilityFunction {
     TimeUtilityFunction {
       time_utility_function_id: row.get("creator_user_id"),
       creation_time: row.get("creator_user_id"),
@@ -16,12 +16,12 @@ impl From<postgres::row::Row> for TimeUtilityFunction {
   }
 }
 
-pub fn add(
+pub async fn add(
   con: &mut impl GenericClient,
   creator_user_id: i64,
   start_times: Vec<i64>,
   utils: Vec<i64>,
-) -> Result<TimeUtilityFunction, postgres::Error> {
+) -> Result<TimeUtilityFunction, tokio_postgres::Error> {
   assert_eq!(start_times.len(), utils.len());
 
   let creation_time = current_time_millis();
@@ -38,7 +38,7 @@ pub fn add(
        VALUES($1, $2, $3, $4)
       ",
       &[&creation_time, &creator_user_id, &start_times, &utils],
-    )?
+    ).await?
     .get(0);
 
   // return time_utility_function
@@ -51,21 +51,21 @@ pub fn add(
   })
 }
 
-pub fn get_by_time_utility_function_id(
+pub async fn get_by_time_utility_function_id(
   con: &mut impl GenericClient,
   time_utility_function_id: i64,
-) -> Result<Option<TimeUtilityFunction>, postgres::Error> {
+) -> Result<Option<TimeUtilityFunction>, tokio_postgres::Error> {
   let sql = "SELECT * FROM time_utility_function WHERE time_utility_function_id=$1";
   let result = con
-    .query_opt(sql, &[&time_utility_function_id])?
+    .query_opt(sql, &[&time_utility_function_id]).await?
     .map(|x| x.into());
   Ok(result)
 }
 
-pub fn query(
+pub async fn query(
   con: &mut impl GenericClient,
   props: request::TimeUtilityFunctionViewProps,
-) -> Result<Vec<TimeUtilityFunction>, postgres::Error> {
+) -> Result<Vec<TimeUtilityFunction>, tokio_postgres::Error> {
   let sql = [
     "SELECT tuf.* FROM time_utility_function tuf WHERE 1 = 1",
     " AND ($1 == NULL OR tuf.time_utility_function_id = $1)",
@@ -78,7 +78,7 @@ pub fn query(
   ]
   .join("");
 
-  let mut stmnt = con.prepare(&sql)?;
+  let stmnt = con.prepare(&sql).await?;
 
   let results = con
     .query(
@@ -92,7 +92,7 @@ pub fn query(
         &props.offset,
         &props.count,
       ],
-    )?
+    ).await?
     .into_iter()
     .map(|x| x.into())
     .collect();

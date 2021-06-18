@@ -1,11 +1,11 @@
 use super::todo_app_db_types::*;
 use super::utils::current_time_millis;
-use postgres::GenericClient;
+use tokio_postgres::GenericClient;
 use todo_app_service_api::request;
 
-impl From<postgres::row::Row> for GoalIntent {
+impl From<tokio_postgres::row::Row> for GoalIntent {
   // select * from goal_intent order only, otherwise it will fail
-  fn from(row: postgres::row::Row) -> GoalIntent {
+  fn from(row: tokio_postgres::row::Row) -> GoalIntent {
     GoalIntent {
       goal_intent_id: row.get("goal_intent_id"),
       creation_time: row.get("creation_time"),
@@ -14,10 +14,10 @@ impl From<postgres::row::Row> for GoalIntent {
   }
 }
 
-pub fn add(
+pub async fn add(
   con: &mut impl GenericClient,
   creator_user_id: i64,
-) -> Result<GoalIntent, postgres::Error> {
+) -> Result<GoalIntent, tokio_postgres::Error> {
   let creation_time = current_time_millis();
 
   let goal_intent_id = con
@@ -31,7 +31,7 @@ pub fn add(
        RETURNING goal_intent_id
       ",
       &[&creation_time, &creator_user_id],
-    )?
+    ).await?
     .get(0);
 
   // return goal_intent
@@ -42,24 +42,24 @@ pub fn add(
   })
 }
 
-pub fn get_by_goal_intent_id(
+pub async fn get_by_goal_intent_id(
   con: &mut impl GenericClient,
   goal_intent_id: i64,
-) -> Result<Option<GoalIntent>, postgres::Error> {
+) -> Result<Option<GoalIntent>, tokio_postgres::Error> {
   let result = con
     .query_opt(
       "SELECT * FROM goal_intent WHERE goal_intent_id=$1",
       &[&goal_intent_id],
-    )?
+    ).await?
     .map(|x| x.into());
 
   Ok(result)
 }
 
-pub fn query(
+pub async fn query(
   con: &mut impl GenericClient,
   props: request::GoalIntentViewProps,
-) -> Result<Vec<GoalIntent>, postgres::Error> {
+) -> Result<Vec<GoalIntent>, tokio_postgres::Error> {
   let results = con
     .query(
       " SELECT g.* FROM goal_intent g WHERE 1 = 1,
@@ -80,7 +80,7 @@ pub fn query(
         &props.offset,
         &props.count,
       ],
-    )?
+    ).await?
     .into_iter()
     .map(|row| row.into())
     .collect();

@@ -1,11 +1,11 @@
 use super::todo_app_db_types::*;
 use super::utils::current_time_millis;
-use postgres::GenericClient;
+use tokio_postgres::GenericClient;
 use std::convert::{From, TryInto};
 
-impl From<postgres::row::Row> for GoalIntentData {
+impl From<tokio_postgres::row::Row> for GoalIntentData {
   // select * from goal_intent_data order only, otherwise it will fail
-  fn from(row: postgres::Row) -> GoalIntentData {
+  fn from(row: tokio_postgres::Row) -> GoalIntentData {
     GoalIntentData {
       goal_intent_data_id: row.get("goal_intent_data_id"),
       creation_time: row.get("creation_time"),
@@ -18,13 +18,13 @@ impl From<postgres::row::Row> for GoalIntentData {
 }
 
 // TODO we need to figure out a way to make scheduled and unscheduled goals work better
-pub fn add(
+pub async fn add(
   con: &mut impl GenericClient,
   creator_user_id: i64,
   goal_intent_id:i64,
   name: String,
   active: bool, 
-) -> Result<GoalIntentData, postgres::Error> {
+) -> Result<GoalIntentData, tokio_postgres::Error> {
   let creation_time = current_time_millis();
 
 let goal_intent_data_id = 
@@ -47,7 +47,7 @@ let goal_intent_data_id =
       &name,
       &active,
     ],
-  )?.get(0);
+  ).await?.get(0);
 
 
   Ok(GoalIntentData {
@@ -60,15 +60,15 @@ let goal_intent_data_id =
   })
 }
 
-pub fn get_by_goal_intent_data_id(
+pub async fn get_by_goal_intent_data_id(
   con: &mut impl GenericClient,
   goal_intent_data_id: &i64,
-) -> Result<Option<GoalIntentData>, postgres::Error> {
+) -> Result<Option<GoalIntentData>, tokio_postgres::Error> {
   let result = con
     .query_opt(
       "SELECT * FROM goal_intent_data WHERE goal_intent_data_id=$1",
       &[&goal_intent_data_id],
-    )?
+    ).await?
     .map(|x| x.into());
 
   Ok(result)
@@ -76,10 +76,10 @@ pub fn get_by_goal_intent_data_id(
 
 // TODO need to fix
 
-pub fn query(
+pub async fn query(
   con: &mut impl GenericClient,
   props: todo_app_service_api::request::GoalIntentDataViewProps,
-) -> Result<Vec<GoalIntentData>, postgres::Error> {
+) -> Result<Vec<GoalIntentData>, tokio_postgres::Error> {
   // TODO prevent getting meaningless duration
 
   let sql = [
@@ -106,7 +106,7 @@ pub fn query(
   ]
   .join("");
 
-  let stmnt = con.prepare(&sql)?;
+  let stmnt = con.prepare(&sql).await?;
 
   let results = con
     .query(
@@ -123,7 +123,7 @@ pub fn query(
         &props.active,
         &props.offset,
         &props.offset,
-    ])?
+    ]).await?
     .into_iter()
     .map(|row| row.into())
     .collect();

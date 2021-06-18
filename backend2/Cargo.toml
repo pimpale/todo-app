@@ -8,7 +8,6 @@ edition = "2018"
 [dependencies]
 warp ="^0.3"
 clap = "3.0.0-beta.2"
-postgres = "0.19.1"
 tokio = { version = "1", features=["full"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -16,3 +15,4 @@ mail-service-api = {version = "*", git = "https://github.com/innexgo/mail-servic
 auth-service-api = {version = "*", git = "https://github.com/innexgo/auth-service-api", features=["client"]}
 
 todo-app-service-api = {version = "*", git = "https://github.com/pimpale/todo-app-service-api"}
+tokio-postgres = "0.7.2"

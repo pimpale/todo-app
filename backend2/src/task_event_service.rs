@@ -1,10 +1,10 @@
 use super::todo_app_db_types::*;
 use super::utils::current_time_millis;
-use postgres::GenericClient;
+use tokio_postgres::GenericClient;
 
-impl From<postgres::row::Row> for TaskEvent {
+impl From<tokio_postgres::row::Row> for TaskEvent {
   // select * from task_event order only, otherwise it will fail
-  fn from(row: postgres::row::Row) -> TaskEvent {
+  fn from(row: tokio_postgres::row::Row) -> TaskEvent {
     TaskEvent {
       task_event_id: row.get("task_event_id"),
       creation_time: row.get("creation_time"),
@@ -17,14 +17,14 @@ impl From<postgres::row::Row> for TaskEvent {
   }
 }
 
-pub fn add(
+pub async fn add(
   con: &mut impl GenericClient,
   creator_user_id: i64,
   goal_id: i64,
   start_time: i64,
   duration: i64,
   active: bool,
-) -> Result<TaskEvent, postgres::Error> {
+) -> Result<TaskEvent, tokio_postgres::Error> {
   let creation_time = current_time_millis();
 
   let task_event_id = con
@@ -46,7 +46,7 @@ pub fn add(
         &duration,
         &active,
       ],
-    )?
+    ).await?
     .get(0);
 
   // return task_event
@@ -61,19 +61,19 @@ pub fn add(
   })
 }
 
-pub fn get_by_task_event_id(
+pub async fn get_by_task_event_id(
   con: &mut impl GenericClient,
   task_event_id: &str,
-) -> Result<Option<TaskEvent>, postgres::Error> {
+) -> Result<Option<TaskEvent>, tokio_postgres::Error> {
   let sql = "SELECT * FROM task_event WHERE task_event_id=$1";
-  let result = con.query_opt(sql, &[&task_event_id])?.map(|x| x.into());
+  let result = con.query_opt(sql, &[&task_event_id]).await?.map(|x| x.into());
   Ok(result)
 }
 
-pub fn query(
+pub async fn query(
   con: &mut impl GenericClient,
   props: todo_app_service_api::request::TaskEventViewProps,
-) -> Result<Vec<TaskEvent>, postgres::Error> {
+) -> Result<Vec<TaskEvent>, tokio_postgres::Error> {
   let sql = [
     "SELECT te.* FROM task_event te",
     if props.only_recent {
@@ -101,7 +101,7 @@ pub fn query(
   ]
   .join("");
 
-  let mut stmnt = con.prepare(&sql)?;
+  let stmnt = con.prepare(&sql).await?;
 
   let results = con
     .query(
@@ -123,7 +123,7 @@ pub fn query(
         &props.offset,
         &props.count,
       ],
-    )?
+    ).await?
     .into_iter()
     .map(|row| row.into())
     .collect();

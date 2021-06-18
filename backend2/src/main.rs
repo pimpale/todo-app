@@ -1,7 +1,7 @@
 #![feature(async_closure)]
 #![feature(never_type)]
 use clap::Clap;
-use postgres::{Client, NoTls};
+use tokio_postgres::{Client, NoTls};
 use std::sync::Arc;
 
 use tokio::sync::Mutex;
@@ -43,7 +43,7 @@ pub struct Config {
 pub type Db = Arc<Mutex<Client>>;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), tokio_postgres::Error> {
   let Opts {
     database_url,
     site_external_url,
@@ -51,7 +51,17 @@ async fn main() {
     port,
   } = Opts::parse();
 
-  let db: Db = Arc::new(Mutex::new(Client::connect(&database_url, NoTls).unwrap()));
+  let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+  // The connection object performs the actual communication with the database,
+  // so spawn it off to run on its own.
+  tokio::spawn(async move {
+    if let Err(e) = connection.await {
+      eprintln!("connection error: {}", e);
+    }
+  });
+
+  let db: Db = Arc::new(Mutex::new(client));
 
   // open connection to auth service
   let auth_service = AuthService::new(&auth_service_url).await;
@@ -63,4 +73,6 @@ async fn main() {
   );
 
   warp::serve(api).run(([127, 0, 0, 1], port)).await;
+
+  Ok(())
 }
