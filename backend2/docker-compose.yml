@@ -1,0 +1,78 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres
+    volumes:
+      # Means that the files in sql will be run whenever ./data/db is not present
+      # If you want to refresh the schema (and delete current data)
+      # delete ./data/db
+      - ./sql:/docker-entrypoint-initdb.d
+      # This is a a persistent store of PSQL data for development
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=toor
+    # will periodically run this command to check it hasn't crashed
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+  mail-service:
+    build:
+      context: https://github.com/innexgo/mail-service.git
+      dockerfile: Dev.Dockerfile
+    environment:
+      - RUST_BACKTRACE=1
+    command:
+      [
+        "/bin/mail-service",
+        "--port=8078",
+        "--database-url=postgres://postgres:toor@db/mail",
+      ]
+    ports:
+      - "8078:8078"
+    # waits for postgres's healthcheck to succeed before running mail-service
+    depends_on:
+      db:
+        condition: service_healthy
+  auth-service:
+    build:
+      context: https://github.com/innexgo/auth-service.git
+      dockerfile: Dev.Dockerfile
+    environment:
+      - RUST_BACKTRACE=1
+    command:
+      [
+        "/bin/auth-service",
+        "--port=8079",
+        "--database-url=postgres://postgres:toor@db/auth",
+        "--site-external-url=http://localhost:8080",
+        "--mail-service-url=http://mail-service:8078",
+      ]
+    ports:
+      - "8079:8079"
+    # waits for postgres's healthcheck to succeed before running auth-service
+    depends_on:
+      db:
+        condition: service_healthy
+  todo-app-service:
+    build:
+      context: https://github.com/innexgo/todo-app-service.git
+      dockerfile: Dev.Dockerfile
+    environment:
+      - RUST_BACKTRACE=1
+    command:
+      [
+        "/bin/todo-app-service",
+        "--port=8080",
+        "--database-url=postgres://postgres:toor@db/todo-app",
+        "--site-external-url=http://localhost:8080",
+        "--auth-service-url=http://auth-service:8079",
+      ]
+    ports:
+      - "8080:8080"
+    # waits for postgres's healthcheck to succeed before running todo-app-service
+    depends_on:
+      db:
+        condition: service_healthy
