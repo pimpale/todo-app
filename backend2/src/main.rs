@@ -72,7 +72,7 @@ async fn main() -> Result<(), tokio_postgres::Error> {
       auth_service
   );
 
-  warp::serve(api).run(([127, 0, 0, 1], port)).await;
+  warp::serve(api).run(([0, 0, 0, 0], port)).await;
 
   Ok(())
 }

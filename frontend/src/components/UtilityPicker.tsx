@@ -158,6 +158,7 @@ function UtilityPicker(props: UtilityPickerProps) {
       </Col>
     </Row>
     <Line
+      type="string"
       options={lineOptions}
       data={lineData} />
   </>
