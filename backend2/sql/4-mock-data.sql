@@ -1,3 +1,5 @@
+\c auth
+
 -- users:
 -- user: alpha@example.com 
 -- pass: Boolean500

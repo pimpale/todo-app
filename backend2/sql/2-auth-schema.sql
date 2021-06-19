@@ -5,7 +5,7 @@
 -- Everything else
 
 CREATE DATABASE auth;
-\c auth;
+\c auth
 
 drop table if exists verification_challenge;
 create table verification_challenge(

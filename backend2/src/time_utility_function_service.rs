@@ -36,6 +36,7 @@ pub async fn add(
            utils
        )
        VALUES($1, $2, $3, $4)
+       RETURNING time_utility_function_id
       ",
       &[&creation_time, &creator_user_id, &start_times, &utils],
     ).await?

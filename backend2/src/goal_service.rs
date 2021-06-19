@@ -31,6 +31,7 @@ pub async fn add(
           goal_intent_id
       )
       VALUES($1, $2, $3)
+      RETURNING goal_id
      ",
       &[&creation_time, &creator_user_id, &goal_intent_id],
     ).await?

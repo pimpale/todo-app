@@ -58,7 +58,7 @@ services:
         condition: service_healthy
   todo-app-service:
     build:
-      context: https://github.com/innexgo/todo-app-service.git
+      context: .
       dockerfile: Dev.Dockerfile
     environment:
       - RUST_BACKTRACE=1
@@ -66,7 +66,7 @@ services:
       [
         "/bin/todo-app-service",
         "--port=8080",
-        "--database-url=postgres://postgres:toor@db/todo-app",
+        "--database-url=postgres://postgres:toor@db/todo_app",
         "--site-external-url=http://localhost:8080",
         "--auth-service-url=http://auth-service:8079",
       ]

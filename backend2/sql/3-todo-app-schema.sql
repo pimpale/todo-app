@@ -1,3 +1,6 @@
+CREATE DATABASE todo_app;
+\c todo_app
+
 -- Table Structure
 -- Primary Key
 -- Creation Time

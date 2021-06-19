@@ -30,14 +30,17 @@ pub async fn add(
   let task_event_id = con
     .query_one(
       "INSERT INTO
-    task_event(
-        creation_time,
-        creator_user_id,
-        goal_id,
-        start_time,
-        duration,
-        active
-    ) values ($1, $2, $3, $4, $5, $6)",
+        task_event(
+          creation_time,
+          creator_user_id,
+          goal_id,
+          start_time,
+          duration,
+          active
+       )
+       VALUES($1, $2, $3, $4, $5, $6)
+       RETURNING task_event_id
+      ",
       &[
         &creation_time,
         &creator_user_id,
@@ -46,7 +49,8 @@ pub async fn add(
         &duration,
         &active,
       ],
-    ).await?
+    )
+    .await?
     .get(0);
 
   // return task_event
@@ -66,7 +70,10 @@ pub async fn get_by_task_event_id(
   task_event_id: &str,
 ) -> Result<Option<TaskEvent>, tokio_postgres::Error> {
   let sql = "SELECT * FROM task_event WHERE task_event_id=$1";
-  let result = con.query_opt(sql, &[&task_event_id]).await?.map(|x| x.into());
+  let result = con
+    .query_opt(sql, &[&task_event_id])
+    .await?
+    .map(|x| x.into());
   Ok(result)
 }
 
@@ -123,7 +130,8 @@ pub async fn query(
         &props.offset,
         &props.count,
       ],
-    ).await?
+    )
+    .await?
     .into_iter()
     .map(|row| row.into())
     .collect();
