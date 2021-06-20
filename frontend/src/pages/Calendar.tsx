@@ -5,24 +5,25 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
 import DashboardLayout from '../components/DashboardLayout';
 import CalendarSolver from '../components/CalendarSolver';
-import CalendarCard, { taskEventToEvent } from '../components/CalendarCard';
+import CalendarCard, { goalDataToEvent, externalEventDataToEvent } from '../components/CalendarCard';
 
 import { Async, AsyncProps } from 'react-async';
 import { Row, Col, Tab, Tabs, Popover, Container, } from 'react-bootstrap';
-import { taskEventNew, goalDataNew, taskEventView, goalDataView, isTodoAppErrorCode } from '../utils/utils';
+import { externalEventNew, goalDataNew, externalEventView, externalEventDataView, goalDataView, isTodoAppErrorCode } from '../utils/utils';
+import { ApiKey } from '@innexgo/frontend-auth-api';
 
 import UtilityWrapper from '../components/UtilityWrapper';
 
-import CreatePastEvent from '../components/CreatePastEvent';
+import CreateExternalEvent from '../components/CreateExternalEvent';
 import CreateGoal from '../components/CreateGoal';
-import ManagePastEvent from '../components/ManagePastEvent';
+import ManageExternalEvent from '../components/ManageExternalEvent';
 import ManageGoalTable from '../components/ManageGoalTable';
 import DisplayModal from '../components/DisplayModal';
 
 
 type UnscheduledGoalCardProps = {
   onChange: () => void;
-  goalData: GoalDataUnscheduled;
+  goalData: GoalData;
 }
 
 function UnscheduledGoalCard(props: UnscheduledGoalCardProps) {
@@ -65,8 +66,8 @@ function UnscheduledGoalCard(props: UnscheduledGoalCardProps) {
 }
 
 
-const loadUnscheduledGoalData = async (props: AsyncProps<GoalDataUnscheduled[]>) => {
-  const maybeGoalData = await viewGoalData({
+const loadUnscheduledGoalData = async (props: AsyncProps<GoalData[]>) => {
+  const maybeGoalData = await goalDataView({
     creatorUserId: props.apiKey.creator.userId,
     onlyRecent: true,
     scheduled: false,
@@ -74,12 +75,11 @@ const loadUnscheduledGoalData = async (props: AsyncProps<GoalDataUnscheduled[]>)
     apiKey: props.apiKey.key,
   });
 
-  if (isApiErrorCode(maybeGoalData)) {
+  if (isTodoAppErrorCode(maybeGoalData)) {
     throw Error;
   }
 
-  return maybeGoalData
-    .filter((x): x is GoalDataUnscheduled => !x.scheduled);
+  return maybeGoalData;
 }
 
 
@@ -107,7 +107,7 @@ function EventCalendar(props: EventCalendarProps) {
 
   // the currently selected data
   const [selectedManageGoalData, setSelectedManageGoalData] = React.useState<GoalData | null>(null);
-  const [selectedManagePastEventData, setSelectedManagePastEventData] = React.useState<PastEventData | null>(null);
+  const [selectedManageExternalEventData, setSelectedManageExternalEventData] = React.useState<ExternalEventData | null>(null);
 
   const calendarRef = React.useRef<FullCalendar | null>(null);
 
@@ -120,7 +120,7 @@ function EventCalendar(props: EventCalendarProps) {
       timeZone: string;
     }) => {
 
-    const maybePastEventData = await viewPastEventData({
+    const maybeExternalEventData = await externalEventDataView({
       creatorUserId: props.apiKey.creator.userId,
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
@@ -129,27 +129,23 @@ function EventCalendar(props: EventCalendarProps) {
       apiKey: props.apiKey.key
     });
 
-    const maybeGoalData = await viewGoalData({
+    const maybeGoalData = await goalDataView({
       creatorUserId: props.apiKey.creator.userId,
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
       onlyRecent: true,
-      scheduled: true,
       status: "PENDING",
       apiKey: props.apiKey.key
     });
 
-    const pastEventData = isApiErrorCode(maybePastEventData)
+    const externalEventData = isTodoAppErrorCode(maybeExternalEventData)
       ? []
-      : maybePastEventData.map(pastEventDataToEvent)
+      : maybeExternalEventData.map(externalEventDataToEvent)
 
-    const task = isApiErrorCode(maybeGoalData)
+    const external = isTodoAppErrorCode(maybeGoalData)
       ? []
-      : maybeGoalData
-        // this asserts that x is scheduled if x's scheduled is true
-        .filter((x): x is GoalDataScheduled => x.scheduled)
-        .map(goalDataToEvent);
-    return [...pastEventData, ...task];
+      : maybeGoalData.map(goalDataToEvent);
+    return [...externalEventData, ...external];
   }
 
   //this handler runs any time we recieve a click on an event
@@ -157,8 +153,8 @@ function EventCalendar(props: EventCalendarProps) {
     const props = eca.event.extendedProps;
     // we switch on what type it is
     switch (eca.event.id.split(':')[0]) {
-      case "PastEventData": {
-        setSelectedManagePastEventData(props.pastEventData);
+      case "ExternalEventData": {
+        setSelectedManageExternalEventData(props.externalEventData);
         break;
       }
       case "GoalData": {
@@ -170,10 +166,10 @@ function EventCalendar(props: EventCalendarProps) {
 
   const changeHandler = async (event: EventApi, oldEventProps: Record<string, any>, revert: () => void) => {
     switch (event.id.split(':')[0]) {
-      case "PastEventData": {
-        const oped = oldEventProps.pastEventData;
-        const maybePastEventData = await newPastEventData({
-          pastEventId: oped.pastEvent.pastEventId,
+      case "ExternalEventData": {
+        const oped = oldEventProps.externalEventData;
+        const maybeExternalEventData = await newExternalEventData({
+          externalEventId: oped.externalEvent.externalEventId,
           name: oped.name,
           description: oped.description,
           startTime: event.start!.valueOf(),
@@ -181,10 +177,10 @@ function EventCalendar(props: EventCalendarProps) {
           active: oped.active,
           apiKey: props.apiKey.key,
         });
-        if (isApiErrorCode(maybePastEventData)) {
+        if (isTodoAppErrorCode(maybeExternalEventData)) {
           revert();
         }
-        event.setExtendedProp("pastEventData", maybePastEventData);
+        event.setExtendedProp("externalEventData", maybeExternalEventData);
         break;
       }
       case "GoalData": {
@@ -200,7 +196,7 @@ function EventCalendar(props: EventCalendarProps) {
           status: ogd.status,
           apiKey: props.apiKey.key
         })
-        if (isApiErrorCode(maybeGoalData)) {
+        if (isTodoAppErrorCode(maybeGoalData)) {
           revert();
         }
         event.setExtendedProp("goalData", maybeGoalData);
@@ -230,7 +226,7 @@ function EventCalendar(props: EventCalendarProps) {
           <Async.Rejected>
             <span className="text-danger">An unknown error has occured.</span>
           </Async.Rejected>
-          <Async.Fulfilled<GoalDataUnscheduled[]>>{gdus =>
+          <Async.Fulfilled<GoalData[]>>{gdus =>
             gdus.map(gdu =>
               <UnscheduledGoalCard
                 key={gdu.goalDataId}
@@ -316,7 +312,7 @@ function EventCalendar(props: EventCalendarProps) {
         onClose={() => setSelectedSpan(null)}
       >
         <Tabs className="py-3">
-          <Tab eventKey="task" title="Create Task">
+          <Tab eventKey="external" title="Create External">
             <CreateGoal
               apiKey={props.apiKey}
               span={selectedSpan}
@@ -324,23 +320,23 @@ function EventCalendar(props: EventCalendarProps) {
             />
           </Tab>
           <Tab eventKey="event" title="Create Event">
-            <CreatePastEvent
+            <CreateExternalEvent
               apiKey={props.apiKey}
               startTime={selectedSpan[0]}
-              duration={selectedSpan[1] - selectedSpan[0]}
+              endTime={selectedSpan[1]}
               postSubmit={() => setSelectedSpan(null)}
             />
           </Tab>
         </Tabs>
       </DisplayModal>
     }
-    {selectedManagePastEventData === null ? <> </> :
+    {selectedManageExternalEventData === null ? <> </> :
       <DisplayModal
         title="Manage Event"
-        show={selectedManagePastEventData !== null}
-        onClose={() => setSelectedManagePastEventData(null)}
+        show={selectedManageExternalEventData !== null}
+        onClose={() => setSelectedManageExternalEventData(null)}
       >
-        <ManagePastEvent pastEventId={selectedManagePastEventData.pastEvent.pastEventId} apiKey={props.apiKey} />
+        <ManageExternalEvent externalEventId={selectedManageExternalEventData.externalEvent.externalEventId} apiKey={props.apiKey} />
       </DisplayModal>
     }
     {selectedManageGoalData === null ? <> </> :

@@ -39,7 +39,6 @@ function CreateExternalEvent(props: CreateExternalEventProps) {
 
     const maybeExternalEvent = await externalEventNew({
       name: values.name,
-      description: values.description,
       startTime: values.startTime,
       endTime: values.endTime,
       apiKey: props.apiKey.key,

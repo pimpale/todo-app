@@ -1,6 +1,6 @@
 use super::todo_app_db_types::*;
 use super::utils::current_time_millis;
-use std::convert::{From, TryInto};
+use std::convert::From;
 use tokio_postgres::GenericClient;
 
 impl From<tokio_postgres::row::Row> for GoalIntentData {

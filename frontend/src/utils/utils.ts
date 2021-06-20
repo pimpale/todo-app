@@ -22,11 +22,6 @@ export const TodoAppErrorCodes = [
   "USER_EMAIL_INVALIDATED",
   "USER_KIND_INVALID",
 
-  "SUBSCRIPTION_NONEXISTENT",
-  "SUBSCRIPTION_EXPIRED",
-  "SUBSCRIPTION_UNAUTHORIZED",
-  "SUBSCRIPTION_LIMITED",
-
   "VERIFICATION_CHALLENGE_NONEXISTENT",
   "VERIFICATION_CHALLENGE_TIMED_OUT",
 
@@ -39,13 +34,12 @@ export const TodoAppErrorCodes = [
 
   "GOAL_NONEXISTENT",
 
-  "PAST_EVENT_NONEXISTENT",
+  "EXTERNAL_EVENT_NONEXISTENT",
 
   "TIME_UTILITY_FUNCTION_NONEXISTENT",
   "TIME_UTILITY_FUNCTION_NOT_VALID",
   "NEGATIVE_START_TIME",
   "NEGATIVE_DURATION",
-  "CANNOT_ALTER_PAST",
 
   "UNKNOWN",
   "NETWORK"
@@ -53,6 +47,30 @@ export const TodoAppErrorCodes = [
 
 // Creates a union type
 export type TodoAppErrorCode = typeof TodoAppErrorCodes[number];
+
+export interface ExternalEventNewProps {
+  name: string,
+  startTime: number,
+  endTime: number,
+  apiKey: string,
+}
+
+export function externalEventNew(props: ExternalEventNewProps): Promise<ExternalEventData | TodoAppErrorCode> {
+  return fetchApi("todo_app/external_event/new", props);
+}
+
+export interface ExternalEventDataNewProps {
+  externalEventId: number,
+  name: string,
+  startTime: number,
+  endTime: number,
+  active: boolean,
+  apiKey: string,
+}
+
+export function externalEventDataNew(props: ExternalEventDataNewProps): Promise<ExternalEventData | TodoAppErrorCode> {
+  return fetchApi("todo_app/external_event_data/new", props);
+}
 
 export interface GoalIntentNewProps {
   name: string,
@@ -76,7 +94,6 @@ export function goalIntentDataNew(props: GoalIntentDataNewProps): Promise<GoalIn
 
 export interface GoalNewProps {
   name: string,
-  durationEstimate: number,
   timeUtilityFunctionId: number,
   goalIntentId?: number,
   parentGoalId?: number,
@@ -90,9 +107,10 @@ export function goalNew(props: GoalNewProps): Promise<GoalData | TodoAppErrorCod
 export interface GoalDataNewProps {
   goalId: number,
   name: string,
-  durationEstimate: number,
+  tags: string[],
   timeUtilityFunctionId: number,
   parentGoalId?: number,
+  timeSpan?: [startTime: number, endTime: number],
   status: GoalDataStatusKind,
   apiKey: string,
 }
@@ -111,21 +129,9 @@ export function timeUtilityFunctionNew(props: TimeUtilityFunctionNewProps): Prom
   return fetchApi("todo_app/time_utility_function/new", props);
 }
 
-export interface TaskEventNewProps {
-  goalId: number,
-  startTime: number,
-  duration: number,
-  active: boolean,
-  apiKey: string,
-}
-
-export function taskEventNew(props: TaskEventNewProps): Promise<TaskEvent | TodoAppErrorCode> {
-  return fetchApi("todo_app/task_event/new", props);
-}
 
 export interface GoalIntentViewProps {
   goalIntentId?: number,
-  creationTime?: number,
   minCreationTime?: number,
   maxCreationTime?: number,
   creatorUserId?: number,
@@ -140,7 +146,6 @@ export function goalIntentView(props: GoalIntentViewProps): Promise<GoalIntent[]
 
 export interface GoalIntentDataViewProps {
   goalIntentDataId?: number,
-  creationTime?: number,
   minCreationTime?: number,
   maxCreationTime?: number,
   creatorUserId?: number,
@@ -161,7 +166,6 @@ export function goalIntentDataView(props: GoalIntentDataViewProps): Promise<Goal
 
 export interface GoalViewProps {
   goalId?: number,
-  creationTime?: number,
   minCreationTime?: number,
   maxCreationTime?: number,
   creatorUserId?: number,
@@ -177,14 +181,12 @@ export function goalView(props: GoalViewProps): Promise<Goal[] | TodoAppErrorCod
 
 export interface GoalDataViewProps {
   goalDataId?: number,
-  creationTime?: number,
   minCreationTime?: number,
   maxCreationTime?: number,
   creatorUserId?: number,
   goalId?: number,
   name?: string,
   partialName?: string,
-  durationEstimate?: number,
   minDurationEstimate?: number,
   maxDurationEstimate?: number,
   timeUtilityFunctionId?: number,
@@ -203,19 +205,32 @@ export function goalDataView(props: GoalDataViewProps): Promise<GoalData[] | Tod
   return fetchApi("todo_app/goal_data/view", props);
 }
 
-export interface TaskEventViewProps {
-  taskEventId?: number,
-  creationTime?: number,
+export interface ExternalEventViewProps {
+  externalEventId?: number,
   minCreationTime?: number,
   maxCreationTime?: number,
   creatorUserId?: number,
-  goalId?: number,
-  startTime?: number,
+  offset?: number,
+  count?: number,
+  apiKey: string,
+}
+
+export function externalEventView(props: ExternalEventViewProps): Promise<ExternalEvent[] | TodoAppErrorCode> {
+  return fetchApi("todo_app/external_event/view", props);
+}
+
+export interface ExternalEventDataViewProps {
+  externalEventDataId?: number,
+  minCreationTime?: number,
+  maxCreationTime?: number,
+  creatorUserId?: number,
+  externalEventId?: number,
+  name?: string,
+  partialName?: string,
   minStartTime?: number,
   maxStartTime?: number,
-  duration?: number,
-  minDuration?: number,
-  maxDuration?: number,
+  minEndTime?: number,
+  maxEndTime?: number,
   active?: boolean,
   onlyRecent: boolean,
   offset?: number,
@@ -223,14 +238,12 @@ export interface TaskEventViewProps {
   apiKey: string,
 }
 
-
-export function taskEventView(props: TaskEventViewProps): Promise<TaskEvent[] | TodoAppErrorCode> {
-  return fetchApi("todo_app/task_event/view", props);
+export function externalEventDataView(props: ExternalEventDataViewProps): Promise<ExternalEventData[] | TodoAppErrorCode> {
+  return fetchApi("todo_app/external_event_data/view", props);
 }
 
 export interface TimeUtilityFunctionViewProps {
   timeUtilityFunctionId?: number,
-  creationTime?: number,
   minCreationTime?: number,
   maxCreationTime?: number,
   creatorUserId?: number,

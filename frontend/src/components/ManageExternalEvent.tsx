@@ -2,9 +2,9 @@ import React from 'react';
 import { Form, Button, Table } from 'react-bootstrap'; import Loader from '../components/Loader';
 import { Async, AsyncProps } from 'react-async';
 import DisplayModal from '../components/DisplayModal';
-import { newExternalEvent, newExternalEventData, isTodoAppErrorCode} from '../utils/utils';
+import { externalEventDataNew, externalEventDataView, isTodoAppErrorCode } from '../utils/utils';
 import { ApiKey } from '@innexgo/frontend-auth-api';
-import { Edit, Archive, Unarchive} from '@material-ui/icons';
+import { Edit, Archive, Unarchive } from '@material-ui/icons';
 import { Formik, FormikHelpers } from 'formik'
 import format from 'date-fns/format';
 
@@ -19,19 +19,17 @@ function EditExternalEventData(props: EditExternalEventDataProps) {
 
   type EditExternalEventDataValue = {
     name: string,
-    description: string,
   }
 
   const onSubmit = async (values: EditExternalEventDataValue,
     fprops: FormikHelpers<EditExternalEventDataValue>) => {
 
-    const maybeExternalEventData = await newExternalEventData({
+    const maybeExternalEventData = await externalEventDataNew({
       externalEventId: props.externalEventData.externalEvent.externalEventId,
       apiKey: props.apiKey.key,
       name: values.name,
-      description: values.description,
-      startTime:props.externalEventData.startTime,
-      endTime:props.externalEventData.endTime,
+      startTime: props.externalEventData.startTime,
+      endTime: props.externalEventData.endTime,
       active: props.externalEventData.active,
     });
 
@@ -132,7 +130,7 @@ function ArchiveExternalEvent(props: ArchiveExternalEventProps) {
   const onSubmit = async (_: ArchiveExternalEventValue,
     fprops: FormikHelpers<ArchiveExternalEventValue>) => {
 
-    const maybeExternalEventData = await newExternalEventData({
+    const maybeExternalEventData = await externalEventDataNew({
       externalEventId: props.externalEventData.externalEvent.externalEventId,
       apiKey: props.apiKey.key,
       name: props.externalEventData.name,
@@ -157,7 +155,7 @@ function ArchiveExternalEvent(props: ArchiveExternalEventProps) {
           });
           break;
         }
-        case "EXTErnal_EVENT_NONEXISTENT": {
+        case "EXTERNAL_EVENT_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "This event does not exist.",
             successResult: ""
@@ -215,7 +213,7 @@ function ArchiveExternalEvent(props: ArchiveExternalEventProps) {
 
 
 const loadExternalEventData = async (props: AsyncProps<ExternalEventData>) => {
-  const maybeExternalEventData = await viewExternalEventData({
+  const maybeExternalEventData = await externalEventDataView({
     externalEventId: props.externalEventId,
     onlyRecent: true,
     apiKey: props.apiKey.key
@@ -259,10 +257,6 @@ const ManageExternalEventData = (props: {
               <td>{externalEventData.name}</td>
             </tr>
             <tr>
-              <th>Description</th>
-              <td>{externalEventData.description}</td>
-            </tr>
-            <tr>
               <th>Creation Time</th>
               <td>{format(externalEventData.externalEvent.creationTime, "MMM do")} </td>
             </tr>
@@ -270,9 +264,9 @@ const ManageExternalEventData = (props: {
         </Table>
         <Button variant="secondary" onClick={_ => setShowEditExternalEventData(true)}>Edit <Edit /></Button>
 
-        { externalEventData.active
-            ? <Button variant="danger" onClick={_ => setShowArchiveExternalEvent(true)}>Archive <Archive /></Button>
-            : <Button variant="success" onClick={_ => setShowArchiveExternalEvent(true)}>Unarchive <Unarchive /></Button>
+        {externalEventData.active
+          ? <Button variant="danger" onClick={_ => setShowArchiveExternalEvent(true)}>Archive <Archive /></Button>
+          : <Button variant="success" onClick={_ => setShowArchiveExternalEvent(true)}>Unarchive <Unarchive /></Button>
         }
 
         <DisplayModal

@@ -16,7 +16,7 @@ type SolverDataPoint = {
 }
 
 type SolverGoalData = {
-  data: GoalDataScheduled,
+  data: GoalData,
   tuf: SolverDataPoint[],
   startTime: number,
   duration: number,
@@ -135,7 +135,7 @@ function ICalendarSolver(props: ICalendarSolverProps) {
           click: async () => {
             // for each element in the middle of the array:
             for (const sgd of dataRef.current.slice(1, -1)) {
-              const maybeTimeUtilFunction = await newTimeUtilityFunction({
+              const maybeTimeUtilFunction = await timeUtilityFunctionNew({
                 startTimes: sgd.tuf.map(p => Math.floor(p.startTime)),
                 utils: sgd.tuf.map(p => p.utils),
                 apiKey: props.apiKey.key,
@@ -147,10 +147,9 @@ function ICalendarSolver(props: ICalendarSolverProps) {
                 continue;
               }
 
-              const maybeGoalData = await newScheduledGoalData({
+              const maybeGoalData = await goalDataNew({
                 goalId: sgd.data.goal.goalId,
                 name: sgd.data.name,
-                description: sgd.data.description,
                 durationEstimate: Math.floor(sgd.data.durationEstimate),
                 timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
                 startTime: Math.floor(sgd.startTime),
@@ -211,7 +210,7 @@ const loadSolverData = async (props: AsyncProps<SolverGoalData[]>) => {
   return (
     await Promise.all(
       maybeGoalData
-        .filter((gd): gd is GoalDataScheduled => gd.scheduled)
+        .filter((gd): gd is GoalData => gd.scheduled)
         .map(async goal => {
           // load tuf
           const maybeTuf = await viewTimeUtilityFunctionPoint({
