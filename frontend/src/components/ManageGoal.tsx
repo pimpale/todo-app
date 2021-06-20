@@ -4,7 +4,7 @@ import Loader from '../components/Loader';
 import { Async, AsyncProps } from 'react-async';
 import DisplayModal from '../components/DisplayModal';
 import UtilityPicker from '../components/UtilityPicker';
-import { viewTimeUtilityFunctionPoint, newTimeUtilityFunction, viewGoalData, newGoalData, newScheduledGoalData, isApiErrorCode } from '../utils/utils';
+import { timeUtilityFunctionNew, goalDataView, goalDataNew, isTodoAppErrorCode } from '../utils/utils';
 import { Edit, Cancel, } from '@material-ui/icons';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import parseDuration from 'parse-duration';
@@ -56,13 +56,13 @@ function EditGoal(props: EditGoalProps) {
 
     // TODO: check if utility function has been changed before creating a new one
     // this will be more efficient
-    const maybeTimeUtilFunction = await newTimeUtilityFunction({
+    const maybeTimeUtilFunction = await timeUtilityFunctionNew({
       startTimes: values.points.map(p => p.x),
       utils: values.points.map(p => p.y),
       apiKey: props.apiKey.key,
     })
 
-    if (isApiErrorCode(maybeTimeUtilFunction)) {
+    if (isTodoAppErrorCode(maybeTimeUtilFunction)) {
       switch (maybeTimeUtilFunction) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
@@ -100,7 +100,7 @@ function EditGoal(props: EditGoalProps) {
         status: props.goalData.status,
         apiKey: props.apiKey.key,
       })
-      : await newGoalData({
+      : await goalDataNew({
         goalId: props.goalData.goal.goalId,
         name: values.name,
         description: values.description,
@@ -110,7 +110,7 @@ function EditGoal(props: EditGoalProps) {
         apiKey: props.apiKey.key,
       })
 
-    if (isApiErrorCode(maybeGoalData)) {
+    if (isTodoAppErrorCode(maybeGoalData)) {
       switch (maybeGoalData) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
@@ -271,7 +271,7 @@ function CancelGoal(props: CancelGoalProps) {
         duration: props.goalData.duration,
         status: "CANCEL",
       })
-      : await newGoalData({
+      : await goalDataNew({
         goalId: props.goalData.goal.goalId,
         apiKey: props.apiKey.key,
         name: props.goalData.name,
@@ -281,7 +281,7 @@ function CancelGoal(props: CancelGoalProps) {
         status: "CANCEL",
       });
 
-    if (isApiErrorCode(maybeGoalData)) {
+    if (isTodoAppErrorCode(maybeGoalData)) {
       switch (maybeGoalData) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
@@ -358,13 +358,13 @@ type ManageGoalData = {
 }
 
 const loadManageGoalData = async (props: AsyncProps<ManageGoalData>) => {
-  const maybeGoalData = await viewGoalData({
+  const maybeGoalData = await goalDataView({
     goalId: props.goalId,
     onlyRecent: true,
     apiKey: props.apiKey.key
   });
 
-  if (isApiErrorCode(maybeGoalData) || maybeGoalData.length === 0) {
+  if (isTodoAppErrorCode(maybeGoalData) || maybeGoalData.length === 0) {
     throw Error;
   }
 
@@ -375,7 +375,7 @@ const loadManageGoalData = async (props: AsyncProps<ManageGoalData>) => {
     apiKey: props.apiKey.key
   });
 
-  if (isApiErrorCode(maybeTuf) || maybeTuf.length === 0) {
+  if (isTodoAppErrorCode(maybeTuf) || maybeTuf.length === 0) {
     throw Error;
   }
 

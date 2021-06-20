@@ -1,7 +1,6 @@
-import React from 'react';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Button, Form, } from 'react-bootstrap'
-import { newValidApiKey, isApiErrorCode } from '../utils/utils';
+import { ApiKey, newValidApiKey, isAuthErrorCode } from '@innexgo/frontend-auth-api';
 
 
 // onSuccess is a callback that will be run once the user has successfully logged in.
@@ -56,7 +55,7 @@ function Login(props: LoginProps) {
     });
 
     // check if the operation was successful
-    if (isApiErrorCode(maybeApiKey)) {
+    if (isAuthErrorCode(maybeApiKey)) {
       // otherwise display errors
       switch (maybeApiKey) {
         case "USER_NONEXISTENT": {

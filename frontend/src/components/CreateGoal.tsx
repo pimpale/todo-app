@@ -1,7 +1,7 @@
-import React from "react"
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Col, Row, Card, Button, Form } from "react-bootstrap";
-import { newScheduledGoal, newGoal, newTimeUtilityFunction, isApiErrorCode } from "../utils/utils";
+import { goalNew, timeUtilityFunctionNew, isTodoAppErrorCode } from "../utils/utils";
+import { ApiKey } from '@innexgo/frontend-auth-api';
 import UtilityPicker from "../components/UtilityPicker"
 import parseDuration from 'parse-duration';
 import formatDuration from 'date-fns/formatDuration';
@@ -47,13 +47,13 @@ function CreateGoal(props: CreateGoalProps) {
       return;
     }
 
-    const maybeTimeUtilFunction = await newTimeUtilityFunction({
+    const maybeTimeUtilFunction = await timeUtilityFunctionNew({
       startTimes: values.points.map(p => p.x),
       utils: values.points.map(p => p.y),
       apiKey: props.apiKey.key,
     })
 
-    if (isApiErrorCode(maybeTimeUtilFunction)) {
+    if (isTodoAppErrorCode(maybeTimeUtilFunction)) {
       switch (maybeTimeUtilFunction) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
@@ -90,7 +90,7 @@ function CreateGoal(props: CreateGoalProps) {
         duration: props.span[1] - props.span[0],
         apiKey: props.apiKey.key,
       })
-      : await newGoal({
+      : await goalNew({
         name: values.name,
         description: values.description,
         durationEstimate: durationEstimate!,
@@ -99,7 +99,7 @@ function CreateGoal(props: CreateGoalProps) {
       });
 
 
-    if (isApiErrorCode(maybeGoalData)) {
+    if (isTodoAppErrorCode(maybeGoalData)) {
       switch (maybeGoalData) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({

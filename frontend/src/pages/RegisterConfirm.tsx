@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, Button, Form } from "react-bootstrap";
 import SimpleLayout from '../components/SimpleLayout';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
-import { newUser, isApiErrorCode } from '../utils/utils';
+import { User, newUser, isAuthErrorCode } from '@innexgo/frontend-auth-api';
 
 type CreateUserProps = {
   verificationChallengeKey: string;
@@ -12,7 +12,7 @@ type CreateUserProps = {
 function CreateUser(props: CreateUserProps) {
   type CreateUserValue = {}
 
-  const onSubmit = async (values: CreateUserValue,
+  const onSubmit = async (_: CreateUserValue,
     fprops: FormikHelpers<CreateUserValue>) => {
 
     let errors: FormikErrors<CreateUserValue> = {};
@@ -29,7 +29,7 @@ function CreateUser(props: CreateUserProps) {
       verificationChallengeKey: props.verificationChallengeKey,
     });
 
-    if (isApiErrorCode(maybeUser)) {
+    if (isAuthErrorCode(maybeUser)) {
       switch (maybeUser) {
         case "VERIFICATION_CHALLENGE_NONEXISTENT": {
           fprops.setStatus({

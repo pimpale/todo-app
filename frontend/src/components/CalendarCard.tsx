@@ -1,26 +1,15 @@
-import React from "react";
 import { Card } from "react-bootstrap";
 import { EventContentArg, EventInput } from "@fullcalendar/react"
 
-export function goalDataToEvent(gd: GoalDataScheduled): EventInput {
+export function taskEventToEvent(te: TaskEvent, gd: GoalData): EventInput {
   return {
-    id: `GoalData:${gd.goalDataId}`,
-    start: new Date(gd.startTime),
-    end: new Date(gd.startTime + gd.duration),
+    id: `TaskEvent:${te.taskEventId}`,
+    start: new Date(te.startTime),
+    end: new Date(te.startTime + te.duration),
     color: "#00000000",
     borderColor: "#00000000",
-    goalData: gd
-  }
-}
-
-export function pastEventDataToEvent(ped: PastEventData): EventInput {
-  return {
-    id: `PastEventData:${ped.pastEventDataId}`,
-    start: new Date(ped.startTime),
-    end: new Date(ped.startTime + ped.duration),
-    color: "#00000000",
-    borderColor: "#00000000",
-    pastEventData: ped
+    taskEvent: te,
+    goalData: gd,
   }
 }
 
@@ -30,13 +19,13 @@ export function GoalCard(props: { goalData: GoalData }) {
   </Card>
 }
 
-// PastEvent
-export function PastEventCard(props: {
-  pastEventData: PastEventData
+// TaskEvent
+export function TaskEventCard(props: {
+  goalData: GoalData
 }) {
   return (
     <Card className="px-1 py-1 h-100 w-100 bg-primary text-light overflow-hidden" >
-      {props.pastEventData.name}
+      {props.goalData.name}
     </Card>
   )
 }
@@ -45,10 +34,8 @@ export function PastEventCard(props: {
 function CalendarCard(eventInfo: EventContentArg) {
   const props = eventInfo.event.extendedProps;
   switch (eventInfo.event.id.split(':')[0]) {
-    case "PastEventData":
-      return <PastEventCard pastEventData={props.pastEventData} />
-    case "GoalData":
-      return <GoalCard goalData={props.goalData} />
+    case "TaskEvent":
+      return <TaskEventCard goalData={props.goalData} />
   }
 }
 

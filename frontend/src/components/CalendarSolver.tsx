@@ -6,8 +6,9 @@ import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import CalendarCard from '../components/CalendarCard';
-import { viewTimeUtilityFunctionPoint, viewGoalData, newScheduledGoalData, newTimeUtilityFunction, isApiErrorCode, assert, INT_MAX, findLastIndex } from '../utils/utils';
-
+import { ApiKey } from '@innexgo/frontend-auth-api';
+import { goalDataView, goalDataNew, timeUtilityFunctionNew, isTodoAppErrorCode, INT_MAX, } from '../utils/utils';
+import {assert, findLastIndex } from '@innexgo/frontend-common';
 
 type SolverDataPoint = {
   startTime: number,
@@ -141,7 +142,7 @@ function ICalendarSolver(props: ICalendarSolverProps) {
               })
 
               // do better error handling later
-              if (isApiErrorCode(maybeTimeUtilFunction)) {
+              if (isTodoAppErrorCode(maybeTimeUtilFunction)) {
                 console.log(maybeTimeUtilFunction);
                 continue;
               }
@@ -203,7 +204,7 @@ const loadSolverData = async (props: AsyncProps<SolverGoalData[]>) => {
     apiKey: props.apiKey.key
   });
 
-  if (isApiErrorCode(maybeGoalData)) {
+  if (isTodoAppErrorCode(maybeGoalData)) {
     throw Error;
   }
 
@@ -218,7 +219,7 @@ const loadSolverData = async (props: AsyncProps<SolverGoalData[]>) => {
             apiKey: props.apiKey.key
           });
           // if there's an error return empty list (this will be filtered out)
-          if (isApiErrorCode(maybeTuf)) {
+          if (isTodoAppErrorCode(maybeTuf)) {
             return []
           }
 

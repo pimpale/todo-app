@@ -1,25 +1,25 @@
-import React from 'react'
 import { Row, Container, Col, Form} from 'react-bootstrap';
 import { Async, AsyncProps } from 'react-async';
 import Section from '../components/Section';
 import DashboardLayout from '../components/DashboardLayout';
 import ManageGoalTable from '../components/ManageGoalTable';
 import Loader from '../components/Loader';
-import { viewGoalData, isApiErrorCode} from '../utils/utils';
+import { goalDataView, isTodoAppErrorCode} from '../utils/utils';
+import {AuthenticatedComponentProps} from '@innexgo/frontend-auth-api';
 
 type DashboardData = {
   goalData: GoalData
 }
 
 const loadDashboardData = async (props: AsyncProps<DashboardData[]>) => {
-  const maybeGoalData = await viewGoalData({
+  const maybeGoalData = await goalDataView({
     creatorUserId: props.apiKey.creator.userId,
     onlyRecent: true,
     status: "PENDING",
     apiKey: props.apiKey.key,
   });
 
-  if (isApiErrorCode(maybeGoalData)) {
+  if (isTodoAppErrorCode(maybeGoalData)) {
     throw Error;
   }
 

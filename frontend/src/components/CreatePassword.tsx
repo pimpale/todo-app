@@ -1,7 +1,6 @@
-import React from 'react';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Button, Form, } from 'react-bootstrap'
-import { newChangePassword, isPasswordValid, isApiErrorCode } from '../utils/utils';
+import { ApiKey, newChangePassword, isPasswordValid, isAuthErrorCode } from '@innexgo/frontend-auth-api';
 
 interface CreatePasswordProps {
   apiKey: ApiKey,
@@ -33,20 +32,12 @@ function CreatePassword(props: CreatePasswordProps) {
     }
 
     const passwordChangeResult = await newChangePassword({
-      userId: props.apiKey.creator.userId,
       oldPassword: values.oldpassword,
       newPassword: values.password1,
       apiKey: props.apiKey.key,
     });
-    if (isApiErrorCode(passwordChangeResult)) {
+    if (isAuthErrorCode(passwordChangeResult)) {
       switch (passwordChangeResult) {
-        case "OK": {
-          setStatus({
-            failureMessage: "",
-            successMessage: "Password successfully changed."
-          });
-          break;
-        }
         case "API_KEY_UNAUTHORIZED": {
           setStatus({
             failureMessage: "Please log back in and try again",
@@ -76,6 +67,10 @@ function CreatePassword(props: CreatePasswordProps) {
         }
       }
     } else {
+      setStatus({
+        failureMessage: "",
+        successMessage: "Password successfully changed."
+      });
       props.onSuccess();
     }
   }

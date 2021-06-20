@@ -5,6 +5,7 @@ import {Card} from "react-bootstrap";
 import { RouteProps } from "react-router";
 import { Route } from "react-router-dom";
 
+import {ApiKey, AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
 
 interface AuthenticatedRouteProps extends Omit<RouteProps, 'component'> {
   component: React.ComponentType<AuthenticatedComponentProps>

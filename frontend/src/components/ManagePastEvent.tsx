@@ -2,40 +2,41 @@ import React from 'react';
 import { Form, Button, Table } from 'react-bootstrap'; import Loader from '../components/Loader';
 import { Async, AsyncProps } from 'react-async';
 import DisplayModal from '../components/DisplayModal';
-import { viewPastEventData, newPastEventData, isApiErrorCode} from '../utils/utils';
+import { newTaskEvent, isTodoAppErrorCode} from '../utils/utils';
+import { ApiKey } from '@innexgo/frontend-auth-api';
 import { Edit, Archive, Unarchive} from '@material-ui/icons';
 import { Formik, FormikHelpers } from 'formik'
 import format from 'date-fns/format';
 
 
-type EditPastEventDataProps = {
-  pastEventData: PastEventData,
+type EditTaskEventDataProps = {
+  taskEventData: TaskEventData,
   apiKey: ApiKey,
   postSubmit: () => void
 };
 
-function EditPastEventData(props: EditPastEventDataProps) {
+function EditTaskEventData(props: EditTaskEventDataProps) {
 
-  type EditPastEventDataValue = {
+  type EditTaskEventDataValue = {
     name: string,
     description: string,
   }
 
-  const onSubmit = async (values: EditPastEventDataValue,
-    fprops: FormikHelpers<EditPastEventDataValue>) => {
+  const onSubmit = async (values: EditTaskEventDataValue,
+    fprops: FormikHelpers<EditTaskEventDataValue>) => {
 
-    const maybePastEventData = await newPastEventData({
-      pastEventId: props.pastEventData.pastEvent.pastEventId,
+    const maybeTaskEventData = await newTaskEventData({
+      taskEventId: props.taskEventData.taskEvent.taskEventId,
       apiKey: props.apiKey.key,
       name: values.name,
       description: values.description,
-      startTime:props.pastEventData.startTime,
-      duration:props.pastEventData.duration,
-      active: props.pastEventData.active,
+      startTime:props.taskEventData.startTime,
+      duration:props.taskEventData.duration,
+      active: props.taskEventData.active,
     });
 
-    if (isApiErrorCode(maybePastEventData)) {
-      switch (maybePastEventData) {
+    if (isTodoAppErrorCode(maybeTaskEventData)) {
+      switch (maybeTaskEventData) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
@@ -50,7 +51,7 @@ function EditPastEventData(props: EditPastEventDataProps) {
           });
           break;
         }
-        case "PAST_EVENT_NONEXISTENT": {
+        case "TASK_EVENT_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "This event does not exist.",
             successResult: ""
@@ -78,11 +79,11 @@ function EditPastEventData(props: EditPastEventDataProps) {
   }
 
   return <>
-    <Formik<EditPastEventDataValue>
+    <Formik<EditTaskEventDataValue>
       onSubmit={onSubmit}
       initialValues={{
-        name: props.pastEventData.name,
-        description: props.pastEventData.description
+        name: props.taskEventData.name,
+        description: props.taskEventData.description
       }}
       initialStatus={{
         failureResult: "",
@@ -108,7 +109,7 @@ function EditPastEventData(props: EditPastEventDataProps) {
               <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
             </Form.Group>
             <Form.Group >
-              <Form.Label >PastEvent Description</Form.Label>
+              <Form.Label >TaskEvent Description</Form.Label>
               <Form.Control
                 name="description"
                 type="text"
@@ -131,31 +132,31 @@ function EditPastEventData(props: EditPastEventDataProps) {
 }
 
 
-type ArchivePastEventProps = {
-  pastEventData: PastEventData,
+type ArchiveTaskEventProps = {
+  taskEventData: TaskEventData,
   apiKey: ApiKey,
   postSubmit: () => void
 };
 
-function ArchivePastEvent(props: ArchivePastEventProps) {
+function ArchiveTaskEvent(props: ArchiveTaskEventProps) {
 
-  type ArchivePastEventValue = {}
+  type ArchiveTaskEventValue = {}
 
-  const onSubmit = async (_: ArchivePastEventValue,
-    fprops: FormikHelpers<ArchivePastEventValue>) => {
+  const onSubmit = async (_: ArchiveTaskEventValue,
+    fprops: FormikHelpers<ArchiveTaskEventValue>) => {
 
-    const maybePastEventData = await newPastEventData({
-      pastEventId: props.pastEventData.pastEvent.pastEventId,
+    const maybeTaskEventData = await newTaskEventData({
+      taskEventId: props.taskEventData.taskEvent.taskEventId,
       apiKey: props.apiKey.key,
-      startTime: props.pastEventData.startTime,
-      duration: props.pastEventData.duration,
-      name: props.pastEventData.name,
-      description: props.pastEventData.description,
-      active: !props.pastEventData.active,
+      startTime: props.taskEventData.startTime,
+      duration: props.taskEventData.duration,
+      name: props.taskEventData.name,
+      description: props.taskEventData.description,
+      active: !props.taskEventData.active,
     });
 
-    if (isApiErrorCode(maybePastEventData)) {
-      switch (maybePastEventData) {
+    if (isTodoAppErrorCode(maybeTaskEventData)) {
+      switch (maybeTaskEventData) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
@@ -170,7 +171,7 @@ function ArchivePastEvent(props: ArchivePastEventProps) {
           });
           break;
         }
-        case "PAST_EVENT_NONEXISTENT": {
+        case "TASK_EVENT_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "This event does not exist.",
             successResult: ""
@@ -198,7 +199,7 @@ function ArchivePastEvent(props: ArchivePastEventProps) {
   }
 
   return <>
-    <Formik<ArchivePastEventValue>
+    <Formik<ArchiveTaskEventValue>
       onSubmit={onSubmit}
       initialValues={{}}
       initialStatus={{
@@ -212,7 +213,7 @@ function ArchivePastEvent(props: ArchivePastEventProps) {
           onSubmit={fprops.handleSubmit} >
           <div hidden={fprops.status.successResult !== ""}>
             <p>
-              Are you sure you want to {props.pastEventData.active ? "archive" : "unarchive"} {props.pastEventData.name}?
+              Are you sure you want to {props.taskEventData.active ? "archive" : "unarchive"} {props.taskEventData.name}?
             </p>
             <Button type="submit">Confirm</Button>
             <br />
@@ -227,77 +228,77 @@ function ArchivePastEvent(props: ArchivePastEventProps) {
 
 
 
-const loadPastEventData = async (props: AsyncProps<PastEventData>) => {
-  const maybePastEventData = await viewPastEventData({
-    pastEventId: props.pastEventId,
+const loadTaskEventData = async (props: AsyncProps<TaskEventData>) => {
+  const maybeTaskEventData = await viewTaskEventData({
+    taskEventId: props.taskEventId,
     onlyRecent: true,
     apiKey: props.apiKey.key
   });
 
-  if (isApiErrorCode(maybePastEventData) || maybePastEventData.length === 0) {
+  if (isTodoAppErrorCode(maybeTaskEventData) || maybeTaskEventData.length === 0) {
     throw Error;
   } else {
-    return maybePastEventData[0];
+    return maybeTaskEventData[0];
   }
 }
 
 
-const ManagePastEventData = (props: {
-  pastEventId: number,
+const ManageTaskEventData = (props: {
+  taskEventId: number,
   apiKey: ApiKey,
 }) => {
 
-  const [showEditPastEventData, setShowEditPastEventData] = React.useState(false);
-  const [showArchivePastEvent, setShowArchivePastEvent] = React.useState(false);
+  const [showEditTaskEventData, setShowEditTaskEventData] = React.useState(false);
+  const [showArchiveTaskEvent, setShowArchiveTaskEvent] = React.useState(false);
 
 
   return <Async
-    promiseFn={loadPastEventData}
+    promiseFn={loadTaskEventData}
     apiKey={props.apiKey}
-    pastEventId={props.pastEventId}>
+    taskEventId={props.taskEventId}>
     {({ reload }) => <>
       <Async.Pending><Loader /></Async.Pending>
       <Async.Rejected>
         <span className="text-danger">An unknown error has occured.</span>
       </Async.Rejected>
-      <Async.Fulfilled<PastEventData>>{pastEventData => <>
+      <Async.Fulfilled<TaskEventData>>{taskEventData => <>
         <Table hover bordered>
           <tbody>
             <tr>
               <th>Status</th>
-              <td>{pastEventData.active ? "Active" : "Archived"}</td>
+              <td>{taskEventData.active ? "Active" : "Archived"}</td>
             </tr>
             <tr>
               <th>Name</th>
-              <td>{pastEventData.name}</td>
+              <td>{taskEventData.name}</td>
             </tr>
             <tr>
               <th>Description</th>
-              <td>{pastEventData.description}</td>
+              <td>{taskEventData.description}</td>
             </tr>
             <tr>
               <th>Creation Time</th>
-              <td>{format(pastEventData.pastEvent.creationTime, "MMM do")} </td>
+              <td>{format(taskEventData.taskEvent.creationTime, "MMM do")} </td>
             </tr>
           </tbody>
         </Table>
-        <Button variant="secondary" onClick={_ => setShowEditPastEventData(true)}>Edit <Edit /></Button>
+        <Button variant="secondary" onClick={_ => setShowEditTaskEventData(true)}>Edit <Edit /></Button>
 
-        { pastEventData.active
-            ? <Button variant="danger" onClick={_ => setShowArchivePastEvent(true)}>Archive <Archive /></Button>
-            : <Button variant="success" onClick={_ => setShowArchivePastEvent(true)}>Unarchive <Unarchive /></Button>
+        { taskEventData.active
+            ? <Button variant="danger" onClick={_ => setShowArchiveTaskEvent(true)}>Archive <Archive /></Button>
+            : <Button variant="success" onClick={_ => setShowArchiveTaskEvent(true)}>Unarchive <Unarchive /></Button>
         }
 
         <DisplayModal
           title="Edit Event"
-          show={showEditPastEventData}
-          onClose={() => setShowEditPastEventData(false)}
+          show={showEditTaskEventData}
+          onClose={() => setShowEditTaskEventData(false)}
         >
-          <EditPastEventData
-            pastEventData={pastEventData}
+          <EditTaskEventData
+            taskEventData={taskEventData}
             apiKey={props.apiKey}
             postSubmit={() => {
-              setShowEditPastEventData(false);
+              setShowEditTaskEventData(false);
               reload();
             }}
           />
@@ -305,14 +306,14 @@ const ManagePastEventData = (props: {
 
         <DisplayModal
           title="Archive Event"
-          show={showArchivePastEvent}
-          onClose={() => setShowArchivePastEvent(false)}
+          show={showArchiveTaskEvent}
+          onClose={() => setShowArchiveTaskEvent(false)}
         >
-          <ArchivePastEvent
-            pastEventData={pastEventData}
+          <ArchiveTaskEvent
+            taskEventData={taskEventData}
             apiKey={props.apiKey}
             postSubmit={() => {
-              setShowArchivePastEvent(false);
+              setShowArchiveTaskEvent(false);
               reload();
             }}
           />
@@ -324,4 +325,4 @@ const ManagePastEventData = (props: {
   </Async>
 }
 
-export default ManagePastEventData;
+export default ManageTaskEventData;

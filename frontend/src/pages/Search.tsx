@@ -2,7 +2,8 @@ import React from 'react'
 import { Button, Container, Form, Row, Col } from 'react-bootstrap';
 import DashboardLayout from '../components/DashboardLayout';
 import ManageGoalTable from '../components/ManageGoalTable';
-import { viewGoalData, isApiErrorCode } from '../utils/utils';
+import { goalDataView, isTodoAppErrorCode } from '../utils/utils';
+import {ApiKey, AuthenticatedComponentProps} from '@innexgo/frontend-auth-api';
 
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 
@@ -26,7 +27,7 @@ function SearchForm(props: SearchProps) {
       return;
     }
 
-    const maybeGoalData = await viewGoalData({
+    const maybeGoalData = await goalDataView({
       creatorUserId: props.apiKey.creator.userId,
       onlyRecent: true,
       partialName: values.search,
@@ -34,7 +35,7 @@ function SearchForm(props: SearchProps) {
       apiKey: props.apiKey.key,
     });
 
-    if (isApiErrorCode(maybeGoalData)) {
+    if (isTodoAppErrorCode(maybeGoalData)) {
       switch (maybeGoalData) {
         case "API_KEY_UNAUTHORIZED": {
           fprops.setStatus({

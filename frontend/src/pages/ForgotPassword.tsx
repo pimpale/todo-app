@@ -1,7 +1,7 @@
 import React from 'react';
 import { Formik, FormikHelpers } from 'formik'
 import { Button, Card, Form, } from 'react-bootstrap'
-import { newPasswordReset, isApiErrorCode } from '../utils/utils';
+import { newPasswordReset, isAuthErrorCode } from '@innexgo/frontend-auth-api';
 
 import SimpleLayout from '../components/SimpleLayout';
 
@@ -27,18 +27,18 @@ function ForgotPasswordForm(props:ForgotPasswordFormProps) {
       userEmail: values.email
     });
 
-    if (isApiErrorCode(maybePasswordResetKey)) {
+    if (isAuthErrorCode(maybePasswordResetKey)) {
       switch (maybePasswordResetKey) {
         case "USER_NONEXISTENT": {
           setErrors({ email: "No such user exists." });
           break;
         }
-        case "EMAIL_RATELIMIT": {
-          setErrors({ email: "Please wait 5 minutes before sending another email." });
+        case "EMAIL_BOUNCED": {
+          setErrors({ email: "This email address is invalid." });
           break;
         }
-        case "EMAIL_BLACKLISTED": {
-          setErrors({ email: "This email address has been blacklisted." });
+        case "EMAIL_UNKNOWN": {
+          setErrors({ email: "Unable to send mail to this address. Try again later." });
           break;
         }
         default: {

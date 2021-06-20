@@ -1,7 +1,7 @@
 import React from 'react';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Card, Button, Form, } from 'react-bootstrap'
-import { newResetPassword, isPasswordValid, isApiErrorCode } from '../utils/utils';
+import { newResetPassword, isPasswordValid, isAuthErrorCode } from '@innexgo/frontend-auth-api';
 
 import SimpleLayout from '../components/SimpleLayout';
 
@@ -37,15 +37,8 @@ function ResetPasswordForm(props: ResetPasswordProps) {
       passwordResetKey: props.resetKey,
       newPassword: values.password1,
     });
-    if (isApiErrorCode(passwordResetResult)) {
+    if (isAuthErrorCode(passwordResetResult)) {
       switch (passwordResetResult) {
-        case "OK": {
-          setStatus({
-            failureMessage: "",
-            successMessage: "Password successfully changed."
-          });
-          break;
-        }
         case "PASSWORD_RESET_NONEXISTENT": {
           setStatus({
             failureMessage: "Invalid password reset link.",
@@ -82,6 +75,10 @@ function ResetPasswordForm(props: ResetPasswordProps) {
         }
       }
     } else {
+      setStatus({
+        failureMessage: "",
+        successMessage: "Password successfully changed."
+      });
       props.onSuccess();
     }
   }

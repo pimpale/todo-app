@@ -1,152 +1,56 @@
 declare global {
-  type PasswordReset = {
-    creationTime: number;
-  }
-  // changes with PasswordKind and Password in the future?
-  type PasswordKind = "CHANGE" | "RESET" | "CANCEL";
 
-  type Password = {
-    passwordId: number,
+  interface GoalIntent {
+    goalIntentId: number,
     creationTime: number,
-    creator: User,
-    user: User,
-    kind: "CANCEL" | "CHANGE",
-    passwordReset: null,
-  } | {
-    passwordId: number,
-    creationTime: number,
-    creator: User,
-    user: User,
-    kind: "RESET",
-    passwordReset: PasswordReset,
+    creatorUserId: number
   }
 
-  type VerificationChallenge = {
+  interface GoalIntentData {
+    goalIntentDataId: number,
     creationTime: number,
+    creatorUserId: number,
+    goalIntent: GoalIntent,
     name: string,
-    email: string,
+    active: boolean
   }
 
-  type User = {
-    userId: number,
-    creationTime: number,
-    name: string,
-    email: string,
-  }
-
-  type SubscriptionKind = "VALID" | "CANCEL";
-
-  type Subscription = {
-    subscriptionId: number,
-    creationTime: number,
-    creator: User,
-    subscriptionKind: SubscriptionKind,
-    maxUses: number
-  }
-
-  type Invoice = { // Did not use yet
-    invoiceId: number,
-    creationTime: number,
-    creator: User,
-    subscriptionId: Subscription,
-    amountCents: number
-  }
-
-  type ApiKeyKind = "VALID" | "CANCEL";
-
-  type ApiKey = {
-    apiKeyId: number,
-    creationTime: number,
-    creator: User,
-    duration: number, // only valid if ApiKeyKind isn't CANCEL
-    key: string, // only valid if ApiKeyKind isn't CANCEL
-    apiKeyKind: ApiKeyKind,
-  }
-
-  interface AuthenticatedComponentProps {
-    apiKey: ApiKey
-    setApiKey: (data: ApiKey | null) => void
-  }
-
-  type Goal = {
+  interface Goal {
     goalId: number,
     creationTime: number,
-    creator: User
+    creatorUserId: number,
+    intent?: GoalIntent
   }
-  // changes: took Goal out of TimeUtilityFunction
+
   type TimeUtilityFunction = {
     timeUtilityFunctionId: number,
     creationTime: number,
-    creator: User,
-  }
-
-  type TimeUtilityFunctionPoint = {
-    timeUtilityFunctionPointId: number,
-    creationTime: number,
-    creator: User,
-    timeUtilityFunction: TimeUtilityFunction,
-    startTime: number,
-    utils: number,
-    active: boolean
+    creatorUserId: number,
+    start_time: number[],
+    utils: number[],
   }
 
   type GoalDataStatusKind = "SUCCEED" | "FAIL" | "CANCEL" | "PENDING";
 
-  type GoalDataScheduled = {
+  type GoalData = {
     goalDataId: number,
     creationTime: number,
-    creator: User,
+    creatorUserId: number,
     goal: Goal
     name: string,
-    description: string,
-    timeUtilityFunction: TimeUtilityFunction,
     durationEstimate: number,
-    scheduled: true,
-    startTime: number,
-    duration: number,
+    timeUtilityFunction: TimeUtilityFunction,
+    parentGoal?: Goal,
     status: GoalDataStatusKind
   }
 
-  type GoalDataUnscheduled = {
-    goalDataId: number,
+  type TaskEvent = {
+    taskEventId: number,
     creationTime: number,
-    creator: User,
-    goal: Goal
-    name: string,
-    description: string,
-    timeUtilityFunction: TimeUtilityFunction,
-    durationEstimate: number,
-    scheduled: false,
-    startTime: null,
-    duration: null,
-    status: GoalDataStatusKind
-  }
-
-  type GoalData  = GoalDataScheduled | GoalDataUnscheduled;
-
-  type GoalDependency = {
-    goalDependencyId: number,
-    creationTime: number,
-    creator: User,
+    creatorUserId: number,
     goal: Goal,
-    dependentGoal: Goal
-  }
-
-  type PastEvent = {
-    pastEventId: number,
-    creationTime: number,
-    creator: User
-  }
-
-  type PastEventData = {
-    pastEventDataId: number,
-    creationTime: number,
-    creator: User,
-    pastEvent: PastEvent,
     startTime: number,
     duration: number,
-    name: string,
-    description: string,
     active: boolean
   }
 }

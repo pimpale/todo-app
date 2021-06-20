@@ -1,7 +1,6 @@
-import React from 'react';
 import { Button, Form } from 'react-bootstrap'
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
-import { newVerificationChallenge, isApiErrorCode, isPasswordValid } from '../utils/utils';
+import { newVerificationChallenge, isAuthErrorCode, isPasswordValid } from '@innexgo/frontend-auth-api';
 
 type RegisterFormProps = {
   onSuccess: () => void
@@ -53,7 +52,7 @@ function RegisterForm(props: RegisterFormProps) {
       userPassword: values.password1,
     });
 
-    if (isApiErrorCode(maybeVerificationChallenge)) {
+    if (isAuthErrorCode(maybeVerificationChallenge)) {
       // otherwise display errors
       switch (maybeVerificationChallenge) {
         case "USER_EMAIL_EMPTY": {

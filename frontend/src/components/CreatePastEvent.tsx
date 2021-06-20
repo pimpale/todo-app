@@ -1,28 +1,28 @@
-import React from "react"
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Button, Form } from "react-bootstrap";
-import { newPastEvent, isApiErrorCode } from "../utils/utils";
+import { taskEventNew, isTodoAppErrorCode } from "../utils/utils";
+import {ApiKey, AuthenticatedComponentProps} from '@innexgo/frontend-auth-api';
 
 
-type CreatePastEventProps = {
+type CreateTaskEventProps = {
   startTime: number;
   duration: number;
   apiKey: ApiKey;
   postSubmit: () => void;
 }
 
-function CreatePastEvent(props: CreatePastEventProps) {
-  type CreatePastEventValue = {
+function CreateTaskEvent(props: CreateTaskEventProps) {
+  type CreateTaskEventValue = {
     name: string,
     description: string,
     startTime: number,
     duration: number,
   }
 
-  const onSubmit = async (values: CreatePastEventValue,
-    fprops: FormikHelpers<CreatePastEventValue>) => {
+  const onSubmit = async (values: CreateTaskEventValue,
+    fprops: FormikHelpers<CreateTaskEventValue>) => {
 
-    let errors: FormikErrors<CreatePastEventValue> = {};
+    let errors: FormikErrors<CreateTaskEventValue> = {};
 
     // Validate input
 
@@ -37,7 +37,7 @@ function CreatePastEvent(props: CreatePastEventProps) {
       return;
     }
 
-    const maybePastEvent = await newPastEvent({
+    const maybeTaskEvent = await taskEventNew({
       name: values.name,
       description: values.description,
       startTime: values.startTime,
@@ -45,8 +45,8 @@ function CreatePastEvent(props: CreatePastEventProps) {
       apiKey: props.apiKey.key,
     });
 
-    if (isApiErrorCode(maybePastEvent)) {
-      switch (maybePastEvent) {
+    if (isTodoAppErrorCode(maybeTaskEvent)) {
+      switch (maybeTaskEvent) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
@@ -56,7 +56,7 @@ function CreatePastEvent(props: CreatePastEventProps) {
         }
         default: {
           fprops.setStatus({
-            failureResult: "An unknown or network error has occured while trying to create pastEvent.",
+            failureResult: "An unknown or network error has occured while trying to create taskEvent.",
             successResult: ""
           });
           break;
@@ -74,7 +74,7 @@ function CreatePastEvent(props: CreatePastEventProps) {
   }
 
   return <>
-    <Formik<CreatePastEventValue>
+    <Formik<CreateTaskEventValue>
       onSubmit={onSubmit}
       initialValues={{
         name: "",
@@ -93,7 +93,7 @@ function CreatePastEvent(props: CreatePastEventProps) {
           onSubmit={fprops.handleSubmit} >
           <div hidden={fprops.status.successResult !== ""}>
             <Form.Group >
-              <Form.Label>PastEvent Name</Form.Label>
+              <Form.Label>TaskEvent Name</Form.Label>
               <Form.Control
                 name="name"
                 type="text"
@@ -129,4 +129,4 @@ function CreatePastEvent(props: CreatePastEventProps) {
   </>
 }
 
-export default CreatePastEvent;
+export default CreateTaskEvent;

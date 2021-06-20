@@ -5,11 +5,11 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
 import DashboardLayout from '../components/DashboardLayout';
 import CalendarSolver from '../components/CalendarSolver';
-import CalendarCard, { pastEventDataToEvent, goalDataToEvent } from '../components/CalendarCard';
+import CalendarCard, { taskEventToEvent } from '../components/CalendarCard';
 
 import { Async, AsyncProps } from 'react-async';
 import { Row, Col, Tab, Tabs, Popover, Container, } from 'react-bootstrap';
-import { newPastEventData, newScheduledGoalData, viewPastEventData, viewGoalData, isApiErrorCode } from '../utils/utils';
+import { taskEventNew, goalDataNew, taskEventView, goalDataView, isTodoAppErrorCode } from '../utils/utils';
 
 import UtilityWrapper from '../components/UtilityWrapper';
 
