@@ -58,8 +58,15 @@ pub fn api(
       config.clone(),
       db.clone(),
       auth_service.clone(),
-      warp::path!("public" / "task_event" / "new"),
-      todo_app_handlers::task_event_new,
+      warp::path!("public" / "external_event" / "new"),
+      todo_app_handlers::external_event_new,
+    ))
+    .or(adapter(
+      config.clone(),
+      db.clone(),
+      auth_service.clone(),
+      warp::path!("public" / "external_event_data" / "new"),
+      todo_app_handlers::external_event_data_new,
     ))
     .or(adapter(
       config.clone(),
@@ -92,8 +99,15 @@ pub fn api(
       config.clone(),
       db.clone(),
       auth_service.clone(),
-      warp::path!("public" / "task_event" / "view"),
-      todo_app_handlers::task_event_view,
+      warp::path!("public" / "external_event" / "view"),
+      todo_app_handlers::external_event_view,
+    ))
+    .or(adapter(
+      config.clone(),
+      db.clone(),
+      auth_service.clone(),
+      warp::path!("public" / "external_event_data" / "view"),
+      todo_app_handlers::external_event_data_view,
     ))
     .or(adapter(
       config.clone(),

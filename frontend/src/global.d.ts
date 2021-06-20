@@ -38,20 +38,31 @@ declare global {
     creatorUserId: number,
     goal: Goal
     name: string,
+    tags: string[],
     durationEstimate: number,
     timeUtilityFunction: TimeUtilityFunction,
     parentGoal?: Goal,
+    time_span?: number[],
     status: GoalDataStatusKind
   }
 
-  type TaskEvent = {
-    taskEventId: number,
+  interface ExternalEvent {
+    externalEventId: number,
+    creationTime: number,
+    creatorUserId: number
+  }
+
+  interface ExternalEventData {
+    externalEventDataId: number,
     creationTime: number,
     creatorUserId: number,
-    goal: Goal,
-    startTime: number,
-    duration: number,
+    externalEvent: ExternalEvent,
+    name: string,
+    start_time: number,
+    end_time: number,
     active: boolean
   }
+
+
 }
 export { }

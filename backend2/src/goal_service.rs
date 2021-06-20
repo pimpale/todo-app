@@ -1,7 +1,7 @@
 use super::todo_app_db_types::*;
 use super::utils::current_time_millis;
-use tokio_postgres::GenericClient;
 use todo_app_service_api::request;
+use tokio_postgres::GenericClient;
 
 impl From<tokio_postgres::row::Row> for Goal {
   // select * from goal order only, otherwise it will fail
@@ -25,16 +25,17 @@ pub async fn add(
   let goal_id = con
     .query_one(
       "INSERT INTO
-      goal(
-          creation_time,
-          creator_user_id,
-          goal_intent_id
-      )
-      VALUES($1, $2, $3)
-      RETURNING goal_id
-     ",
+       goal(
+           creation_time,
+           creator_user_id,
+           goal_intent_id
+       )
+       VALUES($1, $2, $3)
+       RETURNING goal_id
+      ",
       &[&creation_time, &creator_user_id, &goal_intent_id],
-    ).await?
+    )
+    .await?
     .get(0);
 
   // return goal
@@ -51,7 +52,8 @@ pub async fn get_by_goal_id(
   goal_id: i64,
 ) -> Result<Option<Goal>, tokio_postgres::Error> {
   let result = con
-    .query_opt("SELECT * FROM goal WHERE goal_id=$1", &[&goal_id]).await?
+    .query_opt("SELECT * FROM goal WHERE goal_id=$1", &[&goal_id])
+    .await?
     .map(|x| x.into());
 
   Ok(result)
@@ -62,14 +64,13 @@ pub async fn query(
   props: request::GoalViewProps,
 ) -> Result<Vec<Goal>, tokio_postgres::Error> {
   let sql = "SELECT g.* FROM goal g WHERE 1 = 1
-     AND ($1 == NULL OR g.goal_id = $1)
-     AND ($2 == NULL OR g.creation_time = $2)
-     AND ($3 == NULL OR g.creation_time >= $3)
-     AND ($4 == NULL OR g.creation_time <= $4)
-     AND ($5 == NULL OR g.creator_user_id = $5)
-     AND ($6 == NULL OR g.goal_intent_id = $6)
+     AND ($1 IS NULL OR g.goal_id = $1)
+     AND ($2 IS NULL OR g.creation_time >= $2)
+     AND ($3 IS NULL OR g.creation_time <= $3)
+     AND ($4 IS NULL OR g.creator_user_id = $4)
+     AND ($5 IS NULL OR g.goal_intent_id = $5 IS TRUE)
      ORDER BY g.goal_id
-     LIMIT $7, $8";
+     LIMIT $6, $7";
 
   let stmnt = con.prepare(&sql).await?;
 
@@ -78,7 +79,6 @@ pub async fn query(
       &stmnt,
       &[
         &props.goal_id,
-        &props.creation_time,
         &props.min_creation_time,
         &props.max_creation_time,
         &props.creator_user_id,
@@ -86,7 +86,8 @@ pub async fn query(
         &props.offset,
         &props.count,
       ],
-    ).await?
+    )
+    .await?
     .into_iter()
     .map(|x| x.into())
     .collect();

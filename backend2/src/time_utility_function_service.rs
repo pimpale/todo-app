@@ -69,13 +69,12 @@ pub async fn query(
 ) -> Result<Vec<TimeUtilityFunction>, tokio_postgres::Error> {
   let sql = [
     "SELECT tuf.* FROM time_utility_function tuf WHERE 1 = 1",
-    " AND ($1 == NULL OR tuf.time_utility_function_id = $1)",
-    " AND ($2 == NULL OR tuf.creation_time = $2)",
-    " AND ($3 == NULL OR tuf.creation_time >= $3)",
-    " AND ($4 == NULL OR tuf.creation_time <= $4)",
-    " AND ($5 == NULL OR tuf.creator_user_id = $5)",
+    " AND ($1 IS NULL OR tuf.time_utility_function_id = $1)",
+    " AND ($2 IS NULL OR tuf.creation_time >= $2)",
+    " AND ($3 IS NULL OR tuf.creation_time <= $3)",
+    " AND ($4 IS NULL OR tuf.creator_user_id = $4)",
     " ORDER BY tuf.time_utility_function_id",
-    " LIMIT $6, $7",
+    " LIMIT $5, $6",
   ]
   .join("");
 
@@ -86,7 +85,6 @@ pub async fn query(
       &stmnt,
       &[
         &props.time_utility_function_id,
-        &props.creation_time,
         &props.min_creation_time,
         &props.max_creation_time,
         &props.creator_user_id,

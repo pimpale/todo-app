@@ -49,19 +49,42 @@ create table goal_data(
   creator_user_id bigint not null,
   goal_id bigint not null,
   name text not null,
+  tags text[] not null,
   duration_estimate bigint not null,
   time_utility_function_id bigint not null,
-  parent_goal_id bigint not null, -- NULLABLE
+  parent_goal_id bigint, -- NULLABLE
+  -- invariant: Both start_time and end_time must be null or not null
+  -- invariant: start_time < end_time
+  start_time bigint,     -- NULLABLE
+  end_time bigint,       -- NULLABLE
   status bigint not null -- enum
 );
 
-drop table if exists task_event;
-create table task_event(
-  task_event_id bigserial primary key,
+drop table if exists tag; 
+create table tag(
+  tag_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null,
   goal_id bigint not null,
+  name text not null,
+  active bigint not null
+);
+
+drop table if exists external_event;
+create table external_event(
+  extenal_event_id bigserial primary key,
+  creation_time bigint not null,
+  creator_user_id bigint not null
+)
+
+drop table if exists external_event_data;
+create table external_event_data(
+  external_event_data_id bigserial primary key,
+  creation_time bigint not null,
+  creator_user_id bigint not null,
+  external_event_id bigint not null,
+  name text not null,
   start_time bigint not null,
-  duration bigint not null,
-  active bigint not null -- boolean
+  end_time bigint not null,
+  active bigint not null
 );

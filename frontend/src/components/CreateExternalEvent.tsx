@@ -1,28 +1,28 @@
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Button, Form } from "react-bootstrap";
-import { taskEventNew, isTodoAppErrorCode } from "../utils/utils";
-import {ApiKey, AuthenticatedComponentProps} from '@innexgo/frontend-auth-api';
+import { externalEventNew, isTodoAppErrorCode } from "../utils/utils";
+import {ApiKey } from '@innexgo/frontend-auth-api';
 
 
-type CreateTaskEventProps = {
+type CreateExternalEventProps = {
   startTime: number;
-  duration: number;
+  endTime: number;
   apiKey: ApiKey;
   postSubmit: () => void;
 }
 
-function CreateTaskEvent(props: CreateTaskEventProps) {
-  type CreateTaskEventValue = {
+function CreateExternalEvent(props: CreateExternalEventProps) {
+  type CreateExternalEventValue = {
     name: string,
     description: string,
     startTime: number,
-    duration: number,
+    endTime: number,
   }
 
-  const onSubmit = async (values: CreateTaskEventValue,
-    fprops: FormikHelpers<CreateTaskEventValue>) => {
+  const onSubmit = async (values: CreateExternalEventValue,
+    fprops: FormikHelpers<CreateExternalEventValue>) => {
 
-    let errors: FormikErrors<CreateTaskEventValue> = {};
+    let errors: FormikErrors<CreateExternalEventValue> = {};
 
     // Validate input
 
@@ -37,16 +37,16 @@ function CreateTaskEvent(props: CreateTaskEventProps) {
       return;
     }
 
-    const maybeTaskEvent = await taskEventNew({
+    const maybeExternalEvent = await externalEventNew({
       name: values.name,
       description: values.description,
       startTime: values.startTime,
-      duration: values.duration,
+      endTime: values.endTime,
       apiKey: props.apiKey.key,
     });
 
-    if (isTodoAppErrorCode(maybeTaskEvent)) {
-      switch (maybeTaskEvent) {
+    if (isTodoAppErrorCode(maybeExternalEvent)) {
+      switch (maybeExternalEvent) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
@@ -56,7 +56,7 @@ function CreateTaskEvent(props: CreateTaskEventProps) {
         }
         default: {
           fprops.setStatus({
-            failureResult: "An unknown or network error has occured while trying to create taskEvent.",
+            failureResult: "An unknown or network error has occured while trying to create externalEvent.",
             successResult: ""
           });
           break;
@@ -74,13 +74,13 @@ function CreateTaskEvent(props: CreateTaskEventProps) {
   }
 
   return <>
-    <Formik<CreateTaskEventValue>
+    <Formik<CreateExternalEventValue>
       onSubmit={onSubmit}
       initialValues={{
         name: "",
         description: "",
         startTime: props.startTime,
-        duration: props.duration
+        endTime: props.endTime
       }}
       initialStatus={{
         failureResult: "",
@@ -93,7 +93,7 @@ function CreateTaskEvent(props: CreateTaskEventProps) {
           onSubmit={fprops.handleSubmit} >
           <div hidden={fprops.status.successResult !== ""}>
             <Form.Group >
-              <Form.Label>TaskEvent Name</Form.Label>
+              <Form.Label>ExternalEvent Name</Form.Label>
               <Form.Control
                 name="name"
                 type="text"
@@ -129,4 +129,4 @@ function CreateTaskEvent(props: CreateTaskEventProps) {
   </>
 }
 
-export default CreateTaskEvent;
+export default CreateExternalEvent;

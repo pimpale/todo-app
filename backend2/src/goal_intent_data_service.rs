@@ -1,7 +1,7 @@
 use super::todo_app_db_types::*;
 use super::utils::current_time_millis;
-use tokio_postgres::GenericClient;
 use std::convert::{From, TryInto};
+use tokio_postgres::GenericClient;
 
 impl From<tokio_postgres::row::Row> for GoalIntentData {
   // select * from goal_intent_data order only, otherwise it will fail
@@ -21,34 +21,35 @@ impl From<tokio_postgres::row::Row> for GoalIntentData {
 pub async fn add(
   con: &mut impl GenericClient,
   creator_user_id: i64,
-  goal_intent_id:i64,
+  goal_intent_id: i64,
   name: String,
-  active: bool, 
+  active: bool,
 ) -> Result<GoalIntentData, tokio_postgres::Error> {
   let creation_time = current_time_millis();
 
-let goal_intent_data_id = 
-  con.query_one(
-    "INSERT INTO
-    goal_intent_data(
-        creation_time,
-        creator_user_id,
-        goal_intent_id,
-        name,
-        active
+  let goal_intent_data_id = con
+    .query_one(
+      "INSERT INTO
+       goal_intent_data(
+           creation_time,
+           creator_user_id,
+           goal_intent_id,
+           name,
+           active
+       )
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING goal_intent_data_id
+      ",
+      &[
+        &creation_time,
+        &creator_user_id,
+        &goal_intent_id,
+        &name,
+        &active,
+      ],
     )
-    VALUES ($1, $2, $3, $4, $5)
-    RETURNING goal_intent_data_id
-    ",
-    &[
-      &creation_time,
-      &creator_user_id,
-      &goal_intent_id,
-      &name,
-      &active,
-    ],
-  ).await?.get(0);
-
+    .await?
+    .get(0);
 
   Ok(GoalIntentData {
     goal_intent_data_id,
@@ -68,7 +69,8 @@ pub async fn get_by_goal_intent_data_id(
     .query_opt(
       "SELECT * FROM goal_intent_data WHERE goal_intent_data_id=$1",
       &[&goal_intent_data_id],
-    ).await?
+    )
+    .await?
     .map(|x| x.into());
 
   Ok(result)
@@ -92,17 +94,16 @@ pub async fn query(
       ""
     },
     " WHERE 1 = 1",
-    " AND ($1 == NULL OR gdi.goal_intent_data_id = $1)",
-    " AND ($2 == NULL OR gdi.creation_time = $2)",
-    " AND ($3 == NULL OR gdi.creation_time >= $3)",
-    " AND ($4 == NULL OR gdi.creation_time <= $4)",
-    " AND ($5 == NULL OR gdi.creator_user_id = $5)",
-    " AND ($6 == NULL OR gdi.goal_intent_id = $6)",
-    " AND ($7 == NULL OR gdi.name = $7)",
-    " AND ($8 == NULL OR gdi.partial_name LIKE CONCAT('%',$8,'%'))",
-    " AND ($9 == NULL OR gdi.active = $9)",
+    " AND ($1 IS NULL OR gdi.goal_intent_data_id = $1)",
+    " AND ($2 IS NULL OR gdi.creation_time >= $2)",
+    " AND ($3 IS NULL OR gdi.creation_time <= $3)",
+    " AND ($4 IS NULL OR gdi.creator_user_id = $4)",
+    " AND ($5 IS NULL OR gdi.goal_intent_id = $5)",
+    " AND ($6 IS NULL OR gdi.name = $6)",
+    " AND ($7 IS NULL OR gdi.name LIKE CONCAT('%',$7,'%'))",
+    " AND ($8 IS NULL OR gdi.active = $8)",
     " ORDER BY gdi.goal_intent_data_id",
-    " LIMIT $10, $11",
+    " LIMIT $9, $10",
   ]
   .join("");
 
@@ -110,10 +111,9 @@ pub async fn query(
 
   let results = con
     .query(
-        &stmnt,
-        & [
+      &stmnt,
+      &[
         &props.goal_intent_data_id,
-        &props.creation_time,
         &props.min_creation_time,
         &props.max_creation_time,
         &props.creator_user_id,
@@ -122,8 +122,10 @@ pub async fn query(
         &props.partial_name,
         &props.active,
         &props.offset,
-        &props.offset,
-    ]).await?
+        &props.count,
+      ],
+    )
+    .await?
     .into_iter()
     .map(|row| row.into())
     .collect();

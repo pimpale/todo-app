@@ -9,11 +9,12 @@ use todo_app_service_api::response;
 use super::todo_app_db_types::*;
 use super::utils;
 
+use super::external_event_data_service;
+use super::external_event_service;
 use super::goal_data_service;
 use super::goal_intent_data_service;
 use super::goal_intent_service;
 use super::goal_service;
-use super::task_event_service;
 use super::time_utility_function_service;
 
 use std::error::Error;
@@ -143,9 +144,11 @@ async fn fill_goal_data(
     creator_user_id: goal_data.creator_user_id,
     goal: fill_goal(con, goal).await?,
     name: goal_data.name,
+    tags: goal_data.tags,
     duration_estimate: goal_data.duration_estimate,
     time_utility_function: fill_time_utility_function(con, time_utility_function).await?,
     parent_goal,
+    time_span: goal_data.time_span,
     status: goal_data.status,
   })
 }
@@ -163,23 +166,36 @@ async fn fill_time_utility_function(
   })
 }
 
-async fn fill_task_event(
-  con: &mut tokio_postgres::Client,
-  task_event: TaskEvent,
-) -> Result<response::TaskEvent, response::TodoAppError> {
-  let goal = goal_service::get_by_goal_id(con, task_event.goal_id)
-    .await
-    .map_err(report_postgres_err)?
-    .ok_or(response::TodoAppError::GoalNonexistent)?;
+async fn fill_external_event(
+  _con: &mut tokio_postgres::Client,
+  external_event: ExternalEvent,
+) -> Result<response::ExternalEvent, response::TodoAppError> {
+  Ok(response::ExternalEvent {
+    external_event_id: external_event.external_event_id,
+    creation_time: external_event.creation_time,
+    creator_user_id: external_event.creator_user_id,
+  })
+}
 
-  Ok(response::TaskEvent {
-    task_event_id: task_event.task_event_id,
-    creation_time: task_event.creation_time,
-    creator_user_id: task_event.creator_user_id,
-    goal: fill_goal(con, goal).await?,
-    start_time: task_event.start_time,
-    duration: task_event.duration,
-    active: task_event.active,
+async fn fill_external_event_data(
+  con: &mut tokio_postgres::Client,
+  external_event_data: ExternalEventData,
+) -> Result<response::ExternalEventData, response::TodoAppError> {
+  let external_event =
+    external_event_service::get_by_external_event_id(con, external_event_data.external_event_id)
+      .await
+      .map_err(report_postgres_err)?
+      .ok_or(response::TodoAppError::GoalNonexistent)?;
+
+  Ok(response::ExternalEventData {
+    external_event_data_id: external_event_data.external_event_id,
+    creation_time: external_event_data.creation_time,
+    creator_user_id: external_event_data.creator_user_id,
+    external_event: fill_external_event(con, external_event).await?,
+    name: external_event_data.name,
+    start_time: external_event_data.start_time,
+    end_time: external_event_data.end_time,
+    active: external_event_data.active,
   })
 }
 
@@ -191,6 +207,102 @@ pub async fn get_user_if_api_key_valid(
     .get_user_by_api_key_if_valid(api_key)
     .await
     .map_err(report_auth_err)
+}
+
+pub async fn external_event_new(
+  _config: Config,
+  db: Db,
+  auth_service: AuthService,
+  props: request::ExternalEventNewProps,
+) -> Result<response::ExternalEventData, response::TodoAppError> {
+  // validate api key
+  let user = get_user_if_api_key_valid(&auth_service, props.api_key).await?;
+
+  // validate
+  if props.start_time < 0 {
+    return Err(response::TodoAppError::NegativeStartTime);
+  }
+  if props.start_time >= props.end_time {
+    return Err(response::TodoAppError::NegativeDuration);
+  }
+
+  let con = &mut *db.lock().await;
+
+  let mut sp = con.transaction().await.map_err(report_postgres_err)?;
+
+  // create event
+  let external_event = external_event_service::add(&mut sp, user.user_id)
+    .await
+    .map_err(report_postgres_err)?;
+
+  // create data
+  let external_event_data = external_event_data_service::add(
+    &mut sp,
+    user.user_id,
+    external_event.external_event_id,
+    props.name,
+    props.start_time,
+    props.end_time,
+    true,
+  )
+  .await
+  .map_err(report_postgres_err)?;
+
+  sp.commit().await.map_err(report_postgres_err)?;
+
+  // return json
+  fill_external_event_data(con, external_event_data).await
+}
+
+pub async fn external_event_data_new(
+  _config: Config,
+  db: Db,
+  auth_service: AuthService,
+  props: request::ExternalEventDataNewProps,
+) -> Result<response::ExternalEventData, response::TodoAppError> {
+  // validate api key
+  let user = get_user_if_api_key_valid(&auth_service, props.api_key).await?;
+
+  // validate
+  if props.start_time < 0 {
+    return Err(response::TodoAppError::NegativeStartTime);
+  }
+  if props.start_time >= props.end_time {
+    return Err(response::TodoAppError::NegativeDuration);
+  }
+
+  let con = &mut *db.lock().await;
+
+  let mut sp = con.transaction().await.map_err(report_postgres_err)?;
+
+  let external_event =
+    external_event_service::get_by_external_event_id(&mut sp, props.external_event_id)
+      .await
+      .map_err(report_postgres_err)?
+      .ok_or(response::TodoAppError::ExternalEventNonexistent)?;
+
+  // validate event is owned by correct user
+  if external_event.creator_user_id != user.user_id {
+    return Err(response::TodoAppError::ExternalEventNonexistent);
+  }
+
+  // now we can update data
+  let external_event_data = external_event_data_service::add(
+    &mut sp,
+    user.user_id,
+    external_event.external_event_id,
+    props.name,
+    props.start_time,
+    props.end_time,
+    true,
+  )
+  .await
+  .map_err(report_postgres_err)?;
+
+  sp.commit().await.map_err(report_postgres_err)?;
+
+  // return json
+  fill_external_event_data(con, external_event_data).await
 }
 
 pub async fn goal_intent_new(
@@ -281,6 +393,16 @@ pub async fn goal_new(
 
   let mut sp = con.transaction().await.map_err(report_postgres_err)?;
 
+  // validate start and end time
+  if let Some((start_time, end_time)) = props.time_span {
+    if start_time < 0 {
+      return Err(response::TodoAppError::NegativeStartTime);
+    }
+    if start_time >= end_time {
+      return Err(response::TodoAppError::NegativeDuration);
+    }
+  }
+
   // ensure time utility function exists and belongs to you
   let time_utility_function = time_utility_function_service::get_by_time_utility_function_id(
     &mut sp,
@@ -329,9 +451,11 @@ pub async fn goal_new(
     user.user_id,
     goal.goal_id,
     props.name,
+    props.tags,
     props.duration_estimate,
     props.time_utility_function_id,
     props.parent_goal_id,
+    props.time_span,
     request::GoalDataStatusKind::Pending,
   )
   .await
@@ -355,6 +479,16 @@ pub async fn goal_data_new(
   let con = &mut *db.lock().await;
 
   let mut sp = con.transaction().await.map_err(report_postgres_err)?;
+
+  // validate start and end time
+  if let Some((start_time, end_time)) = props.time_span {
+    if start_time < 0 {
+      return Err(response::TodoAppError::NegativeStartTime);
+    }
+    if start_time >= end_time {
+      return Err(response::TodoAppError::NegativeDuration);
+    }
+  }
 
   // ensure time utility function exists and belongs to you
   let time_utility_function = time_utility_function_service::get_by_time_utility_function_id(
@@ -397,9 +531,11 @@ pub async fn goal_data_new(
     user.user_id,
     goal.goal_id,
     props.name,
+    props.tags,
     props.duration_estimate,
     props.time_utility_function_id,
     props.parent_goal_id,
+    props.time_span,
     props.status,
   )
   .await
@@ -437,47 +573,59 @@ pub async fn time_utility_function_new(
   fill_time_utility_function(con, time_utility_function).await
 }
 
-pub async fn task_event_new(
+pub async fn external_event_view(
   _config: Config,
   db: Db,
   auth_service: AuthService,
-  props: request::TaskEventNewProps,
-) -> Result<response::TaskEvent, response::TodoAppError> {
+  props: request::ExternalEventViewProps,
+) -> Result<Vec<response::ExternalEvent>, response::TodoAppError> {
   // validate api key
-  let user = get_user_if_api_key_valid(&auth_service, props.api_key).await?;
+  let user = get_user_if_api_key_valid(&auth_service, props.api_key.clone()).await?;
 
   let con = &mut *db.lock().await;
-
-  let mut sp = con.transaction().await.map_err(report_postgres_err)?;
-
-  // ensure that goal exists and belongs to you
-  let goal = goal_service::get_by_goal_id(&mut sp, props.goal_id)
+  // get users
+  let external_events = external_event_service::query(con, props)
     .await
-    .map_err(report_postgres_err)?
-    .ok_or(response::TodoAppError::GoalNonexistent)?;
-  // validate intent is owned by correct user
-  if goal.creator_user_id != user.user_id {
-    return Err(response::TodoAppError::GoalNonexistent);
+    .map_err(report_postgres_err)?;
+
+  // return external_events
+  let mut resp_external_events = vec![];
+  for u in external_events
+    .into_iter()
+    .filter(|u| u.creator_user_id == user.user_id)
+  {
+    resp_external_events.push(fill_external_event(con, u).await?);
   }
 
-  // create goal data
-  let task_event = task_event_service::add(
-    &mut sp,
-    user.user_id,
-    goal.goal_id,
-    props.start_time,
-    props.duration,
-    props.active,
-  )
-  .await
-  .map_err(report_postgres_err)?;
-
-  sp.commit().await.map_err(report_postgres_err)?;
-
-  // return json
-  fill_task_event(con, task_event).await
+  Ok(resp_external_events)
 }
 
+pub async fn external_event_data_view(
+  _config: Config,
+  db: Db,
+  auth_service: AuthService,
+  props: request::ExternalEventDataViewProps,
+) -> Result<Vec<response::ExternalEventData>, response::TodoAppError> {
+  // validate api key
+  let user = get_user_if_api_key_valid(&auth_service, props.api_key.clone()).await?;
+
+  let con = &mut *db.lock().await;
+  // get users
+  let external_event_data = external_event_data_service::query(con, props)
+    .await
+    .map_err(report_postgres_err)?;
+  // return users
+  // return external_event_datas
+  let mut resp_external_event_datas = vec![];
+  for u in external_event_data
+    .into_iter()
+    .filter(|u| u.creator_user_id == user.user_id)
+  {
+    resp_external_event_datas.push(fill_external_event_data(con, u).await?);
+  }
+
+  Ok(resp_external_event_datas)
+}
 pub async fn goal_intent_view(
   _config: Config,
   db: Db,
@@ -610,31 +758,4 @@ pub async fn time_utility_function_view(
   }
 
   Ok(resp_time_utility_functions)
-}
-
-pub async fn task_event_view(
-  _config: Config,
-  db: Db,
-  auth_service: AuthService,
-  props: request::TaskEventViewProps,
-) -> Result<Vec<response::TaskEvent>, response::TodoAppError> {
-  // validate api key
-  let user = get_user_if_api_key_valid(&auth_service, props.api_key.clone()).await?;
-
-  let con = &mut *db.lock().await;
-  // get users
-  let task_event = task_event_service::query(con, props)
-    .await
-    .map_err(report_postgres_err)?;
-  // return users
-  // return task_events
-  let mut resp_task_events = vec![];
-  for u in task_event
-    .into_iter()
-    .filter(|u| u.creator_user_id == user.user_id)
-  {
-    resp_task_events.push(fill_task_event(con, u).await?);
-  }
-
-  Ok(resp_task_events)
 }
