@@ -19,7 +19,6 @@ function CreateGoal(props: CreateGoalProps) {
   type CreateGoalValue = {
     name: string,
     durationEstimate: string,
-    description: string,
     points: { x: number, y: number }[]
   }
 
@@ -125,7 +124,6 @@ function CreateGoal(props: CreateGoalProps) {
       onSubmit={onSubmit}
       initialValues={{
         name: "",
-        description: "",
         durationEstimate: formatDuration(
           props.span
             ? intervalToDuration({
@@ -154,7 +152,7 @@ function CreateGoal(props: CreateGoalProps) {
                   <UtilityPicker
                     span={props.span}
                     points={fprops.values.points}
-                    setPoints={p => fprops.setFieldValue("points", p)}
+                    setPoints={fprops.handleChange}
                     mutable
                   />
                 </Card.Body>
@@ -169,7 +167,7 @@ function CreateGoal(props: CreateGoalProps) {
                   placeholder="Goal Name"
                   as="input"
                   value={fprops.values.name}
-                  onChange={e => fprops.setFieldValue("name", e.target.value)}
+                  onChange={fprops.handleChange}
                   isInvalid={!!fprops.errors.name}
                 />
                 <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
@@ -181,24 +179,12 @@ function CreateGoal(props: CreateGoalProps) {
                   placeholder="Estimated Duration"
                   as="input"
                   value={fprops.values.durationEstimate}
-                  onChange={e => fprops.setFieldValue("durationEstimate", e.target.value)}
+                  onChange={fprops.handleChange}
                   isInvalid={!!fprops.errors.durationEstimate}
                 />
                 <Form.Control.Feedback type="invalid">{fprops.errors.durationEstimate}</Form.Control.Feedback>
               </Form.Group>
             </Row>
-            <Form.Group >
-              <Form.Control
-                name="description"
-                type="text"
-                placeholder="Goal Description (Optional)"
-                as="textarea"
-                value={fprops.values.description}
-                onChange={e => fprops.setFieldValue("description", e.target.value)}
-                isInvalid={!!fprops.errors.description}
-              />
-              <Form.Control.Feedback type="invalid">{fprops.errors.description}</Form.Control.Feedback>
-            </Form.Group>
             <Button type="submit">Submit Form</Button>
             <br />
             <Form.Text className="text-danger">{fprops.status.failureResult}</Form.Text>

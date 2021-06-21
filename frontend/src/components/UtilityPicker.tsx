@@ -2,71 +2,99 @@ import React from 'react'
 import Select from 'react-select'
 import { Col, Row } from 'react-bootstrap';
 import { Line } from 'react-chartjs-2';
-import moment from 'moment';
 import TimePicker from '../components/TimePicker';
-import { setHrMin} from '../utils/utils';
+import { setHrMin } from '../utils/utils';
 import getHours from 'date-fns/getHours'
 import getMinutes from 'date-fns/getMinutes'
 import addHours from "date-fns/addHours";
+import format from 'date-fns/format';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import 'react-day-picker/lib/style.css';
 import 'chartjs-plugin-dragdata';
 
 const scale = 100;
 
+type Point = { x: number, y: number };
+
+
 type UtilityPickerProps = {
-  span?: [startTime:number, endTime:number];
+  span?: [startTime: number, endTime: number];
   mutable: boolean,
-  points: { x: number, y: number }[],
-  setPoints: (points: { x: number, y: number }[]) => void,
+  points: Point[],
+  setPoints: (points: Point[]) => void,
 }
 
-function noTimePrefTUF(start: Date, end: Date) {
+function noTimePrefTUF(start: number, end: number) {
   return [{
-    x: (start.valueOf() + end.valueOf()) / 2,
+    x: (start + end) / 2,
     y: scale
   }]
 }
 
 function UtilityPicker(props: UtilityPickerProps) {
-  const [start, setStart] = React.useState(new Date(props.span?.[0] ?? Date.now()));
-  const [end, setEnd] = React.useState(new Date(props.span?.[1] ?? addHours(new Date(), 3).valueOf()));
+  const [start, setStart] = React.useState(props.span?.[0] ?? Date.now());
+  const [end, setEnd] = React.useState(props.span?.[1] ?? addHours(new Date(), 3).valueOf());
+  const [points, setPointsRaw] = React.useState(props.points);
+  const setPoints = (x:Point[]) => {
+      setPointsRaw(x);
+      props.setPoints(x);
+  };
 
-  // Had problems with stale closures
-  const pointsRef = React.useRef(props.points);
-  pointsRef.current = props.points;
 
   const lineOptions = {
-    type: 'scatter',
-    dragData: props.mutable,
-    dragX: props.mutable,
-    dragDataRound: 0,
-    tooltips: { enabled: true },
+    line: 'scatter',
+    responsive: true,
+    plugins: {
+      dragData: {
+        round: 0,
+        dragX: true,
+        showTooltip: true,
+        onDragStart: function(_: React.MouseEvent, datasetIndex:number, index:number, value:Point) {
+          if (index === 0) {
+            return false
+          }
+          if (index === points.length) {
+            return false
+          }
+          return true;
+        },
+        onDrag:(e: React.MouseEvent, datasetIndex:number, index:number, value:Point) => {
+          console.log(points.length)
+          if (value.y > 100) {
+            return false
+          }
+          return true;
+        },
+        onDragEnd: () => {
+          props.setPoints(
+            .map(a => ({ x: a.x.valueOf(), y: a.y })));
+
+        },
+      },
+      tooltip: {
+        callbacks: {
+          title: (context: any) => format(context[0].parsed.x, "hh:mm a")
+        }
+      },
+    },
     scales: {
-      xAxes: [{
-        type: 'time',
-        position: 'bottom',
+      x: {
+        type: 'linear',
+        min: start,
+        max: end,
         ticks: {
-          min: start,
-          max: end,
-          maxTicksLimit: 10
+          callback: (v: number) => format(v, "yyyy mm do hh:mm a")
         }
-      }],
-      yAxes: [{
-        ticks: {
-          max: scale,
-          min: 0
-        }
-      }]
+      },
+      y: {
+        beginAtZero: true,
+        steps: 1,
+        stepValue: 1,
+        max: 120
+      },
     },
     legend: {
       display: false
-    },
-    onDragEnd: () => {
-      // sort points such that the points with lower x come first
-      props.setPoints(pointsRef.current
-        .sort((a, b) => moment(a.x).valueOf() - moment(b.x).valueOf())
-        .map(a => ({ x: a.x.valueOf(), y: a.y })));
     },
   };
 
@@ -81,13 +109,13 @@ function UtilityPicker(props: UtilityPickerProps) {
         data: [
           {
             x: start,
-            y: props.points.length === 0 ? 0 : props.points[0].y
+            y: points.length === 0 ? 0 : points[0].y
           },
-          ...props.points,
+          ...points,
           {
             x: end,
-            y: props.points.length === 0 ? 0 : props.points[props.points.length - 1].y
-          }],
+            y: points.length === 0 ? 0 : points[points.length - 1].y
+          }]
       },
     ],
   }
@@ -96,18 +124,18 @@ function UtilityPicker(props: UtilityPickerProps) {
     <Row>
       <Col>
         <div> Date: </div>
-        <DayPickerInput value={start} onDayChange={day => {
-          setStart(setHrMin(day, getHours(start), getMinutes(start)));
-          setEnd(setHrMin(day, getHours(end), getMinutes(end)));
+        <DayPickerInput value={new Date(start)} onDayChange={day => {
+          setStart(setHrMin(day, getHours(start), getMinutes(start)).valueOf());
+          setEnd(setHrMin(day, getHours(end), getMinutes(end)).valueOf());
         }} />
       </Col>
       <Col sm={3}>
         <div>From:</div>
-        <TimePicker time={start} setTime={t => setStart(t)} maxTime={end} />
+        <TimePicker time={new Date(start)} setTime={t => setStart(t.valueOf())} maxTime={new Date(end)} />
       </Col>
       <Col sm={3}>
         <div>To:</div>
-        <TimePicker time={end} setTime={t => setEnd(t)} minTime={start} />
+        <TimePicker time={new Date(end)} setTime={t => setEnd(t.valueOf())} minTime={new Date(start)} />
       </Col>
       <Col hidden={!props.mutable}>
         <div>Utility Distribution</div>
@@ -123,11 +151,11 @@ function UtilityPicker(props: UtilityPickerProps) {
             const t = (start.valueOf() + end.valueOf()) / 2;
             switch (o!.value) {
               case "constant": {
-                props.setPoints(noTimePrefTUF(start, end));
+                setPoints(noTimePrefTUF(start, end));
                 break;
               }
               case "deadline": {
-                props.setPoints([{
+                setPoints([{
                   x: t - 1,
                   y: scale
                 }, {
@@ -137,7 +165,7 @@ function UtilityPicker(props: UtilityPickerProps) {
                 break;
               }
               case "interval": {
-                props.setPoints([{
+                setPoints([{
                   x: t - 1000001,
                   y: 0
                 }, {
@@ -158,7 +186,7 @@ function UtilityPicker(props: UtilityPickerProps) {
       </Col>
     </Row>
     <Line
-      type="string"
+      type="scatter"
       options={lineOptions}
       data={lineData} />
   </>

@@ -14,7 +14,6 @@ function Settings(props: AuthenticatedComponentProps) {
   // IMO this would look better than the tiny boxes we have now
 
   const [passwdSuccess, setPasswdSuccess] = React.useState(false);
-  const [subscribeSuccess, setSubscribeSuccess] = React.useState(false);
   return <DashboardLayout {...props}>
     <Container fluid className="py-4 px-4">
       <div className="mx-3 my-3">
