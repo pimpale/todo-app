@@ -1,6 +1,7 @@
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Button, Form, } from 'react-bootstrap'
-import { ApiKey, newValidApiKey, isAuthErrorCode } from '@innexgo/frontend-auth-api';
+import { ApiKey, apiKeyNewValid, } from '@innexgo/frontend-auth-api';
+import { isErr } from '@innexgo/frontend-common';
 
 
 // onSuccess is a callback that will be run once the user has successfully logged in.
@@ -21,12 +22,13 @@ function Login(props: LoginProps) {
   }
 
   // onSubmit is a callback that will be run once the user submits their form.
-  
+
   // here, we're making use of JavaScript's destructuring assignment: 
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
   const onSubmit = async (values: LoginValue, { setStatus, setErrors }: FormikHelpers<LoginValue>) => {
     // Validate input
-    
+
+
     // we start off by assuming no errors
     let errors: FormikErrors<LoginValue> = {};
     let hasError = false;
@@ -38,26 +40,26 @@ function Login(props: LoginProps) {
       errors.password = "Please enter your password";
       hasError = true;
     }
-    
+
     // setErrors is a Formik function that automatically sets errors on the correct fields
     setErrors(errors);
-    
+
     // bail early if we have hit any errors
     if (hasError) {
       return;
     }
 
     // we make our request here
-    const maybeApiKey = await newValidApiKey({
+    const maybeApiKey = await apiKeyNewValid({
       userEmail: values.email,
       userPassword: values.password,
       duration: 5 * 60 * 60 * 1000
     });
 
     // check if the operation was successful
-    if (isAuthErrorCode(maybeApiKey)) {
+    if (isErr(maybeApiKey)) {
       // otherwise display errors
-      switch (maybeApiKey) {
+      switch (maybeApiKey.Err) {
         case "USER_NONEXISTENT": {
           setErrors({
             email: "No such user exists"
@@ -82,10 +84,9 @@ function Login(props: LoginProps) {
     }
 
     // on success execute callBack
-    props.onSuccess(maybeApiKey);
+    props.onSuccess(maybeApiKey.Ok);
   }
-  
-  
+
   // Notice how Formik is a Generic component that does type checking
   // This helps ensure we make fewer mistakes
   return <>

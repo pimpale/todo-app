@@ -1,6 +1,6 @@
 import { ValueType } from 'react-select';
 import AsyncSelect from 'react-select/async';
-import { isApiErrorCode } from '../utils/utils';
+import { User, isAuthErrorCode } from '@innexgo/frontend-auth-api';
 
 interface SearchMultiUserProps {
   name: string,
@@ -19,7 +19,7 @@ export default function SearchMultiUser(props: SearchMultiUserProps) {
   const promiseOptions = async function(input: string): Promise<UserOption[]> {
     const results = await props.search(input)
 
-    if (isApiErrorCode(results)) {
+    if (isAuthErrorCode(results)) {
       return [];
     }
 

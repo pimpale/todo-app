@@ -2,11 +2,12 @@ import React from 'react';
 import { Form, Button, Table } from 'react-bootstrap'; import Loader from '../components/Loader';
 import { Async, AsyncProps } from 'react-async';
 import DisplayModal from '../components/DisplayModal';
-import { externalEventDataNew, externalEventDataView, isTodoAppErrorCode } from '../utils/utils';
+import { externalEventDataNew, externalEventDataView} from '../utils/utils';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { Edit, Archive, Unarchive } from '@material-ui/icons';
 import { Formik, FormikHelpers } from 'formik'
 import format from 'date-fns/format';
+import {isErr} from '@innexgo/frontend-common';
 
 
 type EditExternalEventDataProps = {
@@ -33,8 +34,8 @@ function EditExternalEventData(props: EditExternalEventDataProps) {
       active: props.externalEventData.active,
     });
 
-    if (isTodoAppErrorCode(maybeExternalEventData)) {
-      switch (maybeExternalEventData) {
+    if (isErr(maybeExternalEventData)) {
+      switch (maybeExternalEventData.Err) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
@@ -139,8 +140,8 @@ function ArchiveExternalEvent(props: ArchiveExternalEventProps) {
       active: !props.externalEventData.active,
     });
 
-    if (isTodoAppErrorCode(maybeExternalEventData)) {
-      switch (maybeExternalEventData) {
+    if (isErr(maybeExternalEventData)) {
+      switch (maybeExternalEventData.Err) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
@@ -219,10 +220,10 @@ const loadExternalEventData = async (props: AsyncProps<ExternalEventData>) => {
     apiKey: props.apiKey.key
   });
 
-  if (isTodoAppErrorCode(maybeExternalEventData) || maybeExternalEventData.length === 0) {
-    throw Error;
+  if (isErr(maybeExternalEventData)) {
+    throw Error(maybeExternalEventData.Err);
   } else {
-    return maybeExternalEventData[0];
+    return maybeExternalEventData.Ok[0];
   }
 }
 

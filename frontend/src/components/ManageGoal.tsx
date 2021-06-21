@@ -4,7 +4,9 @@ import Loader from '../components/Loader';
 import { Async, AsyncProps } from 'react-async';
 import DisplayModal from '../components/DisplayModal';
 import UtilityPicker from '../components/UtilityPicker';
-import { timeUtilityFunctionNew, goalDataView, goalDataNew, isTodoAppErrorCode } from '../utils/utils';
+import { timeUtilityFunctionNew, goalDataView, goalDataNew} from '../utils/utils';
+import {isErr} from '@innexgo/frontend-common';
+import { ApiKey } from '@innexgo/frontend-auth-api';
 import { Edit, Cancel, } from '@material-ui/icons';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import parseDuration from 'parse-duration';
@@ -15,7 +17,6 @@ import format from 'date-fns/format';
 
 type EditGoalProps = {
   goalData: GoalData,
-  tuf: TimeUtilityFunctionPoint[],
   apiKey: ApiKey,
   postSubmit: () => void
 };
@@ -24,10 +25,9 @@ function EditGoal(props: EditGoalProps) {
 
   type EditGoalValue = {
     name: string,
-    description: string,
+    tags: string[],
     durationEstimate: string,
-    startTime: number | null,
-    duration: number | null,
+    span?: [number, number],
     points: { x: number, y: number }[]
   }
 
@@ -44,7 +44,7 @@ function EditGoal(props: EditGoalProps) {
 
     const durationEstimate = parseDuration(values.durationEstimate);
 
-    if(durationEstimate === null || durationEstimate < 1) {
+    if (durationEstimate === null || durationEstimate < 1) {
       errors.durationEstimate = "Invalid duration estimate";
       hasError = true;
     }
@@ -62,8 +62,8 @@ function EditGoal(props: EditGoalProps) {
       apiKey: props.apiKey.key,
     })
 
-    if (isTodoAppErrorCode(maybeTimeUtilFunction)) {
-      switch (maybeTimeUtilFunction) {
+    if (isErr(maybeTimeUtilFunction)) {
+      switch (maybeTimeUtilFunction.Err) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
@@ -88,30 +88,19 @@ function EditGoal(props: EditGoalProps) {
       return;
     }
 
-    const maybeGoalData = values.startTime !== null && values.duration !== null
-      ? await newScheduledGoalData({
-        goalId: props.goalData.goal.goalId,
-        name: values.name,
-        description: values.description,
-        durationEstimate: durationEstimate!,
-        timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
-        startTime: values.startTime,
-        duration: values.duration,
-        status: props.goalData.status,
-        apiKey: props.apiKey.key,
-      })
-      : await goalDataNew({
-        goalId: props.goalData.goal.goalId,
-        name: values.name,
-        description: values.description,
-        durationEstimate: durationEstimate!,
-        timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
-        status: props.goalData.status,
-        apiKey: props.apiKey.key,
-      })
+    const maybeGoalData = await goalDataNew({
+      goalId: props.goalData.goal.goalId,
+      name: values.name,
+      tags: values.tags,
+      durationEstimate: durationEstimate!,
+      timeUtilityFunctionId: maybeTimeUtilFunction.Ok.timeUtilityFunctionId,
+      timeSpan: values.span,
+      status: props.goalData.status,
+      apiKey: props.apiKey.key,
+    })
 
-    if (isTodoAppErrorCode(maybeGoalData)) {
-      switch (maybeGoalData) {
+    if (isErr(maybeGoalData)) {
+      switch (maybeGoalData.Err) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
@@ -158,16 +147,15 @@ function EditGoal(props: EditGoalProps) {
       onSubmit={onSubmit}
       initialValues={{
         name: props.goalData.name,
-        description: props.goalData.description,
-        startTime: props.goalData.scheduled ? props.goalData.startTime : null,
-        duration: props.goalData.scheduled ? props.goalData.duration : null,
+        tags: props.goalData.tags,
+        span: props.goalData.timeSpan,
         durationEstimate: formatDuration(
           intervalToDuration({
             start: 0,
             end: props.goalData.durationEstimate
           })
         ),
-        points: props.tuf.map(p => ({ x: p.startTime, y: p.utils }))
+        points: props.goalData.timeUtilityFunction.startTimes.map((t, i) => ({ x: t, y: props.goalData.timeUtilityFunction.utils[i] }))
       }}
       initialStatus={{
         failureResult: "",
@@ -207,25 +195,13 @@ function EditGoal(props: EditGoalProps) {
                 <Form.Control.Feedback type="invalid">{fprops.errors.durationEstimate}</Form.Control.Feedback>
               </Form.Group>
             </Row>
-            <Form.Group >
-              <Form.Label >Goal Description</Form.Label>
-              <Form.Control
-                name="description"
-                type="text"
-                placeholder="Goal Description"
-                value={fprops.values.description}
-                onChange={e => fprops.setFieldValue("description", e.target.value)}
-                isInvalid={!!fprops.errors.description}
-              />
-              <Form.Control.Feedback type="invalid">{fprops.errors.description}</Form.Control.Feedback>
-            </Form.Group>
             <Form.Group>
               <Card>
                 <Card.Body>
                   <UtilityPicker
                     span={[
-                      Math.min(...props.tuf.map(p => p.startTime)) - 100000,
-                      Math.max(...props.tuf.map(p => p.startTime)) + 100000
+                      Math.min(...fprops.values.points.map(p => p.x)) - 100000,
+                      Math.max(...fprops.values.points.map(p => p.x)) + 100000
                     ]}
                     points={fprops.values.points}
                     setPoints={p => fprops.setFieldValue("points", p)}
@@ -259,30 +235,20 @@ function CancelGoal(props: CancelGoalProps) {
   const onSubmit = async (_: CancelGoalValue,
     fprops: FormikHelpers<CancelGoalValue>) => {
 
-    const maybeGoalData = props.goalData.scheduled
-      ? await newScheduledGoalData({
-        goalId: props.goalData.goal.goalId,
-        apiKey: props.apiKey.key,
-        name: props.goalData.name,
-        description: props.goalData.description,
-        durationEstimate: props.goalData.durationEstimate,
-        timeUtilityFunctionId: props.goalData.timeUtilityFunction.timeUtilityFunctionId,
-        startTime: props.goalData.startTime,
-        duration: props.goalData.duration,
-        status: "CANCEL",
-      })
-      : await goalDataNew({
-        goalId: props.goalData.goal.goalId,
-        apiKey: props.apiKey.key,
-        name: props.goalData.name,
-        description: props.goalData.description,
-        durationEstimate: props.goalData.durationEstimate,
-        timeUtilityFunctionId: props.goalData.timeUtilityFunction.timeUtilityFunctionId,
-        status: "CANCEL",
-      });
+    const maybeGoalData = await goalDataNew({
+      goalId: props.goalData.goal.goalId,
+      apiKey: props.apiKey.key,
+      name: props.goalData.name,
+      tags: props.goalData.tags,
+      durationEstimate: props.goalData.durationEstimate,
+      timeUtilityFunctionId: props.goalData.timeUtilityFunction.timeUtilityFunctionId,
+      timeSpan: props.goalData.timeSpan,
 
-    if (isTodoAppErrorCode(maybeGoalData)) {
-      switch (maybeGoalData) {
+      status: "CANCEL",
+    });
+
+    if (isErr(maybeGoalData)) {
+      switch (maybeGoalData.Err) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
@@ -297,7 +263,7 @@ function CancelGoal(props: CancelGoalProps) {
           });
           break;
         }
-        case "PAST_EVENT_NONEXISTENT": {
+        case "GOAL_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "This goal does not exist.",
             successResult: ""
@@ -352,37 +318,17 @@ function CancelGoal(props: CancelGoalProps) {
   </>
 }
 
-type ManageGoalData = {
-  goalData: GoalData,
-  tuf: TimeUtilityFunctionPoint[],
-}
-
-const loadManageGoalData = async (props: AsyncProps<ManageGoalData>) => {
+const loadManageGoalData = async (props: AsyncProps<GoalData>) => {
   const maybeGoalData = await goalDataView({
     goalId: props.goalId,
     onlyRecent: true,
     apiKey: props.apiKey.key
   });
 
-  if (isTodoAppErrorCode(maybeGoalData) || maybeGoalData.length === 0) {
-    throw Error;
+  if (isErr(maybeGoalData)) {
+    throw Error(maybeGoalData.Err);
   }
-
-  const goalData = maybeGoalData[0];
-
-  const maybeTuf = await viewTimeUtilityFunctionPoint({
-    timeUtilityFunctionId: goalData.timeUtilityFunction.timeUtilityFunctionId,
-    apiKey: props.apiKey.key
-  });
-
-  if (isTodoAppErrorCode(maybeTuf) || maybeTuf.length === 0) {
-    throw Error;
-  }
-
-  return {
-    goalData,
-    tuf: maybeTuf
-  };
+  return maybeGoalData.Ok[0];
 }
 
 
@@ -404,37 +350,36 @@ const ManageGoal = (props: {
       <Async.Rejected>
         <span className="text-danger">An unknown error has occured.</span>
       </Async.Rejected>
-      <Async.Fulfilled<ManageGoalData >>{mgd => <>
+      <Async.Fulfilled<GoalData>>{gd => <>
         <td>
-          {mgd.goalData.name}
+          {gd.name}
           <br />
-          <small>{mgd.goalData.status}</small>
+          <small>{gd.status}</small>
         </td>
         <td>
-          {mgd.goalData.scheduled ? format(mgd.goalData.startTime, "p EEE, MMM do") : "NOT SCHEDULED"}
+          {gd.timeSpan ? format(gd.timeSpan[0], "p EEE, MMM do") : "NOT SCHEDULED"}
           <br />
           <small>Estimate: {
             formatDuration(intervalToDuration({
               start: 0,
-              end: mgd.goalData.durationEstimate
+              end: gd.durationEstimate
             }))
           }</small>
         </td>
-        <td>{mgd.goalData.description}</td>
         <td>
           <UtilityPicker
             span={[
-              Math.min(...mgd.tuf.map(p => p.startTime)) - 100000,
-              Math.max(...mgd.tuf.map(p => p.startTime)) + 100000
+              Math.min(...gd.timeUtilityFunction.startTimes) - 100000,
+              Math.max(...gd.timeUtilityFunction.startTimes) + 100000
             ]}
-            points={mgd.tuf.map(p => ({ x: p.startTime, y: p.utils }))}
+            points={gd.timeUtilityFunction.startTimes.map((t, i) => ({ x: t, y: gd.timeUtilityFunction.utils[i] }))}
             setPoints={() => null}
             mutable={false}
           />
         </td>
         <td>
           <Button variant="link" onClick={_ => setShowEditGoal(true)}><Edit /></Button>
-          {mgd.goalData.status !== "CANCEL"
+          {gd.status !== "CANCEL"
             ? <Button variant="link" onClick={_ => setShowCancelGoal(true)}><Cancel /></Button>
             : <> </>
           }
@@ -445,8 +390,7 @@ const ManageGoal = (props: {
           onClose={() => setShowEditGoal(false)}
         >
           <EditGoal
-            goalData={mgd.goalData}
-            tuf={mgd.tuf}
+            goalData={gd}
             apiKey={props.apiKey}
             postSubmit={() => {
               setShowEditGoal(false);
@@ -460,7 +404,7 @@ const ManageGoal = (props: {
           onClose={() => setShowCancelGoal(false)}
         >
           <CancelGoal
-            goalData={mgd.goalData}
+            goalData={gd}
             apiKey={props.apiKey}
             postSubmit={() => {
               setShowCancelGoal(false);

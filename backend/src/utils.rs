@@ -35,13 +35,16 @@ impl TryFrom<u8> for SeverityKind {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Event {
-  pub msg: String,
-  pub source: Option<String>,
+pub struct Event<M: serde::ser::Serialize, S: serde::ser::Serialize> {
+  pub msg: M,
+  pub source: S,
   pub severity: SeverityKind,
 }
 
-pub fn log(e: Event) {
+pub fn log<M, S>(e: Event<M, S>)
+where
+  M: serde::ser::Serialize,
+  S: serde::ser::Serialize,
+{
   println!("{}", serde_json::to_string(&e).unwrap());
 }
-

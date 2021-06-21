@@ -27,14 +27,14 @@ create table goal(
   goal_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null,
-  goal_intent bigint -- NULLABLE
+  goal_intent_id bigint -- NULLABLE
 );
 
 drop table if exists time_utility_function;
 create table time_utility_function(
   time_utility_function_id bigserial primary key,
   creation_time bigint not null,
-  creator_user_id bigint not null
+  creator_user_id bigint not null,
   -- invariant: There must be at least one number in start_times
   -- invariant: There must be the same number of elements in start_times and utils
   start_times bigint[] not null,
@@ -67,7 +67,7 @@ create table tag(
   creator_user_id bigint not null,
   goal_id bigint not null,
   name text not null,
-  active bigint not null
+  active bool not null
 );
 
 drop table if exists external_event;
@@ -75,7 +75,7 @@ create table external_event(
   extenal_event_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null
-)
+);
 
 drop table if exists external_event_data;
 create table external_event_data(
@@ -86,5 +86,5 @@ create table external_event_data(
   name text not null,
   start_time bigint not null,
   end_time bigint not null,
-  active bigint not null
+  active bool not null
 );

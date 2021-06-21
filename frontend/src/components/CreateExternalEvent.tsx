@@ -1,7 +1,10 @@
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Button, Form } from "react-bootstrap";
-import { externalEventNew, isTodoAppErrorCode } from "../utils/utils";
+import { externalEventNew} from "../utils/utils";
 import {ApiKey } from '@innexgo/frontend-auth-api';
+
+
+import {isErr} from '@innexgo/frontend-common';
 
 
 type CreateExternalEventProps = {
@@ -44,8 +47,8 @@ function CreateExternalEvent(props: CreateExternalEventProps) {
       apiKey: props.apiKey.key,
     });
 
-    if (isTodoAppErrorCode(maybeExternalEvent)) {
-      switch (maybeExternalEvent) {
+    if (isErr(maybeExternalEvent)) {
+      switch (maybeExternalEvent.Err) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",

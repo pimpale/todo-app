@@ -17,6 +17,7 @@ pub fn api(
   db: Db,
   auth_service: AuthService,
 ) -> impl Filter<Extract = impl warp::Reply, Error = Infallible> + Clone {
+
   // public API
   api_info()
     .or(adapter(
@@ -80,7 +81,8 @@ pub fn api(
       db.clone(),
       auth_service.clone(),
       warp::path!("public" / "goal_intent_data" / "view"),
-      todo_app_handlers::goal_intent_data_view, ))
+      todo_app_handlers::goal_intent_data_view,
+    ))
     .or(adapter(
       config.clone(),
       db.clone(),
@@ -108,6 +110,13 @@ pub fn api(
       auth_service.clone(),
       warp::path!("public" / "external_event_data" / "view"),
       todo_app_handlers::external_event_data_view,
+    ))
+    .or(adapter(
+      config.clone(),
+      db.clone(),
+      auth_service.clone(),
+      warp::path!("public" / "time_utility_function" / "view"),
+      todo_app_handlers::time_utility_function_view,
     ))
     .or(adapter(
       config.clone(),
@@ -183,7 +192,7 @@ async fn handle_rejection(err: warp::Rejection) -> Result<impl warp::Reply, Infa
     // We should have expected this... Just log and say its a 500
     utils::log(utils::Event {
       msg: "intercepted unknown error kind".to_owned(),
-      source: None,
+      source: format!("{:#?}", err),
       severity: utils::SeverityKind::Error,
     });
     code = StatusCode::INTERNAL_SERVER_ERROR;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Formik, FormikHelpers } from 'formik'
 import { Button, Card, Form, } from 'react-bootstrap'
-import { newPasswordReset, isAuthErrorCode } from '@innexgo/frontend-auth-api';
+import { passwordResetNew, isAuthErrorCode } from '@innexgo/frontend-auth-api';
 
 import SimpleLayout from '../components/SimpleLayout';
 
@@ -23,7 +23,7 @@ function ForgotPasswordForm(props:ForgotPasswordFormProps) {
     }
 
     // Now send request
-    const maybePasswordResetKey = await newPasswordReset({
+    const maybePasswordResetKey = await passwordResetNew({
       userEmail: values.email
     });
 

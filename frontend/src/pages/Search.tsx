@@ -2,8 +2,10 @@ import React from 'react'
 import { Button, Container, Form, Row, Col } from 'react-bootstrap';
 import DashboardLayout from '../components/DashboardLayout';
 import ManageGoalTable from '../components/ManageGoalTable';
-import { goalDataView, isTodoAppErrorCode } from '../utils/utils';
-import {ApiKey, AuthenticatedComponentProps} from '@innexgo/frontend-auth-api';
+import { goalDataView } from '../utils/utils';
+import { isErr } from '@innexgo/frontend-common';
+
+import { ApiKey, AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
 
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 
@@ -35,8 +37,8 @@ function SearchForm(props: SearchProps) {
       apiKey: props.apiKey.key,
     });
 
-    if (isTodoAppErrorCode(maybeGoalData)) {
-      switch (maybeGoalData) {
+    if (isErr(maybeGoalData)) {
+      switch (maybeGoalData.Err) {
         case "API_KEY_UNAUTHORIZED": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out.",
@@ -60,7 +62,7 @@ function SearchForm(props: SearchProps) {
       successResult: "Successfully searched"
     });
     // execute callback
-    props.postSubmit(maybeGoalData);
+    props.postSubmit(maybeGoalData.Ok);
   }
 
   return <>

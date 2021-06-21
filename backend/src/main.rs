@@ -1,8 +1,10 @@
 #![feature(async_closure)]
 #![feature(never_type)]
 use clap::Clap;
-use tokio_postgres::{Client, NoTls};
+use std::error::Error;
 use std::sync::Arc;
+use tokio_postgres::{Client, NoTls};
+use warp::Filter;
 
 use tokio::sync::Mutex;
 
@@ -11,13 +13,13 @@ mod utils;
 use auth_service_api::client::AuthService;
 
 // db web stuff
-mod goal_intent_service;
-mod goal_intent_data_service;
-mod goal_service;
-mod goal_data_service;
-mod time_utility_function_service;
-mod external_event_service;
 mod external_event_data_service;
+mod external_event_service;
+mod goal_data_service;
+mod goal_intent_data_service;
+mod goal_intent_service;
+mod goal_service;
+mod time_utility_function_service;
 mod todo_app_api;
 mod todo_app_db_types;
 mod todo_app_handlers;
@@ -44,7 +46,7 @@ pub struct Config {
 pub type Db = Arc<Mutex<Client>>;
 
 #[tokio::main]
-async fn main() -> Result<(), tokio_postgres::Error> {
+async fn main() {
   let Opts {
     database_url,
     site_external_url,
@@ -52,7 +54,19 @@ async fn main() -> Result<(), tokio_postgres::Error> {
     port,
   } = Opts::parse();
 
-  let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+  let (client, connection) = loop {
+    match tokio_postgres::connect(&database_url, NoTls).await {
+      Ok(v) => break v,
+      Err(e) => utils::log(utils::Event {
+        msg: e.to_string(),
+        source: e.source().map(|x| x.to_string()),
+        severity: utils::SeverityKind::Error,
+      }),
+    }
+
+    // sleep for 5 seconds
+    std::thread::sleep(std::time::Duration::from_secs(5));
+  };
 
   // The connection object performs the actual communication with the database,
   // so spawn it off to run on its own.
@@ -67,13 +81,16 @@ async fn main() -> Result<(), tokio_postgres::Error> {
   // open connection to auth service
   let auth_service = AuthService::new(&auth_service_url).await;
 
-  let api = todo_app_api::api(
-      Config { site_external_url },
-      db,
-      auth_service
-  );
+  let log = warp::log::custom(|info| {
+    // Use a log macro, or slog, or println, or whatever!
+    utils::log(utils::Event {
+      msg: info.method().to_string(),
+      source: Some(info.path().to_string()),
+      severity: utils::SeverityKind::Info,
+    });
+  });
 
-  warp::serve(api).run(([0, 0, 0, 0], port)).await;
+  let api = todo_app_api::api(Config { site_external_url }, db, auth_service);
 
-  Ok(())
+  warp::serve(api.with(log)).run(([0, 0, 0, 0], port)).await;
 }

@@ -1,7 +1,7 @@
 use super::todo_app_db_types::*;
 use super::utils::current_time_millis;
-use tokio_postgres::GenericClient;
 use todo_app_service_api::request;
+use tokio_postgres::GenericClient;
 
 impl From<tokio_postgres::row::Row> for TimeUtilityFunction {
   // select * from time_utility_function order only, otherwise it will fail
@@ -39,7 +39,8 @@ pub async fn add(
        RETURNING time_utility_function_id
       ",
       &[&creation_time, &creator_user_id, &start_times, &utils],
-    ).await?
+    )
+    .await?
     .get(0);
 
   // return time_utility_function
@@ -58,7 +59,8 @@ pub async fn get_by_time_utility_function_id(
 ) -> Result<Option<TimeUtilityFunction>, tokio_postgres::Error> {
   let sql = "SELECT * FROM time_utility_function WHERE time_utility_function_id=$1";
   let result = con
-    .query_opt(sql, &[&time_utility_function_id]).await?
+    .query_opt(sql, &[&time_utility_function_id])
+    .await?
     .map(|x| x.into());
   Ok(result)
 }
@@ -67,18 +69,17 @@ pub async fn query(
   con: &mut impl GenericClient,
   props: request::TimeUtilityFunctionViewProps,
 ) -> Result<Vec<TimeUtilityFunction>, tokio_postgres::Error> {
-  let sql = [
-    "SELECT tuf.* FROM time_utility_function tuf WHERE 1 = 1",
-    " AND ($1 IS NULL OR tuf.time_utility_function_id = $1)",
-    " AND ($2 IS NULL OR tuf.creation_time >= $2)",
-    " AND ($3 IS NULL OR tuf.creation_time <= $3)",
-    " AND ($4 IS NULL OR tuf.creator_user_id = $4)",
-    " ORDER BY tuf.time_utility_function_id",
-    " LIMIT $5, $6",
-  ]
-  .join("");
+  let sql = "SELECT tuf.* FROM time_utility_function tuf WHERE 1 = 1
+     AND ($1::bigint IS NULL OR tuf.time_utility_function_id = $1)
+     AND ($2::bigint IS NULL OR tuf.creation_time >= $2)
+     AND ($3::bigint IS NULL OR tuf.creation_time <= $3)
+     AND ($4::bigint IS NULL OR tuf.creator_user_id = $4)
+     ORDER BY tuf.time_utility_function_id
+     LIMIT $5
+     OFFSET $6
+     ";
 
-  let stmnt = con.prepare(&sql).await?;
+  let stmnt = con.prepare(sql).await?;
 
   let results = con
     .query(
@@ -88,10 +89,11 @@ pub async fn query(
         &props.min_creation_time,
         &props.max_creation_time,
         &props.creator_user_id,
-        &props.offset,
-        &props.count,
+        &props.count.unwrap_or(100),
+        &props.offset.unwrap_or(0),
       ],
-    ).await?
+    )
+    .await?
     .into_iter()
     .map(|x| x.into())
     .collect();

@@ -1,6 +1,6 @@
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Button, Form, } from 'react-bootstrap'
-import { ApiKey, newChangePassword, isPasswordValid, isAuthErrorCode } from '@innexgo/frontend-auth-api';
+import { ApiKey, passwordNewChange, isPasswordValid, isAuthErrorCode } from '@innexgo/frontend-auth-api';
 
 interface CreatePasswordProps {
   apiKey: ApiKey,
@@ -31,7 +31,7 @@ function CreatePassword(props: CreatePasswordProps) {
       return;
     }
 
-    const passwordChangeResult = await newChangePassword({
+    const passwordChangeResult = await passwordNewChange({
       oldPassword: values.oldpassword,
       newPassword: values.password1,
       apiKey: props.apiKey.key,

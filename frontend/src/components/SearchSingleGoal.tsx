@@ -1,7 +1,5 @@
-import React from 'react'
 import AsyncSelect from 'react-select/async';
 import { ValueType } from 'react-select';
-import { isApiErrorCode } from '../utils/utils';
 
 
 interface SearchSingleGoalProps {
@@ -20,10 +18,6 @@ type GoalDataOption = {
 export default function SearchSingleGoal(props: SearchSingleGoalProps) {
   const promiseOptions = async function(input: string): Promise<GoalDataOption[]> {
     const results = await props.search(input);
-
-    if (isApiErrorCode(results)) {
-      return [];
-    }
 
     return results.map((x: GoalData): GoalDataOption => ({
       label: `${x.name}`,

@@ -12,12 +12,6 @@ services:
       - ./data/db:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=toor
-    # will periodically run this command to check it hasn't crashed
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
   mail-service:
     build:
       context: https://github.com/innexgo/mail-service.git
@@ -32,10 +26,6 @@ services:
       ]
     ports:
       - "8078:8078"
-    # waits for postgres's healthcheck to succeed before running mail-service
-    depends_on:
-      db:
-        condition: service_healthy
   auth-service:
     build:
       context: https://github.com/innexgo/auth-service.git
@@ -47,15 +37,11 @@ services:
         "/bin/auth-service",
         "--port=8079",
         "--database-url=postgres://postgres:toor@db/auth",
-        "--site-external-url=http://localhost:8080",
+        "--site-external-url=http://localhost:3000",
         "--mail-service-url=http://mail-service:8078",
       ]
     ports:
       - "8079:8079"
-    # waits for postgres's healthcheck to succeed before running auth-service
-    depends_on:
-      db:
-        condition: service_healthy
   todo-app-service:
     build:
       context: .
@@ -67,12 +53,8 @@ services:
         "/bin/todo-app-service",
         "--port=8080",
         "--database-url=postgres://postgres:toor@db/todo_app",
-        "--site-external-url=http://localhost:8080",
+        "--site-external-url=http://localhost:3000",
         "--auth-service-url=http://auth-service:8079",
       ]
     ports:
       - "8080:8080"
-    # waits for postgres's healthcheck to succeed before running todo-app-service
-    depends_on:
-      db:
-        condition: service_healthy

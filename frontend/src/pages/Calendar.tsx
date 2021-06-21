@@ -9,8 +9,10 @@ import CalendarCard, { goalDataToEvent, externalEventDataToEvent } from '../comp
 
 import { Async, AsyncProps } from 'react-async';
 import { Row, Col, Tab, Tabs, Popover, Container, } from 'react-bootstrap';
-import { externalEventNew, goalDataNew, externalEventView, externalEventDataView, goalDataView, isTodoAppErrorCode } from '../utils/utils';
-import { ApiKey } from '@innexgo/frontend-auth-api';
+import { externalEventNew, externalEventDataNew, goalDataNew, externalEventView, externalEventDataView, goalDataView} from '../utils/utils';
+import { ApiKey, AuthenticatedComponentProps} from '@innexgo/frontend-auth-api';
+
+import {isErr} from '@innexgo/frontend-common';
 
 import UtilityWrapper from '../components/UtilityWrapper';
 
@@ -75,11 +77,11 @@ const loadUnscheduledGoalData = async (props: AsyncProps<GoalData[]>) => {
     apiKey: props.apiKey.key,
   });
 
-  if (isTodoAppErrorCode(maybeGoalData)) {
-    throw Error;
+  if (isErr(maybeGoalData)) {
+    throw Error(maybeGoalData.Err);
   }
 
-  return maybeGoalData;
+  return maybeGoalData.Ok;
 }
 
 
@@ -138,13 +140,13 @@ function EventCalendar(props: EventCalendarProps) {
       apiKey: props.apiKey.key
     });
 
-    const externalEventData = isTodoAppErrorCode(maybeExternalEventData)
+    const externalEventData = isErr(maybeExternalEventData)
       ? []
-      : maybeExternalEventData.map(externalEventDataToEvent)
+      : maybeExternalEventData.Ok.map(externalEventDataToEvent)
 
-    const external = isTodoAppErrorCode(maybeGoalData)
+    const external = isErr(maybeGoalData)
       ? []
-      : maybeGoalData.map(goalDataToEvent);
+      : maybeGoalData.Ok.map(goalDataToEvent);
     return [...externalEventData, ...external];
   }
 
@@ -168,16 +170,15 @@ function EventCalendar(props: EventCalendarProps) {
     switch (event.id.split(':')[0]) {
       case "ExternalEventData": {
         const oped = oldEventProps.externalEventData;
-        const maybeExternalEventData = await newExternalEventData({
+        const maybeExternalEventData = await externalEventDataNew({
           externalEventId: oped.externalEvent.externalEventId,
           name: oped.name,
-          description: oped.description,
           startTime: event.start!.valueOf(),
-          duration: event.end!.valueOf() - event.start!.valueOf(),
+          endTime: event.end!.valueOf(),
           active: oped.active,
           apiKey: props.apiKey.key,
         });
-        if (isTodoAppErrorCode(maybeExternalEventData)) {
+        if (isErr(maybeExternalEventData)) {
           revert();
         }
         event.setExtendedProp("externalEventData", maybeExternalEventData);
@@ -185,18 +186,18 @@ function EventCalendar(props: EventCalendarProps) {
       }
       case "GoalData": {
         const ogd = oldEventProps.goalData;
-        const maybeGoalData = await newScheduledGoalData({
+        const maybeGoalData = await goalDataNew({
           goalId: ogd.goal.goalId,
           name: ogd.name,
-          description: ogd.description,
+          tags: ogd.tags,
           durationEstimate: ogd.durationEstimate,
           timeUtilityFunctionId: ogd.timeUtilityFunction.timeUtilityFunctionId,
-          startTime: event.start!.valueOf(),
-          duration: event.end!.valueOf() - event.start!.valueOf(),
+          parentGoalId: ogd.parentGoalId,
+          timeSpan: [event.start!.valueOf(), event.end!.valueOf()],
           status: ogd.status,
           apiKey: props.apiKey.key
         })
-        if (isTodoAppErrorCode(maybeGoalData)) {
+        if (isErr(maybeGoalData)) {
           revert();
         }
         event.setExtendedProp("goalData", maybeGoalData);

@@ -64,15 +64,16 @@ pub async fn query(
   props: request::GoalViewProps,
 ) -> Result<Vec<Goal>, tokio_postgres::Error> {
   let sql = "SELECT g.* FROM goal g WHERE 1 = 1
-     AND ($1 IS NULL OR g.goal_id = $1)
-     AND ($2 IS NULL OR g.creation_time >= $2)
-     AND ($3 IS NULL OR g.creation_time <= $3)
-     AND ($4 IS NULL OR g.creator_user_id = $4)
-     AND ($5 IS NULL OR g.goal_intent_id = $5 IS TRUE)
+     AND ($1::bigint IS NULL OR g.goal_id = $1)
+     AND ($2::bigint IS NULL OR g.creation_time >= $2)
+     AND ($3::bigint IS NULL OR g.creation_time <= $3)
+     AND ($4::bigint IS NULL OR g.creator_user_id = $4)
+     AND ($5::bigint IS NULL OR g.goal_intent_id = $5 IS TRUE)
      ORDER BY g.goal_id
-     LIMIT $6, $7";
+     OFFSET $6,
+     LIMIT $7";
 
-  let stmnt = con.prepare(&sql).await?;
+  let stmnt = con.prepare(sql).await?;
 
   let results = con
     .query(

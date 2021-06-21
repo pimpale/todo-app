@@ -15,8 +15,8 @@ export function externalEventDataToEvent(eed: ExternalEventData): EventInput {
 export function goalDataToEvent(gd: GoalData): EventInput {
   return {
     id: `Goal:${gd.goal.goalId}`,
-    start: new Date(gd.time_span![0]),
-    end: new Date(gd.time_span![1]),
+    start: new Date(gd.timeSpan![0]),
+    end: new Date(gd.timeSpan![1]),
     color: "#00000000",
     borderColor: "#00000000",
     goalData: gd,

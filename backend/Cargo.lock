@@ -27,7 +27,7 @@ dependencies = [
 [[package]]
 name = "auth-service-api"
 version = "0.7.7"
-source = "git+https://github.com/innexgo/auth-service-api#43063eb02bcc454872dfe128d30df79d6fb0b27d"
+source = "git+https://github.com/innexgo/auth-service-api#64047c83da6e07af17242842677110b69ee90840"
 dependencies = [
  "reqwest",
  "serde",
@@ -592,7 +592,7 @@ dependencies = [
 [[package]]
 name = "mail-service-api"
 version = "0.0.1"
-source = "git+https://github.com/innexgo/mail-service-api#37638740a868751e8b4d39d48227037f2e31b4eb"
+source = "git+https://github.com/innexgo/mail-service-api#5553bdc92a2b5b2f8f9f7294fba311f3ee33227d"
 dependencies = [
  "reqwest",
  "serde",
@@ -1375,7 +1375,7 @@ dependencies = [
 [[package]]
 name = "todo-app-service-api"
 version = "0.0.1"
-source = "git+https://github.com/pimpale/todo-app-service-api#6433cbbc71c85b1777f31d7f95f5fce2614997c6"
+source = "git+https://github.com/pimpale/todo-app-service-api#c1f035ea473a6c885c9fed9e65ca80cf37eda449"
 dependencies = [
  "auth-service-api",
  "serde",

@@ -26,7 +26,7 @@ declare global {
     timeUtilityFunctionId: number,
     creationTime: number,
     creatorUserId: number,
-    start_time: number[],
+    startTimes: number[],
     utils: number[],
   }
 
@@ -42,7 +42,7 @@ declare global {
     durationEstimate: number,
     timeUtilityFunction: TimeUtilityFunction,
     parentGoal?: Goal,
-    time_span?: [start_time:number, end_time:number],
+    timeSpan?: [startTime:number, endTime:number],
     status: GoalDataStatusKind
   }
 

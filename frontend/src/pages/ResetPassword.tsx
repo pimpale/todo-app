@@ -1,7 +1,7 @@
 import React from 'react';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Card, Button, Form, } from 'react-bootstrap'
-import { newResetPassword, isPasswordValid, isAuthErrorCode } from '@innexgo/frontend-auth-api';
+import { passwordNewReset, isPasswordValid, isAuthErrorCode } from '@innexgo/frontend-auth-api';
 
 import SimpleLayout from '../components/SimpleLayout';
 
@@ -33,7 +33,7 @@ function ResetPasswordForm(props: ResetPasswordProps) {
       return;
     }
 
-    const passwordResetResult = await newResetPassword({
+    const passwordResetResult = await passwordNewReset({
       passwordResetKey: props.resetKey,
       newPassword: values.password1,
     });

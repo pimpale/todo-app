@@ -4,7 +4,9 @@ import Section from '../components/Section';
 import DashboardLayout from '../components/DashboardLayout';
 import ManageGoalTable from '../components/ManageGoalTable';
 import Loader from '../components/Loader';
-import { goalDataView, isTodoAppErrorCode} from '../utils/utils';
+import { goalDataView} from '../utils/utils';
+import {isErr} from '@innexgo/frontend-common';
+
 import {AuthenticatedComponentProps} from '@innexgo/frontend-auth-api';
 
 type DashboardData = {
@@ -19,11 +21,11 @@ const loadDashboardData = async (props: AsyncProps<DashboardData[]>) => {
     apiKey: props.apiKey.key,
   });
 
-  if (isTodoAppErrorCode(maybeGoalData)) {
-    throw Error;
+  if (isErr(maybeGoalData)) {
+    throw Error(maybeGoalData.Err);
   }
 
-  return maybeGoalData.map(goalData => ({ goalData }));
+  return maybeGoalData.Ok.map(goalData => ({ goalData }));
 }
 
 function Dashboard(props: AuthenticatedComponentProps) {

@@ -94,16 +94,17 @@ pub async fn query(
       ""
     },
     " WHERE 1 = 1",
-    " AND ($1 IS NULL OR gdi.goal_intent_data_id = $1)",
-    " AND ($2 IS NULL OR gdi.creation_time >= $2)",
-    " AND ($3 IS NULL OR gdi.creation_time <= $3)",
-    " AND ($4 IS NULL OR gdi.creator_user_id = $4)",
-    " AND ($5 IS NULL OR gdi.goal_intent_id = $5)",
-    " AND ($6 IS NULL OR gdi.name = $6)",
-    " AND ($7 IS NULL OR gdi.name LIKE CONCAT('%',$7,'%'))",
-    " AND ($8 IS NULL OR gdi.active = $8)",
+    " AND ($1::bigint IS NULL OR gdi.goal_intent_data_id = $1)",
+    " AND ($2::bigint IS NULL OR gdi.creation_time >= $2)",
+    " AND ($3::bigint IS NULL OR gdi.creation_time <= $3)",
+    " AND ($4::bigint IS NULL OR gdi.creator_user_id = $4)",
+    " AND ($5::bigint IS NULL OR gdi.goal_intent_id = $5)",
+    " AND ($6::text   IS NULL OR gdi.name = $6)",
+    " AND ($7::text   IS NULL OR gdi.name LIKE CONCAT('%',$7,'%'))",
+    " AND ($8::bool   IS NULL OR gdi.active = $8)",
     " ORDER BY gdi.goal_intent_data_id",
-    " LIMIT $9, $10",
+    " LIMIT $9",
+    " OFFSET $10",
   ]
   .join("");
 
@@ -121,8 +122,8 @@ pub async fn query(
         &props.name,
         &props.partial_name,
         &props.active,
-        &props.offset,
-        &props.count,
+        &props.count.unwrap_or(100),
+        &props.offset.unwrap_or(0),
       ],
     )
     .await?

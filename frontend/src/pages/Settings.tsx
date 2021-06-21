@@ -5,6 +5,7 @@ import UtilityWrapper from '../components/UtilityWrapper';
 
 import DashboardLayout from '../components/DashboardLayout';
 import CreatePassword from '../components/CreatePassword';
+import {AuthenticatedComponentProps} from '@innexgo/frontend-auth-api';
 
 function Settings(props: AuthenticatedComponentProps) {
   // TODO actually add backend components to handle changing the name properly

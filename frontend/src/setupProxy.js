@@ -6,6 +6,9 @@ module.exports = function(app) {
     createProxyMiddleware({
       target: 'http://localhost:8079',
       changeOrigin: true,
+      pathRewrite: {
+        '^/api/auth': '/public', // rewrite path
+      },
     })
   );
   app.use(
@@ -13,6 +16,9 @@ module.exports = function(app) {
     createProxyMiddleware({
       target: 'http://localhost:8080',
       changeOrigin: true,
+      pathRewrite: {
+        '^/api/todo_app': '/public', // rewrite path
+      },
     })
   );
 };

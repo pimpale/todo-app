@@ -1,6 +1,6 @@
 import AsyncSelect from 'react-select/async';
 import { ValueType } from 'react-select';
-import { isApiErrorCode } from '../utils/utils';
+import { isAuthErrorCode, User} from '@innexgo/frontend-auth-api';
 
 interface SearchSingleUserProps {
   name: string,
@@ -19,7 +19,7 @@ export default function SearchSingleUser(props: SearchSingleUserProps) {
   const promiseOptions = async function(input: string): Promise<UserOption[]> {
     const results = await props.search(input);
 
-    if (isApiErrorCode(results)) {
+    if (isAuthErrorCode(results)) {
       return [];
     }
 

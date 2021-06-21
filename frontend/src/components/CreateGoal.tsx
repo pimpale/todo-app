@@ -1,11 +1,12 @@
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Col, Row, Card, Button, Form } from "react-bootstrap";
-import { goalNew, timeUtilityFunctionNew, isTodoAppErrorCode } from "../utils/utils";
+import { goalNew, timeUtilityFunctionNew, } from "../utils/utils";
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import UtilityPicker from "../components/UtilityPicker"
 import parseDuration from 'parse-duration';
 import formatDuration from 'date-fns/formatDuration';
 import intervalToDuration from 'date-fns/intervalToDuration';
+import { isErr } from '@innexgo/frontend-common';
 
 
 type CreateGoalProps = {
@@ -37,7 +38,7 @@ function CreateGoal(props: CreateGoalProps) {
 
     const durationEstimate = parseDuration(values.durationEstimate);
 
-    if(durationEstimate === null) {
+    if (durationEstimate === null) {
       errors.durationEstimate = "Invalid duration estimate";
       hasError = true;
     }
@@ -53,8 +54,8 @@ function CreateGoal(props: CreateGoalProps) {
       apiKey: props.apiKey.key,
     })
 
-    if (isTodoAppErrorCode(maybeTimeUtilFunction)) {
-      switch (maybeTimeUtilFunction) {
+    if (isErr(maybeTimeUtilFunction)) {
+      switch (maybeTimeUtilFunction.Err) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
@@ -79,28 +80,20 @@ function CreateGoal(props: CreateGoalProps) {
       return;
     }
 
-
-    let maybeGoalData = props.span
-      ? await newScheduledGoal({
-        name: values.name,
-        description: values.description,
-        durationEstimate: durationEstimate!,
-        timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
-        startTime: props.span[0],
-        duration: props.span[1] - props.span[0],
-        apiKey: props.apiKey.key,
-      })
-      : await goalNew({
-        name: values.name,
-        description: values.description,
-        durationEstimate: durationEstimate!,
-        timeUtilityFunctionId: maybeTimeUtilFunction.timeUtilityFunctionId,
-        apiKey: props.apiKey.key,
-      });
+    let tuf = maybeTimeUtilFunction.Ok;
 
 
-    if (isTodoAppErrorCode(maybeGoalData)) {
-      switch (maybeGoalData) {
+    let maybeGoalData = await goalNew({
+      name: values.name,
+      durationEstimate: durationEstimate!,
+      timeUtilityFunctionId: tuf.timeUtilityFunctionId,
+      timeSpan: props.span,
+      apiKey: props.apiKey.key,
+    })
+
+
+    if (isErr(maybeGoalData)) {
+      switch (maybeGoalData.Err) {
         case "API_KEY_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",

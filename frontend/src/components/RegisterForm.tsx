@@ -1,6 +1,7 @@
 import { Button, Form } from 'react-bootstrap'
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
-import { newVerificationChallenge, isAuthErrorCode, isPasswordValid } from '@innexgo/frontend-auth-api';
+import { verificationChallengeNew, isPasswordValid } from '@innexgo/frontend-auth-api';
+import { isErr } from '@innexgo/frontend-common';
 
 type RegisterFormProps = {
   onSuccess: () => void
@@ -46,15 +47,15 @@ function RegisterForm(props: RegisterFormProps) {
       return;
     }
 
-    const maybeVerificationChallenge = newVerificationChallenge({
+    const maybeVerificationChallenge = await verificationChallengeNew({
       userName: values.name,
       userEmail: values.email,
       userPassword: values.password1,
     });
 
-    if (isAuthErrorCode(maybeVerificationChallenge)) {
+    if (isErr(maybeVerificationChallenge)) {
       // otherwise display errors
-      switch (maybeVerificationChallenge) {
+      switch (maybeVerificationChallenge.Err) {
         case "USER_EMAIL_EMPTY": {
           fprops.setErrors({
             email: "No such user exists"
@@ -79,13 +80,13 @@ function RegisterForm(props: RegisterFormProps) {
           });
           break;
         }
-        case "EMAIL_RATELIMIT": {
+        case "EMAIL_UNKNOWN": {
           fprops.setErrors({
             email: "Please wait 5 minutes before sending another email."
           });
           break;
         }
-        case "EMAIL_BLACKLISTED": {
+        case "EMAIL_BOUNCED": {
           fprops.setErrors({
             email: "This email address is not permitted to make an account."
           });
@@ -186,7 +187,7 @@ function RegisterForm(props: RegisterFormProps) {
                 onChange={fprops.handleChange}
                 isInvalid={!!fprops.errors.terms}
               />
-              <Form.Check.Label> Agree to <a target="_blank" rel="noopener noreferrer"  href="/terms_of_service">terms of service</a></Form.Check.Label>
+              <Form.Check.Label> Agree to <a target="_blank" rel="noopener noreferrer" href="/terms_of_service">terms of service</a></Form.Check.Label>
               <Form.Control.Feedback type="invalid">{fprops.errors.terms}</Form.Control.Feedback>
             </Form.Check>
             <br />
