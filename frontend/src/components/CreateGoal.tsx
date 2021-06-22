@@ -119,6 +119,7 @@ function CreateGoal(props: CreateGoalProps) {
     props.postSubmit();
   }
 
+
   return <>
     <Formik<CreateGoalValue>
       onSubmit={onSubmit}
@@ -152,7 +153,7 @@ function CreateGoal(props: CreateGoalProps) {
                   <UtilityPicker
                     span={props.span}
                     points={fprops.values.points}
-                    setPoints={fprops.handleChange}
+                    setPoints={e => fprops.setFieldValue('points', e)}
                     mutable
                   />
                 </Card.Body>
@@ -167,7 +168,7 @@ function CreateGoal(props: CreateGoalProps) {
                   placeholder="Goal Name"
                   as="input"
                   value={fprops.values.name}
-                  onChange={fprops.handleChange}
+                  onChange={e => fprops.setFieldValue('name', e.target.value)}
                   isInvalid={!!fprops.errors.name}
                 />
                 <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
@@ -179,7 +180,7 @@ function CreateGoal(props: CreateGoalProps) {
                   placeholder="Estimated Duration"
                   as="input"
                   value={fprops.values.durationEstimate}
-                  onChange={fprops.handleChange}
+                  onChange={e => fprops.setFieldValue('durationEstimate', e.target.value)}
                   isInvalid={!!fprops.errors.durationEstimate}
                 />
                 <Form.Control.Feedback type="invalid">{fprops.errors.durationEstimate}</Form.Control.Feedback>

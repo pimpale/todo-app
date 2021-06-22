@@ -34,41 +34,52 @@ function noTimePrefTUF(start: number, end: number) {
 function UtilityPicker(props: UtilityPickerProps) {
   const [start, setStart] = React.useState(props.span?.[0] ?? Date.now());
   const [end, setEnd] = React.useState(props.span?.[1] ?? addHours(new Date(), 3).valueOf());
-  const [points, setPointsRaw] = React.useState(props.points);
-  const setPoints = (x:Point[]) => {
-      setPointsRaw(x);
-      props.setPoints(x);
-  };
 
+  const pointsRef = React.useRef([] as Point[]);
+  pointsRef.current = [
+    {
+      x: start,
+      y: props.points.length === 0 ? 0 : props.points[0].y
+    },
+    ...props.points,
+    {
+      x: end,
+      y: props.points.length === 0 ? 0 : props.points[props.points.length - 1].y
+    }
+  ];
 
   const lineOptions = {
     line: 'scatter',
     responsive: true,
+    animation: {
+      duration: 0
+    },
     plugins: {
       dragData: {
         round: 0,
         dragX: true,
         showTooltip: true,
-        onDragStart: function(_: React.MouseEvent, datasetIndex:number, index:number, value:Point) {
+        onDragStart: function(_: React.MouseEvent, datasetIndex: number, index: number, value: Point) {
           if (index === 0) {
             return false
           }
-          if (index === points.length) {
+          if (index === pointsRef.current.length-1) {
             return false
           }
           return true;
         },
-        onDrag:(e: React.MouseEvent, datasetIndex:number, index:number, value:Point) => {
-          console.log(points.length)
+        onDrag: (e: React.MouseEvent, datasetIndex: number, index: number, value: Point) => {
           if (value.y > 100) {
             return false
           }
           return true;
         },
-        onDragEnd: () => {
-          props.setPoints(
-            .map(a => ({ x: a.x.valueOf(), y: a.y })));
-
+        onDragEnd: (e: React.MouseEvent, datasetIndex: number, index: number, value: Point) => {
+          if(value.y > 100) {
+              value.y = 100;
+          }
+          pointsRef.current[index] = value;
+          props.setPoints(pointsRef.current.slice(1, pointsRef.current.length - 1));
         },
       },
       tooltip: {
@@ -83,7 +94,7 @@ function UtilityPicker(props: UtilityPickerProps) {
         min: start,
         max: end,
         ticks: {
-          callback: (v: number) => format(v, "yyyy mm do hh:mm a")
+          callback: (v: number) => format(v, "hh:mm a")
         }
       },
       y: {
@@ -106,19 +117,11 @@ function UtilityPicker(props: UtilityPickerProps) {
         label: 'Utility',
         fill: false,
         borderColor: 'rgba(255, 99, 132, 0.8)',
-        data: [
-          {
-            x: start,
-            y: points.length === 0 ? 0 : points[0].y
-          },
-          ...points,
-          {
-            x: end,
-            y: points.length === 0 ? 0 : points[points.length - 1].y
-          }]
+        data: pointsRef.current
       },
     ],
   }
+
 
   return <>
     <Row>
@@ -151,11 +154,11 @@ function UtilityPicker(props: UtilityPickerProps) {
             const t = (start.valueOf() + end.valueOf()) / 2;
             switch (o!.value) {
               case "constant": {
-                setPoints(noTimePrefTUF(start, end));
+                props.setPoints(noTimePrefTUF(start, end));
                 break;
               }
               case "deadline": {
-                setPoints([{
+                props.setPoints([{
                   x: t - 1,
                   y: scale
                 }, {
@@ -165,7 +168,7 @@ function UtilityPicker(props: UtilityPickerProps) {
                 break;
               }
               case "interval": {
-                setPoints([{
+                props.setPoints([{
                   x: t - 1000001,
                   y: 0
                 }, {
