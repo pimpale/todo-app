@@ -84,6 +84,7 @@ function CreateGoal(props: CreateGoalProps) {
 
     let maybeGoalData = await goalNew({
       name: values.name,
+      tags: [] as string[],
       durationEstimate: durationEstimate!,
       timeUtilityFunctionId: tuf.timeUtilityFunctionId,
       timeSpan: props.span,

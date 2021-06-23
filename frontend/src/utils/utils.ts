@@ -103,6 +103,7 @@ export function goalIntentDataNew(props: GoalIntentDataNewProps): Promise<Result
 
 export interface GoalNewProps {
   name: string,
+  tags: string[],
   durationEstimate: number,
   timeUtilityFunctionId: number,
   goalIntentId?: number,

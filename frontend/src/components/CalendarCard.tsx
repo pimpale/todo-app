@@ -3,7 +3,7 @@ import { EventContentArg, EventInput } from "@fullcalendar/react"
 
 export function externalEventDataToEvent(eed: ExternalEventData): EventInput {
   return {
-    id: `ExternalEvent:${eed.externalEvent.externalEventId}`,
+    id: `ExternalEventData:${eed.externalEvent.externalEventId}`,
     start: new Date(eed.startTime),
     end: new Date(eed.endTime),
     color: "#00000000",
@@ -14,7 +14,7 @@ export function externalEventDataToEvent(eed: ExternalEventData): EventInput {
 
 export function goalDataToEvent(gd: GoalData): EventInput {
   return {
-    id: `Goal:${gd.goal.goalId}`,
+    id: `GoalData:${gd.goal.goalId}`,
     start: new Date(gd.timeSpan![0]),
     end: new Date(gd.timeSpan![1]),
     color: "#00000000",
@@ -45,9 +45,9 @@ export function ExternalEventCard(props: {
 function CalendarCard(eventInfo: EventContentArg) {
   const props = eventInfo.event.extendedProps;
   switch (eventInfo.event.id.split(':')[0]) {
-    case "ExternalEvent":
+    case "ExternalEventData":
       return <ExternalEventCard externalEventData={props.externalEventData} />
-    case "Goal":
+    case "GoalData":
       return <GoalCard goalData={props.goalData} />
   }
 }

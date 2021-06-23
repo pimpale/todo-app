@@ -9,10 +9,10 @@ import CalendarCard, { goalDataToEvent, externalEventDataToEvent } from '../comp
 
 import { Async, AsyncProps } from 'react-async';
 import { Row, Col, Tab, Tabs, Popover, Container, } from 'react-bootstrap';
-import { externalEventNew, externalEventDataNew, goalDataNew, externalEventView, externalEventDataView, goalDataView} from '../utils/utils';
-import { ApiKey, AuthenticatedComponentProps} from '@innexgo/frontend-auth-api';
+import { externalEventNew, externalEventDataNew, goalDataNew, externalEventView, externalEventDataView, goalDataView } from '../utils/utils';
+import { ApiKey, AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
 
-import {isErr} from '@innexgo/frontend-common';
+import { isErr } from '@innexgo/frontend-common';
 
 import UtilityWrapper from '../components/UtilityWrapper';
 
@@ -180,8 +180,9 @@ function EventCalendar(props: EventCalendarProps) {
         });
         if (isErr(maybeExternalEventData)) {
           revert();
+        } else {
+          event.setExtendedProp("externalEventData", maybeExternalEventData.Ok);
         }
-        event.setExtendedProp("externalEventData", maybeExternalEventData);
         break;
       }
       case "GoalData": {
@@ -199,8 +200,9 @@ function EventCalendar(props: EventCalendarProps) {
         })
         if (isErr(maybeGoalData)) {
           revert();
+        } else {
+          event.setExtendedProp("goalData", maybeGoalData.Ok);
         }
-        event.setExtendedProp("goalData", maybeGoalData);
         break;
       }
       default: {
@@ -257,7 +259,7 @@ function EventCalendar(props: EventCalendarProps) {
         }}
         initialView='timeGridWeek'
         height={"auto"}
-        datesSet={({ view }) => /* Keeps window size in sync */view.calendar.updateSize()}
+        datesSet={({ view }) => /* Keeps window size in sync */ view.calendar.updateSize()}
         allDaySlot={false}
         slotDuration="00:30:00"
         nowIndicator={true}

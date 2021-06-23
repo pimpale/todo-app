@@ -161,7 +161,7 @@ async fn fill_time_utility_function(
     time_utility_function_id: time_utility_function.time_utility_function_id,
     creation_time: time_utility_function.creation_time,
     creator_user_id: time_utility_function.creator_user_id,
-    start_time: time_utility_function.start_times,
+    start_times: time_utility_function.start_times,
     utils: time_utility_function.utils,
   })
 }
