@@ -4,7 +4,7 @@ import Loader from '../components/Loader';
 import { Async, AsyncProps } from 'react-async';
 import DisplayModal from '../components/DisplayModal';
 import UtilityPicker from '../components/UtilityPicker';
-import { timeUtilityFunctionNew, goalDataView, goalDataNew} from '../utils/utils';
+import { GoalData, timeUtilityFunctionNew, goalDataView, goalDataNew} from '../utils/utils';
 import {isErr} from '@innexgo/frontend-common';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { Edit, Cancel, } from '@material-ui/icons';

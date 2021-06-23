@@ -1,6 +1,6 @@
 import AsyncSelect from 'react-select/async';
 import { ValueType } from 'react-select';
-
+import { GoalData } from '../utils/utils';
 
 interface SearchSingleGoalProps {
   name: string,
@@ -34,7 +34,7 @@ export default function SearchSingleGoal(props: SearchSingleGoalProps) {
     }
   }
 
-  /*components={{ DropdownIndicator: () => null, IndicatorSeparator: () => null }} */ 
+  /*components={{ DropdownIndicator: () => null, IndicatorSeparator: () => null }} */
   return <AsyncSelect
     placeholder="Search for Goals"
     defaultOptions

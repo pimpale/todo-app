@@ -1,13 +1,14 @@
 import React from 'react';
 import { Form, Button, Table } from 'react-bootstrap'; import Loader from '../components/Loader';
 import { Async, AsyncProps } from 'react-async';
+import ErrorMessage from '../components/ErrorMessage';
 import DisplayModal from '../components/DisplayModal';
-import { externalEventDataNew, externalEventDataView} from '../utils/utils';
+import { ExternalEventData, externalEventDataNew, externalEventDataView } from '../utils/utils';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { Edit, Archive, Unarchive } from '@material-ui/icons';
 import { Formik, FormikHelpers } from 'formik'
 import format from 'date-fns/format';
-import {isErr} from '@innexgo/frontend-common';
+import { isErr } from '@innexgo/frontend-common';
 
 
 type EditExternalEventDataProps = {
@@ -244,7 +245,7 @@ const ManageExternalEventData = (props: {
     {({ reload }) => <>
       <Async.Pending><Loader /></Async.Pending>
       <Async.Rejected>
-        <span className="text-danger">An unknown error has occured.</span>
+        {e => <ErrorMessage error={e} />}
       </Async.Rejected>
       <Async.Fulfilled<ExternalEventData>>{externalEventData => <>
         <Table hover bordered>

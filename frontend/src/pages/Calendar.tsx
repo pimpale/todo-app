@@ -6,10 +6,11 @@ import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
 import DashboardLayout from '../components/DashboardLayout';
 import CalendarSolver from '../components/CalendarSolver';
 import CalendarCard, { goalDataToEvent, externalEventDataToEvent } from '../components/CalendarCard';
+import ErrorMessage from '../components/ErrorMessage';
 
 import { Async, AsyncProps } from 'react-async';
 import { Row, Col, Tab, Tabs, Popover, Container, } from 'react-bootstrap';
-import { externalEventNew, externalEventDataNew, goalDataNew, externalEventView, externalEventDataView, goalDataView } from '../utils/utils';
+import { GoalData, ExternalEventData, externalEventDataNew, goalDataNew, externalEventView, externalEventDataView, goalDataView } from '../utils/utils';
 import { ApiKey, AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
 
 import { isErr } from '@innexgo/frontend-common';
@@ -227,7 +228,7 @@ function EventCalendar(props: EventCalendarProps) {
         {({ reload }) => <>
           <Async.Pending><Loader /></Async.Pending>
           <Async.Rejected>
-            <span className="text-danger">An unknown error has occured.</span>
+      {e => <ErrorMessage error={e} />}
           </Async.Rejected>
           <Async.Fulfilled<GoalData[]>>{gdus =>
             gdus.map(gdu =>

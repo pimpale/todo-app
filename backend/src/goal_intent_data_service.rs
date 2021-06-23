@@ -85,24 +85,24 @@ pub async fn query(
   // TODO prevent getting meaningless duration
 
   let sql = [
-    "SELECT gdi.* FROM goal_intent_data gdi",
+    "SELECT gid.* FROM goal_intent_data gid",
     if props.only_recent {
       " INNER JOIN
           (SELECT max(goal_intent_data_id) id FROM goal_intent_data GROUP BY goal_intent_id) maxids
-          ON maxids.id = gdi.goal_intent_data_id"
+          ON maxids.id = gid.goal_intent_data_id"
     } else {
       ""
     },
     " WHERE 1 = 1",
-    " AND ($1::bigint IS NULL OR gdi.goal_intent_data_id = $1)",
-    " AND ($2::bigint IS NULL OR gdi.creation_time >= $2)",
-    " AND ($3::bigint IS NULL OR gdi.creation_time <= $3)",
-    " AND ($4::bigint IS NULL OR gdi.creator_user_id = $4)",
-    " AND ($5::bigint IS NULL OR gdi.goal_intent_id = $5)",
-    " AND ($6::text   IS NULL OR gdi.name = $6)",
-    " AND ($7::text   IS NULL OR gdi.name LIKE CONCAT('%',$7,'%'))",
-    " AND ($8::bool   IS NULL OR gdi.active = $8)",
-    " ORDER BY gdi.goal_intent_data_id",
+    " AND ($1::bigint IS NULL OR gid.goal_intent_data_id = $1)",
+    " AND ($2::bigint IS NULL OR gid.creation_time >= $2)",
+    " AND ($3::bigint IS NULL OR gid.creation_time <= $3)",
+    " AND ($4::bigint IS NULL OR gid.creator_user_id = $4)",
+    " AND ($5::bigint IS NULL OR gid.goal_intent_id = $5)",
+    " AND ($6::text   IS NULL OR gid.name = $6)",
+    " AND ($7::text   IS NULL OR gid.name LIKE CONCAT('%',$7,'%'))",
+    " AND ($8::bool   IS NULL OR gid.active = $8)",
+    " ORDER BY gid.goal_intent_data_id",
     " LIMIT $9",
     " OFFSET $10",
   ]

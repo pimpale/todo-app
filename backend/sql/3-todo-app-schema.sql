@@ -19,7 +19,9 @@ create table goal_intent_data(
   goal_intent_data_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null,
-  name text not null
+  goal_intent_id bigint not null,
+  name text not null,
+  active bool not null
 );
 
 drop table if exists goal;

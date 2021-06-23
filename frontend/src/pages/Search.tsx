@@ -2,7 +2,7 @@ import React from 'react'
 import { Button, Container, Form, Row, Col } from 'react-bootstrap';
 import DashboardLayout from '../components/DashboardLayout';
 import ManageGoalTable from '../components/ManageGoalTable';
-import { goalDataView } from '../utils/utils';
+import { GoalData, goalDataView } from '../utils/utils';
 import { isErr } from '@innexgo/frontend-common';
 
 import { ApiKey, AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';

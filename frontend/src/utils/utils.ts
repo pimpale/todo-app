@@ -1,7 +1,76 @@
 import setHours from 'date-fns/setHours';
 import setMinutes from 'date-fns/setMinutes';
 
-import { fetchApi, Result, fromPromise } from '@innexgo/frontend-common'
+import { fetchApi, Result } from '@innexgo/frontend-common'
+
+export interface GoalIntent {
+  goalIntentId: number,
+  creationTime: number,
+  creatorUserId: number
+}
+
+export interface GoalIntentData {
+  goalIntentDataId: number,
+  creationTime: number,
+  creatorUserId: number,
+  goalIntent: GoalIntent,
+  name: string,
+  active: boolean
+}
+
+export interface Goal {
+  goalId: number,
+  creationTime: number,
+  creatorUserId: number,
+  intent?: GoalIntent
+}
+
+export interface TimeUtilityFunction {
+  timeUtilityFunctionId: number,
+  creationTime: number,
+  creatorUserId: number,
+  startTimes: number[],
+  utils: number[],
+}
+
+type GoalDataStatusKind = "SUCCEED" | "FAIL" | "CANCEL" | "PENDING";
+
+export interface GoalData {
+  goalDataId: number,
+  creationTime: number,
+  creatorUserId: number,
+  goal: Goal
+  name: string,
+  tags: string[],
+  durationEstimate: number,
+  timeUtilityFunction: TimeUtilityFunction,
+  parentGoal?: Goal,
+  timeSpan?: [startTime: number, endTime: number],
+  status: GoalDataStatusKind
+}
+
+export interface ExternalEvent {
+  externalEventId: number,
+  creationTime: number,
+  creatorUserId: number
+}
+
+export interface ExternalEventData {
+  externalEventDataId: number,
+  creationTime: number,
+  creatorUserId: number,
+  externalEvent: ExternalEvent,
+  name: string,
+  startTime: number,
+  endTime: number,
+  active: boolean
+}
+
+
+
+
+
+
 
 export const TodoAppErrorCodes = [
   "OK",
@@ -33,6 +102,8 @@ export const TodoAppErrorCodes = [
   "EMAIL_BLACKLISTED",
 
   "GOAL_NONEXISTENT",
+
+  "GOAL_INTENT_NONEXISTENT",
 
   "EXTERNAL_EVENT_NONEXISTENT",
 

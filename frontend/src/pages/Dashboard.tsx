@@ -1,19 +1,33 @@
-import { Row, Container, Col, Form} from 'react-bootstrap';
+import { Row, Container, Col } from 'react-bootstrap';
 import { Async, AsyncProps } from 'react-async';
 import Section from '../components/Section';
+import ErrorMessage from '../components/ErrorMessage';
 import DashboardLayout from '../components/DashboardLayout';
 import ManageGoalTable from '../components/ManageGoalTable';
+import ManageGoalIntentTable from '../components/ManageGoalIntentTable';
 import Loader from '../components/Loader';
-import { goalDataView} from '../utils/utils';
-import {isErr} from '@innexgo/frontend-common';
+import { GoalIntentData, goalIntentDataView, GoalData, goalDataView } from '../utils/utils';
+import { isErr } from '@innexgo/frontend-common';
 
-import {AuthenticatedComponentProps} from '@innexgo/frontend-auth-api';
+import { AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
 
-type DashboardData = {
-  goalData: GoalData
+const loadGoalIntentData = async (props: AsyncProps<GoalIntentData[]>) => {
+  const maybeGoalIntentData = await goalIntentDataView({
+    creatorUserId: props.apiKey.creator.userId,
+    onlyRecent: true,
+    active: true,
+    responded: false,
+    apiKey: props.apiKey.key,
+  });
+
+  if (isErr(maybeGoalIntentData)) {
+    throw Error(maybeGoalIntentData.Err);
+  }
+
+  return maybeGoalIntentData.Ok;
 }
 
-const loadDashboardData = async (props: AsyncProps<DashboardData[]>) => {
+const loadGoalData = async (props: AsyncProps<GoalData[]>) => {
   const maybeGoalData = await goalDataView({
     creatorUserId: props.apiKey.creator.userId,
     onlyRecent: true,
@@ -25,7 +39,7 @@ const loadDashboardData = async (props: AsyncProps<DashboardData[]>) => {
     throw Error(maybeGoalData.Err);
   }
 
-  return maybeGoalData.Ok.map(goalData => ({ goalData }));
+  return maybeGoalData.Ok;
 }
 
 function Dashboard(props: AuthenticatedComponentProps) {
@@ -33,18 +47,37 @@ function Dashboard(props: AuthenticatedComponentProps) {
     <Container fluid className="py-4 px-4">
       <Row className="justify-content-md-center">
         <Col md={8}>
-          <Section id="goals" name="My Goals">
-            <Async promiseFn={loadDashboardData} apiKey={props.apiKey}>
+          <Section id="goalIntents" name="My GoalIntents">
+            <Async promiseFn={loadGoalIntentData} apiKey={props.apiKey}>
               {({ reload }) => <>
                 <Async.Pending><Loader /></Async.Pending>
                 <Async.Rejected>
-                  <Form.Text className="text-danger">An unknown error has occured while loading data.</Form.Text>
+                  {e => <ErrorMessage error={e} />}
                 </Async.Rejected>
-                <Async.Fulfilled<DashboardData[]>>{ddata =>
+                <Async.Fulfilled<GoalIntentData[]>>{gids =>
+                  <ManageGoalIntentTable
+                    reload={reload}
+                    apiKey={props.apiKey}
+                    goalIntentIds={gids.map(gid => gid.goalIntent.goalIntentId)}
+                    mutable
+                    addable
+                  />
+                }</Async.Fulfilled>
+              </>}
+            </Async>
+          </Section>
+          <Section id="goals" name="My Goals">
+            <Async promiseFn={loadGoalData} apiKey={props.apiKey}>
+              {({ reload }) => <>
+                <Async.Pending><Loader /></Async.Pending>
+                <Async.Rejected>
+                  {e => <ErrorMessage error={e} />}
+                </Async.Rejected>
+                <Async.Fulfilled<GoalData[]>>{gds =>
                   <ManageGoalTable
                     reload={reload}
                     apiKey={props.apiKey}
-                    goalIds={ddata.map(gd => gd.goalData.goal.goalId)}
+                    goalIds={gds.map(gd => gd.goal.goalId)}
                     mutable
                     addable
                   />

@@ -1,5 +1,6 @@
 import { Card } from "react-bootstrap";
 import { EventContentArg, EventInput } from "@fullcalendar/react"
+import { GoalData, ExternalEventData } from '../utils/utils';
 
 export function externalEventDataToEvent(eed: ExternalEventData): EventInput {
   return {

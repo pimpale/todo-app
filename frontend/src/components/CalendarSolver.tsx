@@ -1,15 +1,15 @@
 import React from 'react'
 import Loader from '../components/Loader';
 import { Async, AsyncProps } from 'react-async';
-
+import ErrorMessage from '../components/ErrorMessage';
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import CalendarCard from '../components/CalendarCard';
 import { ApiKey } from '@innexgo/frontend-auth-api';
-import { goalDataView, goalDataNew, timeUtilityFunctionNew, INT_MAX, } from '../utils/utils';
+import { GoalData, goalDataView, goalDataNew, timeUtilityFunctionNew, INT_MAX, } from '../utils/utils';
 
-import {isErr} from '@innexgo/frontend-common';
+import { isErr } from '@innexgo/frontend-common';
 
 
 import { assert, findLastIndex } from '@innexgo/frontend-common';
@@ -248,17 +248,15 @@ const loadSolverData = async (props: AsyncProps<SolverGoalData[]>) => {
 function CalendarSolver(props: CalendarSolverProps) {
   return <Async
     promiseFn={loadSolverData}
-    apiKey={props.apiKey} >
-    {({ reload }) => <>
-      <Async.Pending><Loader /></Async.Pending>
-      <Async.Rejected>
-        <span className="text-danger">An unknown error has occured.</span>
-      </Async.Rejected>
-      <Async.Fulfilled<SolverGoalData[]>>{sgds =>
-        <ICalendarSolver data={sgds} {...props} />
-      }</Async.Fulfilled>
-    </>
-    }
+    apiKey={props.apiKey}
+  >
+    <Async.Pending><Loader /></Async.Pending>
+    <Async.Rejected>
+      {e => <ErrorMessage error={e} />}
+    </Async.Rejected>
+    <Async.Fulfilled<SolverGoalData[]>>
+      {sgds => <ICalendarSolver data={sgds} {...props} />}
+    </Async.Fulfilled>
   </Async>
 }
 
