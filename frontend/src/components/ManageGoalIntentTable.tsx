@@ -16,6 +16,10 @@ type ManageGoalIntentTableProps = {
 
 function ManageGoalIntentTable(props: ManageGoalIntentTableProps) {
 
+  // this list has an object consisting of both the index in the real array and the object constructs a new objec
+  const actives = props.goalIntentData
+    .map((gid, i) => ({ gid, i }))
+    .filter(({ gid }) => props.showInactive || gid.active);
 
   return <>
     <CreateGoalIntent
@@ -31,27 +35,23 @@ function ManageGoalIntentTable(props: ManageGoalIntentTableProps) {
         </tr>
       </thead>
       <tbody>
-        {props.goalIntentData.filter(gid => props.showInactive || gid.active).length !== 0 ? <> </> :
+        {actives.length !== 0 ? <> </> :
           <tr><td className="text-center">No Active GoalIntents</td></tr>
         }
-        {props.goalIntentData
-          // hide inactive unless show enabled
-          .map((gid, i) => props.showInactive || gid.active
-            ?
-            <ManageGoalIntent
-              key={i}
-              goalIntentData={gid}
-              setGoalIntentData={
-                // https://stackoverflow.com/questions/29537299/react-how-to-update-state-item1-in-state-using-setstate
-                (gid) => {
-                  props.setGoalIntentData(update(props.goalIntentData, { [i]: { $set: gid } }))
-                }
+        {actives.map(({ gid, i }) =>
+          <ManageGoalIntent
+            key={i}
+            apiKey={props.apiKey}
+            goalIntentData={gid}
+            setGoalIntentData={
+              // https://stackoverflow.com/questions/29537299/react-how-to-update-state-item1-in-state-using-setstate
+              (gid) => {
+                props.setGoalIntentData(update(props.goalIntentData, { [i]: { $set: gid } }))
               }
-              apiKey={props.apiKey}
-            />
-            :
-            <div />
-          )}
+            }
+            mutable={props.mutable}
+          />
+        )}
       </tbody>
     </Table>
   </>

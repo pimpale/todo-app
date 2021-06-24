@@ -46,7 +46,7 @@ function Dashboard(props: AuthenticatedComponentProps) {
   return <DashboardLayout {...props}>
     <Container fluid className="py-4 px-4">
       <Row className="justify-content-md-center">
-        <Col md={8}>
+        <Col md={6}>
           <Section id="goalIntents" name="My GoalIntents">
             <Async promiseFn={loadGoalIntentData} apiKey={props.apiKey}>
               {({ setData }) => <>

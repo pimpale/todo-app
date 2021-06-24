@@ -9,7 +9,7 @@ import CalendarCard, { goalDataToEvent, externalEventDataToEvent } from '../comp
 import ErrorMessage from '../components/ErrorMessage';
 
 import { Async, AsyncProps } from 'react-async';
-import { Row, Col, Tab, Tabs, Popover, Container, } from 'react-bootstrap';
+import { Row, Col, Tab, Tabs, Container, } from 'react-bootstrap';
 import { GoalData, ExternalEventData, externalEventDataNew, goalDataNew, externalEventView, externalEventDataView, goalDataView } from '../utils/utils';
 import { ApiKey, AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
 
@@ -364,11 +364,11 @@ function EventCalendar(props: EventCalendarProps) {
 
 function CalendarWidget(props: AuthenticatedComponentProps) {
   return <UtilityWrapper title="Upcoming Appointments">
-    <Popover id="information-tooltip">
+    <span>
       This screen shows all future appointments.
       You can click any date to add an appointment on that date,
       or click an existing appointment to delete it.
-    </Popover>
+    </span>
     <EventCalendar apiKey={props.apiKey} />
   </UtilityWrapper>
 };

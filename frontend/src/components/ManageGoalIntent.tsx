@@ -1,10 +1,10 @@
 import React from 'react';
-import { Col, Row, Card, Form, Button } from 'react-bootstrap';
+import { Col, Row, OverlayTrigger, Popover, Form, Button } from 'react-bootstrap';
 import DisplayModal from '../components/DisplayModal';
 import { GoalIntentData, goalIntentDataView, goalIntentDataNew } from '../utils/utils';
 import { isErr } from '@innexgo/frontend-common';
 import { ApiKey } from '@innexgo/frontend-auth-api';
-import { Edit, Cancel, } from '@material-ui/icons';
+import { Edit, Cancel, ArrowForward, Done } from '@material-ui/icons';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 
 
@@ -168,9 +168,20 @@ const cancelGoalIntent = async (
   setGoalIntentData(maybeGoalIntentData.Ok);
 }
 
+const popover = (
+  <Popover id="popover-basic">
+    <Popover.Title as="h3">Promote To </Popover.Title>
+    <Popover.Content>
+      And here's some <strong>amazing</strong> content. It's very engaging.
+      right?
+    </Popover.Content>
+  </Popover>
+);
+
 const ManageGoalIntent = (props: {
   goalIntentData: GoalIntentData,
   setGoalIntentData: (gid: GoalIntentData) => void,
+  mutable: boolean,
   apiKey: ApiKey,
 }) => {
   const [showEditGoalIntent, setShowEditGoalIntent] = React.useState(false);
@@ -180,12 +191,17 @@ const ManageGoalIntent = (props: {
   return <tr>
     <td>
       {props.goalIntentData.name}
-      <button className="btn btn-link px-0 py-0 float-right">
-        <Edit />
-      </button>
-      {props.goalIntentData.active
-        ?
-        <button className="btn btn-link px-0 py-0 float-right"
+      <div className="float-right">
+        <Button variant="link" className="px-0 py-0"
+          onClick={_ => setShowEditGoalIntent(editing => !editing)}
+        >
+          {showEditGoalIntent
+            ? <Done />
+            : <Edit />
+          }
+        </Button>
+        <Button variant="link" className="px-0 py-0"
+          hidden={!(props.goalIntentData.active && props.mutable)}
           onClick={_ =>
             cancelGoalIntent(
               props.apiKey,
@@ -195,9 +211,8 @@ const ManageGoalIntent = (props: {
             )
           }>
           <Cancel />
-        </button>
-        : <> </>
-      }
+        </Button>
+      </div>
       <Form.Text className="text-danger">{failureResult}</Form.Text>
     </td>
     <DisplayModal

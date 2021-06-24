@@ -5,7 +5,7 @@ import UtilityWrapper from '../components/UtilityWrapper';
 
 import DashboardLayout from '../components/DashboardLayout';
 import CreatePassword from '../components/CreatePassword';
-import {AuthenticatedComponentProps} from '@innexgo/frontend-auth-api';
+import { AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
 
 function Settings(props: AuthenticatedComponentProps) {
   // TODO actually add backend components to handle changing the name properly
@@ -18,7 +18,9 @@ function Settings(props: AuthenticatedComponentProps) {
     <Container fluid className="py-4 px-4">
       <div className="mx-3 my-3">
         <UtilityWrapper title="Change Password">
-          <Popover id="information-tooltip"> Shows basic information about this course. </Popover>
+          <span>
+            Shows basic information about this course.
+          </span>
           {passwdSuccess
             ? <Form.Text className="text-success">Password changed successfully</Form.Text>
             : <CreatePassword apiKey={props.apiKey} onSuccess={() => setPasswdSuccess(true)} />
