@@ -350,9 +350,9 @@ function EventCalendar(props: EventCalendarProps) {
         onClose={() => setSelectedManageGoalData(null)}
       >
         <ManageGoalTable
-          goalIds={[selectedManageGoalData.goal.goalId]}
+          goalData={[selectedManageGoalData]}
+          setGoalData={() => setSelectedManageGoalData(null)}
           apiKey={props.apiKey}
-          reload={() => setSelectedManageGoalData(null)}
           mutable
           addable={false}
         />

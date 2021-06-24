@@ -369,7 +369,7 @@ pub async fn goal_intent_data_new(
     user.user_id,
     goal_intent.goal_intent_id,
     props.name,
-    true,
+    props.active,
   )
   .await
   .map_err(report_postgres_err)?;

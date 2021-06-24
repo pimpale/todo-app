@@ -1,6 +1,6 @@
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Col, Row, Card, Button, Form } from "react-bootstrap";
-import { goalNew, timeUtilityFunctionNew, } from "../utils/utils";
+import { goalNew, GoalData, timeUtilityFunctionNew, } from "../utils/utils";
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import UtilityPicker from "../components/UtilityPicker"
 import parseDuration from 'parse-duration';
@@ -12,7 +12,7 @@ import { isErr } from '@innexgo/frontend-common';
 type CreateGoalProps = {
   span?: [startTime: number, endTime: number];
   apiKey: ApiKey;
-  postSubmit: () => void;
+  postSubmit: (gd:GoalData) => void;
 }
 
 function CreateGoal(props: CreateGoalProps) {
@@ -117,7 +117,7 @@ function CreateGoal(props: CreateGoalProps) {
       successResult: "Goal Created"
     });
     // execute callback
-    props.postSubmit();
+    props.postSubmit(maybeGoalData.Ok);
   }
 
 

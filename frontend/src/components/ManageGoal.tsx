@@ -1,11 +1,9 @@
 import React from 'react';
 import { Col, Row, Card, Form, Button } from 'react-bootstrap';
-import Loader from '../components/Loader';
-import { Async, AsyncProps } from 'react-async';
 import DisplayModal from '../components/DisplayModal';
 import UtilityPicker from '../components/UtilityPicker';
-import { GoalData, timeUtilityFunctionNew, goalDataView, goalDataNew} from '../utils/utils';
-import {isErr} from '@innexgo/frontend-common';
+import { GoalData, timeUtilityFunctionNew, goalDataNew } from '../utils/utils';
+import { isErr } from '@innexgo/frontend-common';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { Edit, Cancel, } from '@material-ui/icons';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
@@ -18,7 +16,7 @@ import format from 'date-fns/format';
 type EditGoalProps = {
   goalData: GoalData,
   apiKey: ApiKey,
-  postSubmit: () => void
+  setGoalData: (gd:GoalData)=> void,
 };
 
 function EditGoal(props: EditGoalProps) {
@@ -139,7 +137,7 @@ function EditGoal(props: EditGoalProps) {
     });
 
     // execute callback
-    props.postSubmit();
+    props.setGoalData(maybeGoalData.Ok);
   }
 
   return <>
@@ -224,8 +222,8 @@ function EditGoal(props: EditGoalProps) {
 
 type CancelGoalProps = {
   goalData: GoalData,
+  setGoalData: (gd:GoalData)=>void
   apiKey: ApiKey,
-  postSubmit: () => void
 };
 
 function CancelGoal(props: CancelGoalProps) {
@@ -287,7 +285,7 @@ function CancelGoal(props: CancelGoalProps) {
     });
 
     // execute callback
-    props.postSubmit();
+    props.setGoalData(maybeGoalData.Ok);
   }
 
   return <>
@@ -318,105 +316,78 @@ function CancelGoal(props: CancelGoalProps) {
   </>
 }
 
-const loadManageGoalData = async (props: AsyncProps<GoalData>) => {
-  const maybeGoalData = await goalDataView({
-    goalId: props.goalId,
-    onlyRecent: true,
-    apiKey: props.apiKey.key
-  });
-
-  if (isErr(maybeGoalData)) {
-    throw Error(maybeGoalData.Err);
-  }
-  return maybeGoalData.Ok[0];
-}
-
-
 const ManageGoal = (props: {
-  goalId: number,
+  goalData: GoalData,
+  setGoalData: (gd:GoalData)=>void,
   apiKey: ApiKey,
-  onChange: () => void
 }) => {
 
   const [showEditGoal, setShowEditGoal] = React.useState(false);
   const [showCancelGoal, setShowCancelGoal] = React.useState(false);
 
-  return <Async
-    promiseFn={loadManageGoalData}
-    apiKey={props.apiKey}
-    goalId={props.goalId}>
-    {({ reload }) => <>
-      <Async.Pending><Loader /></Async.Pending>
-      <Async.Rejected>
-        <span className="text-danger">An unknown error has occured.</span>
-      </Async.Rejected>
-      <Async.Fulfilled<GoalData>>{gd => <>
-        <td>
-          {gd.name}
-          <br />
-          <small>{gd.status}</small>
-        </td>
-        <td>
-          {gd.timeSpan ? format(gd.timeSpan[0], "p EEE, MMM do") : "NOT SCHEDULED"}
-          <br />
-          <small>Estimate: {
-            formatDuration(intervalToDuration({
-              start: 0,
-              end: gd.durationEstimate
-            }))
-          }</small>
-        </td>
-        <td>
-          <UtilityPicker
-            span={[
-              Math.min(...gd.timeUtilityFunction.startTimes) - 100000,
-              Math.max(...gd.timeUtilityFunction.startTimes) + 100000
-            ]}
-            points={gd.timeUtilityFunction.startTimes.map((t, i) => ({ x: t, y: gd.timeUtilityFunction.utils[i] }))}
-            setPoints={() => null}
-            mutable={false}
-          />
-        </td>
-        <td>
-          <Button variant="link" onClick={_ => setShowEditGoal(true)}><Edit /></Button>
-          {gd.status !== "CANCEL"
-            ? <Button variant="link" onClick={_ => setShowCancelGoal(true)}><Cancel /></Button>
-            : <> </>
-          }
-        </td>
-        <DisplayModal
-          title="Edit Goal"
-          show={showEditGoal}
-          onClose={() => setShowEditGoal(false)}
-        >
-          <EditGoal
-            goalData={gd}
-            apiKey={props.apiKey}
-            postSubmit={() => {
-              setShowEditGoal(false);
-              reload();
-            }}
-          />
-        </DisplayModal>
-        <DisplayModal
-          title="Cancel Goal"
-          show={showCancelGoal}
-          onClose={() => setShowCancelGoal(false)}
-        >
-          <CancelGoal
-            goalData={gd}
-            apiKey={props.apiKey}
-            postSubmit={() => {
-              setShowCancelGoal(false);
-              props.onChange();
-            }}
-          />
-        </DisplayModal>
-      </>
+  return <tr>
+    <td>
+      {props.goalData.name}
+      <br />
+      <small>{props.goalData.status}</small>
+    </td>
+    <td>
+      {props.goalData.timeSpan ? format(props.goalData.timeSpan[0], "p EEE, MMM do") : "NOT SCHEDULED"}
+      <br />
+      <small>Estimate: {
+        formatDuration(intervalToDuration({
+          start: 0,
+          end: props.goalData.durationEstimate
+        }))
+      }</small>
+    </td>
+    <td>
+      <UtilityPicker
+        span={[
+          Math.min(...props.goalData.timeUtilityFunction.startTimes) - 100000,
+          Math.max(...props.goalData.timeUtilityFunction.startTimes) + 100000
+        ]}
+        points={props.goalData.timeUtilityFunction.startTimes.map((t, i) => ({ x: t, y: props.goalData.timeUtilityFunction.utils[i] }))}
+        setPoints={() => null}
+        mutable={false}
+      />
+    </td>
+    <td>
+      <Button variant="link" onClick={_ => setShowEditGoal(true)}><Edit /></Button>
+      {props.goalData.status !== "CANCEL"
+        ? <Button variant="link" onClick={_ => setShowCancelGoal(true)}><Cancel /></Button>
+        : <> </>
       }
-      </Async.Fulfilled>
-    </>}
-  </Async>
+    </td>
+    <DisplayModal
+      title="Edit Goal"
+      show={showEditGoal}
+      onClose={() => setShowEditGoal(false)}
+    >
+      <EditGoal
+        goalData={props.goalData}
+        setGoalData={(gd) => {
+            setShowEditGoal(false);
+            props.setGoalData(gd);
+        }}
+        apiKey={props.apiKey}
+      />
+    </DisplayModal>
+    <DisplayModal
+      title="Cancel Goal"
+      show={showCancelGoal}
+      onClose={() => setShowCancelGoal(false)}
+    >
+      <CancelGoal
+        goalData={props.goalData}
+        apiKey={props.apiKey}
+        setGoalData={(gd) => {
+          setShowCancelGoal(false);
+          props.setGoalData(gd);
+        }}
+      />
+    </DisplayModal>
+  </tr>
 }
 
 export default ManageGoal;

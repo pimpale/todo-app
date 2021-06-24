@@ -113,9 +113,9 @@ function Search(props: AuthenticatedComponentProps) {
       <Row className="justify-content-md-center">
         <Col md={8}>
           <ManageGoalTable
-            goalIds={search.map(d => d.goal.goalId)}
+            goalData={search}
+            setGoalData={setSearch}
             apiKey={props.apiKey}
-            reload={() => setSearch(search)}
             addable={false}
             mutable
           />

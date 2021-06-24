@@ -49,16 +49,16 @@ function Dashboard(props: AuthenticatedComponentProps) {
         <Col md={8}>
           <Section id="goalIntents" name="My GoalIntents">
             <Async promiseFn={loadGoalIntentData} apiKey={props.apiKey}>
-              {({ reload }) => <>
+              {({ setData }) => <>
                 <Async.Pending><Loader /></Async.Pending>
                 <Async.Rejected>
                   {e => <ErrorMessage error={e} />}
                 </Async.Rejected>
                 <Async.Fulfilled<GoalIntentData[]>>{gids =>
                   <ManageGoalIntentTable
-                    reload={reload}
+                    goalIntentData={gids}
+                    setGoalIntentData={setData}
                     apiKey={props.apiKey}
-                    goalIntentIds={gids.map(gid => gid.goalIntent.goalIntentId)}
                     mutable
                     addable
                   />
@@ -68,16 +68,16 @@ function Dashboard(props: AuthenticatedComponentProps) {
           </Section>
           <Section id="goals" name="My Goals">
             <Async promiseFn={loadGoalData} apiKey={props.apiKey}>
-              {({ reload }) => <>
+              {({ setData }) => <>
                 <Async.Pending><Loader /></Async.Pending>
                 <Async.Rejected>
                   {e => <ErrorMessage error={e} />}
                 </Async.Rejected>
                 <Async.Fulfilled<GoalData[]>>{gds =>
                   <ManageGoalTable
-                    reload={reload}
+                    goalData={gds}
+                    setGoalData={setData}
                     apiKey={props.apiKey}
-                    goalIds={gds.map(gd => gd.goal.goalId)}
                     mutable
                     addable
                   />

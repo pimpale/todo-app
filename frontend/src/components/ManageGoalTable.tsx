@@ -1,15 +1,17 @@
 import React from 'react'
 import { Table } from 'react-bootstrap';
+import update from 'immutability-helper';
 import DisplayModal from '../components/DisplayModal';
+import { GoalData } from '../utils/utils';
 import { Add } from '@material-ui/icons'
 import ManageGoal from '../components/ManageGoal';
 import CreateGoal from '../components/CreateGoal';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 
 type ManageGoalTableProps = {
-  goalIds: number[],
+  goalData: GoalData[],
+  setGoalData: (gds: GoalData[]) => void,
   apiKey: ApiKey,
-  reload: () => void,
   mutable: boolean,
   addable: boolean,
 }
@@ -39,16 +41,21 @@ function ManageGoalTable(props: ManageGoalTableProps) {
             </button>
           </td>
         </tr>
-        {props.goalIds.length !== 0 ? <> </> :
+        {props.goalData.length !== 0 ? <> </> :
           <tr><td colSpan={5} className="text-center">No Goals</td></tr>
         }
-        {props.goalIds.map(gi =>
+        {props.goalData.map((gd, i) =>
           <tr>
             <ManageGoal
-              key={gi}
-              goalId={gi}
+              key={i}
+              goalData={gd}
+              setGoalData={
+                // kinda like mongodb syntax
+                // read here for more info:
+                // https://stackoverflow.com/questions/29537299/react-how-to-update-state-item1-in-state-using-setstate
+                (gd) => props.setGoalData(update(props.goalData, { [i]: { $set: gd } }))
+              }
               apiKey={props.apiKey}
-              onChange={props.reload}
             />
           </tr>
         )}
@@ -61,9 +68,10 @@ function ManageGoalTable(props: ManageGoalTableProps) {
     >
       <CreateGoal
         apiKey={props.apiKey}
-        postSubmit={() => {
+        postSubmit={(gd) => {
           setShowCreateGoal(false);
-          props.reload();
+          // add gd to the goal data
+          props.setGoalData(update(props.goalData, { $push: [gd] }));
         }}
       />
     </DisplayModal>
