@@ -14,6 +14,7 @@ type ManageGoalTableProps = {
   apiKey: ApiKey,
   mutable: boolean,
   addable: boolean,
+  showInactive: boolean,
 }
 
 function ManageGoalTable(props: ManageGoalTableProps) {
@@ -24,7 +25,6 @@ function ManageGoalTable(props: ManageGoalTableProps) {
         <tr>
           <th>Name</th>
           <th>Time</th>
-          <th>Description</th>
           <th>Utility</th>
           <th>Actions</th>
         </tr>
@@ -44,10 +44,12 @@ function ManageGoalTable(props: ManageGoalTableProps) {
         {props.goalData.length !== 0 ? <> </> :
           <tr><td colSpan={5} className="text-center">No Goals</td></tr>
         }
-        {props.goalData.map((gd, i) =>
-          <tr>
+        {props.goalData
+          .filter(gi => gi.status !== "CANCEL" || props.showInactive)
+          .map((gd, i) =>
             <ManageGoal
               key={i}
+              mutable={props.mutable}
               goalData={gd}
               setGoalData={
                 // kinda like mongodb syntax
@@ -57,8 +59,7 @@ function ManageGoalTable(props: ManageGoalTableProps) {
               }
               apiKey={props.apiKey}
             />
-          </tr>
-        )}
+          )}
       </tbody>
     </Table>
     <DisplayModal

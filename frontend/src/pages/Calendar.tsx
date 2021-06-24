@@ -228,7 +228,7 @@ function EventCalendar(props: EventCalendarProps) {
         {({ reload }) => <>
           <Async.Pending><Loader /></Async.Pending>
           <Async.Rejected>
-      {e => <ErrorMessage error={e} />}
+            {e => <ErrorMessage error={e} />}
           </Async.Rejected>
           <Async.Fulfilled<GoalData[]>>{gdus =>
             gdus.map(gdu =>
@@ -355,6 +355,7 @@ function EventCalendar(props: EventCalendarProps) {
           apiKey={props.apiKey}
           mutable
           addable={false}
+          showInactive={false}
         />
       </DisplayModal>
     }

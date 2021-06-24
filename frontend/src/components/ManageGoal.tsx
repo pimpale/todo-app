@@ -16,7 +16,7 @@ import format from 'date-fns/format';
 type EditGoalProps = {
   goalData: GoalData,
   apiKey: ApiKey,
-  setGoalData: (gd:GoalData)=> void,
+  setGoalData: (gd: GoalData) => void,
 };
 
 function EditGoal(props: EditGoalProps) {
@@ -222,7 +222,7 @@ function EditGoal(props: EditGoalProps) {
 
 type CancelGoalProps = {
   goalData: GoalData,
-  setGoalData: (gd:GoalData)=>void
+  setGoalData: (gd: GoalData) => void
   apiKey: ApiKey,
 };
 
@@ -318,7 +318,8 @@ function CancelGoal(props: CancelGoalProps) {
 
 const ManageGoal = (props: {
   goalData: GoalData,
-  setGoalData: (gd:GoalData)=>void,
+  setGoalData: (gd: GoalData) => void,
+  mutable: boolean,
   apiKey: ApiKey,
 }) => {
 
@@ -349,12 +350,18 @@ const ManageGoal = (props: {
         ]}
         points={props.goalData.timeUtilityFunction.startTimes.map((t, i) => ({ x: t, y: props.goalData.timeUtilityFunction.utils[i] }))}
         setPoints={() => null}
-        mutable={false}
+        mutable={
+          // this one is for viewing only
+          false
+        }
       />
     </td>
     <td>
-      <Button variant="link" onClick={_ => setShowEditGoal(true)}><Edit /></Button>
-      {props.goalData.status !== "CANCEL"
+      {props.mutable
+        ? <Button variant="link" onClick={_ => setShowEditGoal(true)}><Edit /></Button>
+        : <> </>
+      }
+      {props.goalData.status !== "CANCEL" && props.mutable
         ? <Button variant="link" onClick={_ => setShowCancelGoal(true)}><Cancel /></Button>
         : <> </>
       }
@@ -367,8 +374,8 @@ const ManageGoal = (props: {
       <EditGoal
         goalData={props.goalData}
         setGoalData={(gd) => {
-            setShowEditGoal(false);
-            props.setGoalData(gd);
+          setShowEditGoal(false);
+          props.setGoalData(gd);
         }}
         apiKey={props.apiKey}
       />

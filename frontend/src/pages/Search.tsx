@@ -118,6 +118,7 @@ function Search(props: AuthenticatedComponentProps) {
             apiKey={props.apiKey}
             addable={false}
             mutable
+            showInactive={false}
           />
         </Col>
       </Row>

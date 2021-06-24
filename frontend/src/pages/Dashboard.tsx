@@ -61,6 +61,7 @@ function Dashboard(props: AuthenticatedComponentProps) {
                     apiKey={props.apiKey}
                     mutable
                     addable
+                    showInactive={false}
                   />
                 }</Async.Fulfilled>
               </>}
@@ -80,6 +81,7 @@ function Dashboard(props: AuthenticatedComponentProps) {
                     apiKey={props.apiKey}
                     mutable
                     addable
+                    showInactive={false}
                   />
                 }</Async.Fulfilled>
               </>}

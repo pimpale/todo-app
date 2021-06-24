@@ -60,6 +60,9 @@ function UtilityPicker(props: UtilityPickerProps) {
         dragX: true,
         showTooltip: true,
         onDragStart: function(_: React.MouseEvent, datasetIndex: number, index: number, value: Point) {
+          if(!props.mutable) {
+              return false;
+          }
           if (index === 0) {
             return false
           }
