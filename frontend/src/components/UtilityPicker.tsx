@@ -48,6 +48,10 @@ function UtilityPicker(props: UtilityPickerProps) {
     }
   ];
 
+  React.useEffect(() => {
+    props.setPoints(noTimePrefTUF(start, end));
+  }, []);
+
   const lineOptions = {
     line: 'scatter',
     responsive: true,
@@ -147,7 +151,7 @@ function UtilityPicker(props: UtilityPickerProps) {
         <div>Utility Distribution</div>
         <Select
           isClearable={false}
-          defaultValue={{ value: "", label: "Select" }}
+          defaultValue={{ value: "constant", label: "No Time Preference" }}
           options={[
             { value: "constant", label: "No Time Preference" },
             { value: "deadline", label: "Deadline" },
