@@ -70,8 +70,9 @@ pub async fn query(
      AND ($4::bigint IS NULL OR g.creator_user_id = $4)
      AND ($5::bigint IS NULL OR g.goal_intent_id = $5 IS TRUE)
      ORDER BY g.goal_id
-     OFFSET $6,
-     LIMIT $7";
+     LIMIT $6
+     OFFSET $7
+     ";
 
   let stmnt = con.prepare(sql).await?;
 
@@ -84,8 +85,8 @@ pub async fn query(
         &props.max_creation_time,
         &props.creator_user_id,
         &props.goal_intent_id,
-        &props.offset,
-        &props.count,
+        &props.count.unwrap_or(100),
+        &props.offset.unwrap_or(0),
       ],
     )
     .await?
