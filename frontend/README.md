@@ -1,9 +1,11 @@
 # Todo App Frontend
 
-### Table of Contents
+## Table of Contents
 
 * [Architecture](#architecture)
   * [Overview](#overview)
+  * [Backend](#backend)
+  * [Innexgo Auth Service](#innexgo-auth-service)
 * [Basics](#basics)
   * [Asynchronous Network Calls](#asynchronous-network-calls)
   * [Error Handling with Typescript](#error-handling-with-typescript)
@@ -23,6 +25,11 @@ The project's directories are structured as follows:
 * `public`
   * These files are directly copied into the final build. This folder holds the favicon, index.html, and other critical files.
 * `src`
+  * `src/assets/`
+    * This is where we store pictures, audio files, and other assets.
+  * `src/style/`
+    * Stores `.scss` files that will be compiled to CSS.
+    * Stores our current bootstrap theming.
   * `src/setupProxy.js`
     * This file is managed by Create React App to set up the development proxy.
     * In production, this will be done by NGINX.
@@ -31,10 +38,99 @@ The project's directories are structured as follows:
       * `/api/todo-app` to `http://localhost:8080`
   * `src/index.tsx`
     * This is the mount point for React.
-  * `src/assets/`
-    * This is where we store pictures, audio files, and other assets. 
   * `src/App.tsx`
-    * This guides which paths are directed to which React components
+    * This component maps paths to React components.
+    * It also handles retrieving the login cookie and whether a page is login protected or not.
+  * `src/utils/utils.ts`
+    * Stores utility functions that connect to the backend.
+  * `src/pages/`
+    * This directory stores all React components that have their own page.
+  * `src/components/`
+    * This directory stores other React components that are smaller and don't have their own page
+
+### Backend
+
+In general, the backend is intended to be relatively lightweight and simple, since we aim to do most processing client side.
+However, it's still important in order for us to persist data between sessions and to ensure that the same data is available  between a user's different devices. 
+In this section we'll go over how the backend interacts with the frontend and what the backend is responsible for.
+The backend is covered in more detail in the [backend documentation]( ../backend/README.md ).
+
+The backend exposes several API endpoints to the frontend that we can interact with to store, process and retrieve data.
+These endpoints' specifications are detailed in `src/utils/utils.ts`.
+
+First, we'll discuss the data structures used by the backend.
+All data persisted by the todo-app is represented as an object.
+Each of these objects directly translates to a row in the backend's database.
+All objects are immutable, and the database on the backend is treated as if it were append only.
+
+
+All objects have certain shared fields:
+* id
+  * The exact name of this field varies, but it represents the unique ID of this object.
+* creationTime
+  * The time this field was created
+* creatorUserId
+  * The user Id of the creator.
+
+There are 2 different kinds of object:
+* Core Object
+* Data Object
+
+Let's consider an example:
+
+```tsx
+export interface GoalIntent {
+  goalIntentId: number,
+  creationTime: number,
+  creatorUserId: number
+}
+
+export interface GoalIntentData {
+  goalIntentDataId: number,
+  creationTime: number,
+  creatorUserId: number,
+  goalIntent: GoalIntent,
+  name: string,
+  active: boolean
+}
+```
+
+Here, we are considering GoalIntent to be the "Core Object", and GoalIntentData to be our "Data Object".
+The "Core Object" represents the things that remain constant over an object's lifetime.
+For example, if a GoalIntent cannot change its creator or the time it was created.
+
+However, since a GoalIntent can be renamed, we place the name field into the GoalIntentData object. 
+This way, we can simply create a new GoalIntentData whenever we want to rename the GoalIntent.
+When we want to fetch our GoalIntent, we can specify we want the latest version of the GoalIntentData, and get only the fresh data.
+
+The backend's endpoints can be classified into 3 basic kinds of operations:
+* Object Creation
+  * Objects can be created on the backend by calling their `new` method. This returns the "Data Object"
+  * If we want to modify an object, we need to make a new "Data Object".
+* Object View
+  * This allows us to retrieve data about an object or set of objects. 
+  * The Api allows us to specify the fields we care about. Returned objects must match all of the specified fields. 
+    Fields we don't care about can be left unfilled, and they will be ignored.
+  * Note that we can only retrieve objects that we have rights to access.
+
+### Innexgo Auth Service
+
+The todo-app backend utilizes Innexgo's [auth-service]( https://github.com/innexgo/auth-service ) to create, manage and authenticate user accounts.
+In order to interface with it, we use 
+[@innexgo/frontend-common]( https://www.npmjs.com/package/@innexgo/frontend-common )
+and 
+[@innexgo/frontend-auth-api]( https://www.npmjs.com/package/@innexgo/frontend-auth-api ). 
+
+This reduces the duplicated functionality between products (and therefore lowers the chance of bugs). 
+In addition, handling user data on a seperate server from other data also makes it easier to support OAuth, if we decide to do so later.
+
+Documentation for the service and its corresponding packages may be found here:
+* `auth-service`
+  * https://github.com/innexgo/auth-service
+* `auth-service-api`
+  * https://github.com/innexgo/auth-service-api
+* `frontend-auth-api`
+  * https://github.com/innexgo/frontend-auth-api
 
 
 ## Basics
@@ -43,7 +139,7 @@ This section goes over the basic design choices and coding strategies in use in 
 
 ### Asynchronous Network Calls
 
-todo-app must communicate with the backend to render persisted data, or submit data to persist.
+Todo-app must communicate with the backend to render persisted data, or submit data to persist.
 Our app uses standard POST requests over HTTP to communicate, as we don't require any special functionality.
 
 In JavaScript, there are two ways to submit data:
