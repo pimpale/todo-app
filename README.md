@@ -126,8 +126,3 @@ This is a somewhat computationally expensive heuristic, but is relatively simple
 
 
 
-
-
-
-
-
