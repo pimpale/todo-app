@@ -1,6 +1,6 @@
 import { Button, Form } from 'react-bootstrap'
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
-import { verificationChallengeNew, isPasswordValid } from '@innexgo/frontend-auth-api';
+import { verificationChallengeNew} from '@innexgo/frontend-auth-api';
 import { isErr } from '@innexgo/frontend-common';
 
 type RegisterFormProps = {
@@ -27,10 +27,6 @@ function RegisterForm(props: RegisterFormProps) {
     }
     if (!values.email.includes("@")) {
       errors.email = "Please enter your email";
-      hasError = true;
-    }
-    if (!isPasswordValid(values.password1)) {
-      errors.password1 = "Password must have at least 8 chars and 1 number";
       hasError = true;
     }
     if (values.password2 !== values.password1) {
@@ -76,7 +72,7 @@ function RegisterForm(props: RegisterFormProps) {
         }
         case "PASSWORD_INSECURE": {
           fprops.setErrors({
-            password1: "Password is of insufficient complexity"
+            password1: "Password must have at least 8 chars and 1 number"
           });
           break;
         }

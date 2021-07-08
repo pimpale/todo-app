@@ -1,6 +1,6 @@
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Button, Form, } from 'react-bootstrap'
-import { ApiKey, passwordNewChange, isPasswordValid, isAuthErrorCode } from '@innexgo/frontend-auth-api';
+import { ApiKey, passwordNewChange, isAuthErrorCode } from '@innexgo/frontend-auth-api';
 
 interface CreatePasswordProps {
   apiKey: ApiKey,
@@ -18,10 +18,6 @@ function CreatePassword(props: CreatePasswordProps) {
     // Validate input
     let errors: FormikErrors<CreatePasswordValue> = {};
     let hasError = false;
-    if (!isPasswordValid(values.password1)) {
-      errors.password1 = "Password must have at least 8 chars and 1 number";
-      hasError = true;
-    }
     if (values.password2 !== values.password1) {
       errors.password2 = "Password does not match.";
       hasError = true;
@@ -54,7 +50,7 @@ function CreatePassword(props: CreatePasswordProps) {
         }
         case "PASSWORD_INSECURE": {
           setErrors({
-            password1: "Password is of insufficient complexity"
+            password1: "Password must have at least 8 chars and 1 number"
           });
           break;
         }

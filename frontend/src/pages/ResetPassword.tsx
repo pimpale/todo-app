@@ -1,7 +1,7 @@
 import React from 'react';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Card, Button, Form, } from 'react-bootstrap'
-import { passwordNewReset, isPasswordValid, isAuthErrorCode } from '@innexgo/frontend-auth-api';
+import { passwordNewReset, isAuthErrorCode } from '@innexgo/frontend-auth-api';
 
 import SimpleLayout from '../components/SimpleLayout';
 
@@ -20,10 +20,6 @@ function ResetPasswordForm(props: ResetPasswordProps) {
     // Validate input
     let errors: FormikErrors<ResetPasswordValue> = {};
     let hasError = false;
-    if (!isPasswordValid(values.password1)) {
-      errors.password1 = "Password must have at least 8 chars and 1 number";
-      hasError = true;
-    }
     if (values.password2 !== values.password1) {
       errors.password2 = "Password does not match.";
       hasError = true;
@@ -62,7 +58,7 @@ function ResetPasswordForm(props: ResetPasswordProps) {
         }
         case "PASSWORD_INSECURE": {
           setErrors({
-            password1: "Password is of insufficient complexity"
+            password1: "Password must have at least 8 chars and 1 number"
           });
           break;
         }

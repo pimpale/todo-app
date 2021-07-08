@@ -1396,15 +1396,15 @@
   dependencies:
     "@hapi/hoek" "^8.3.0"
 
-"@innexgo/frontend-auth-api@^0.2.11":
-  version "0.2.12"
-  resolved "https://registry.yarnpkg.com/@innexgo/frontend-auth-api/-/frontend-auth-api-0.2.12.tgz#b9b2c96d2677fd4ef8c6c4651c93bb558f4f4e5e"
-  integrity sha512-1wimvKS5Ncs67IjO2VytP4PftTkwXl5gYuEkilg1ABndiYPHSNTBPgCHDYjc72yKIopbtxcovqqBS+7/y3lTKQ==
+"@innexgo/frontend-auth-api@^0.2.14":
+  version "0.2.14"
+  resolved "https://registry.yarnpkg.com/@innexgo/frontend-auth-api/-/frontend-auth-api-0.2.14.tgz#72db0c9d7862ca8e10befbd8739897fd893823f7"
+  integrity sha512-OXGNEWgLuPXOqbIw0sNmKSQ7faN+5/zSD3+IKnja0Pc9QlkIGhW2OMraxPGAWN2F2PIgW5D6d4jvq7wyTQ027A==
 
-"@innexgo/frontend-common@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@innexgo/frontend-common/-/frontend-common-0.0.5.tgz#5558dca4448ae4e6f7f04c58f820848361e1c857"
-  integrity sha512-OhiU8sBeX3bwcjdc03zk/k/jlBdghOMvRbypJXR9WrZvHeAWZds01JLvc/mjAqMNauf8d1r3jYN5RSgY81z0bQ==
+"@innexgo/frontend-common@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@innexgo/frontend-common/-/frontend-common-0.0.6.tgz#de9170d9c5c933b2d9cfdee24ab2e8df47d39d9a"
+  integrity sha512-VhXyK7PcL5B2WwXdcaewdFz9G53q+zHCasXx6eEUWMDDjfQzd92RrGWD/MAJnWNZivsJK8aQ5LsjFXu4eD31aQ==
 
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
