@@ -6,21 +6,14 @@ View these guides:
 
 (frontend guide)[./frontend/README.md]
 
-# old stuff, not reviewed yet
-
-# Big Picture
+# Terminology
 The goal of the system is to maximize utils over the interval [now, death).
-The system deals with **users**, **resources**, **goals**, **tasks**, and **events**.
+The system deals with **goal intents**, **goals**, **time utility functions**, and **external events**.
 
-* **User**: At the current progress level of todo-app, we do not intend to aim for multi user configurations.
-    The user is the person who has created the account. 
-    We distinguish the user from the user's time, which is simply treated as a resource.
-
-* **Resource**: Material the user can use in order to accomplish a goal.
-    Resource utilization is exclusive.
-    If a resource is executing a task, it cannot execute another task at the same time.
-    The primary resource available to the user is their time. 
-    todo-app can also schedule goals on other resources, such as equipment,  and other people.
+* **Goal Intent**: A goal the user has typed in.
+    Usually, when the user types in a goal, we are able to infer a goal from it directly.
+    If we can't figure it out, (either it has no recognizable keywords or no deadline), then we leave it as a goal intent.
+    These simply contain a name.
 
 * **Goal**: A valuable goal to be accomplished.
     Goals are per user, not per resource by definition.
@@ -33,26 +26,8 @@ The system deals with **users**, **resources**, **goals**, **tasks**, and **even
     Goals must be converted into tasks, fixed time things on a user's calendar.
     The process of converting goals to tasks is called task allocation.
 
-
-* **Goal Result**: The outcome of a goal.
-    A Goal Result determines if other goals depending on this goal can be scheduled.
     When a goal is completed, it may have a favorable outcome (which awards utils to the user), 
     or an unfavorable outcome (which subtracts utils from the user).
-
-* **Tasks**: Something the user can do with a resource.
-    A task is an instantiation of a goal at a time on a calendar.
-    Goals don't have a fixed time by definition, only a a time-utility distribution.
-    If a goal's execution is preempted, then there may be multiple tasks for one goal.
-    If a goal is dropped, then there may be zero tasks for that goal.
-
-* **Solution**: A group of tasks that satisfy all goal constraints.
-    There are many ways to allocate tasks to goals.
-    The primary rules are:
-    * No dependency cycles
-    * Dependency order must be respected.
-    * All tasks are scheduled for the future.
-    However, not all solutions that obey these rules are optimal.
-    It is a client side task to find the best solution and send it to the server.
 
 * **Event**: Events are primarily there for compatibility when importing other programs' data. 
     They don't carry any metadata, just a name, time and description.
@@ -87,7 +62,7 @@ A significant problem is that it is impossible to fully schedule all goals, sinc
 Thus, we must be able to handle scenarios where no solution is perfect.
 Our solution is to generalize the idea of a deadline by instead adding the idea of time preference.
 
-* **Time Preference Function**: A per goal time based distribution of number of utils that 
+* **Time Utility Function**: A per goal time based distribution of number of utils that 
     will be gained per minute if the task is active in this range.
     The reward will vary based on time.
     You can read more on [wikipedia]( https://en.wikipedia.org/wiki/Time-utility_function ).

@@ -63,7 +63,6 @@ All data persisted by the todo-app is represented as an object.
 Each of these objects directly translates to a row in the backend's database.
 All objects are immutable, and the database on the backend is treated as if it were append only.
 
-
 All objects have certain shared fields:
 * id
   * The exact name of this field varies, but it represents the unique ID of this object.
