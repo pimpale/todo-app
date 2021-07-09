@@ -1,9 +1,12 @@
 # todo-app
 
-# Setup
+View these guides:
 
-In order to run the backend, refer to [the backend guide](./backend/README.md).
-Even if you are only developing the frontend, you'll still need to install the server in order to log into the app.
+(backend guide)[./backend/README.md]
+
+(frontend guide)[./frontend/README.md]
+
+# old stuff, not reviewed yet
 
 # Big Picture
 The goal of the system is to maximize utils over the interval [now, death).
@@ -117,12 +120,4 @@ In the future we may provide multiple different options.
 
 However, we need at least one scheduling algorithm to start out with, and we decided to choose [simulated annealing]( https://en.wikipedia.org/wiki/Simulated_annealing ).
 This is a somewhat computationally expensive heuristic, but is relatively simple to implement.
-
-
-
-
-
-
-
-
 
