@@ -10,8 +10,8 @@
     "@fullcalendar/list": "^5.5.0",
     "@fullcalendar/react": "^5.5.0",
     "@fullcalendar/timegrid": "^5.5.1",
-    "@innexgo/frontend-auth-api": "^0.2.11",
-    "@innexgo/frontend-common": "^0.0.5",
+    "@innexgo/frontend-auth-api": "^0.2.14",
+    "@innexgo/frontend-common": "^0.0.6",
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
     "@types/chart.js": "^2.9.31",
@@ -28,7 +28,6 @@
     "chartjs-plugin-dragdata": "^2.0.2",
     "date-fns": "^2.18.0",
     "formik": "^2.2.6",
-    "http-proxy-middleware": "^2.0.0",
     "immutability-helper": "^3.1.1",
     "jquery": "^3.6.0",
     "parse-duration": "^1.0.0",
@@ -47,6 +46,9 @@
     "typeface-exo": "^1.1.13",
     "typeface-ubuntu": "^1.1.13",
     "typescript": "^4.2.2"
+  },
+  "devDependencies": {
+    "http-proxy-middleware": "^2.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
