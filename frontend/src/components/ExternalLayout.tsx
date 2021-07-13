@@ -57,22 +57,33 @@ class ExternalHeader extends React.Component<ExternalHeaderProps, ExternalHeader
     const topTransparent = this.state.scroll === 0 && this.props.transparentTop;
 
     const navStyle = topTransparent ? {
-      transitionDuration: "0.4s"
+      transitionDuration: "0.4s",
+      backgroundColor: "#1C2B2D"
     } : {
       transitionDuration: "0.4s",
-      backgroundColor: "#fff"
+      backgroundColor: "#F6F0E5"
     };
     const linkStyle = topTransparent ? {
-      color: "white",
+      color: "#F6F0E5",
+      marginLeft: "25px"
     } : {
-      color: "#000"
+      color: "#2A4043",
+      marginLeft: "25px"
+    }
+
+    const gradText = {
+      background: "linear-gradient(#87C6F0, #EFCB8C)",
+      color: "transparent",
+      backgroundClip: "text",
+      webkitBackgroundClip: "text",
+      fontWeight: "bold" as "bold"
     }
 
     return (
       <header>
         <nav style={navStyle} className={"navbar navbar-expand-lg py-3" + (this.props.fixed ? " fixed-top" : "")}>
           <div className="container">
-            <a style={linkStyle} className="navbar-brand font-weight-bold" href="/">{this.props.title}</a>
+            <a style={gradText} className="navbar-brand font-weight-bold" href="/">{this.props.title}</a>
             <button className="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
               <Menu style={linkStyle} />
             </button>
@@ -120,7 +131,9 @@ class ExternalLayout extends React.Component<ExternalLayoutProps> {
             <Nav.Link>&copy; {APP_NAME}, 2021</Nav.Link>
           </Nav>
         </Navbar>
+
       </>
+
     )
   }
 }
