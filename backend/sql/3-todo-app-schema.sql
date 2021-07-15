@@ -51,15 +51,23 @@ create table goal_data(
   creator_user_id bigint not null,
   goal_id bigint not null,
   name text not null,
-  tags text[] not null,
   duration_estimate bigint not null,
   time_utility_function_id bigint not null,
   parent_goal_id bigint, -- NULLABLE
+  status bigint not null -- enum
+);
+
+drop table if exists goal_event;
+create table goal_event(
+  goal_event_id bigserial primary key,
+  creation_time bigint not null,
+  creator_user_id bigint not null,
+  goal_id bigint not null,
   -- invariant: Both start_time and end_time must be null or not null
   -- invariant: start_time < end_time
   start_time bigint,     -- NULLABLE
   end_time bigint,       -- NULLABLE
-  status bigint not null -- enum
+  active bool not null
 );
 
 drop table if exists tag; 

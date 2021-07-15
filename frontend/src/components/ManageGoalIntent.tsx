@@ -191,28 +191,39 @@ const ManageGoalIntent = (props: {
   return <tr>
     <td>
       {props.goalIntentData.name}
-      <div className="float-right">
-        <Button variant="link" className="px-0 py-0"
-          onClick={_ => setShowEditGoalIntent(editing => !editing)}
-        >
-          {showEditGoalIntent
-            ? <Done />
-            : <Edit />
-          }
-        </Button>
-        <Button variant="link" className="px-0 py-0"
-          hidden={!(props.goalIntentData.active && props.mutable)}
-          onClick={_ =>
-            cancelGoalIntent(
-              props.apiKey,
-              props.goalIntentData,
-              props.setGoalIntentData,
-              setFailureResult
-            )
-          }>
-          <Cancel />
-        </Button>
-      </div>
+    </td>
+
+    <td>
+      ?
+    </td>
+
+    <td>
+      ?
+    </td>
+
+    <td>
+      <Button variant="link"
+        hidden={!props.mutable}
+        onClick={_ => setShowEditGoalIntent(editing => !editing)}
+      >
+        {showEditGoalIntent
+          ? <Done />
+          : <Edit />
+        }
+      </Button>
+      <Button variant="link"
+        hidden={!(props.goalIntentData.active && props.mutable)}
+        onClick={_ =>
+          cancelGoalIntent(
+            props.apiKey,
+            props.goalIntentData,
+            props.setGoalIntentData,
+            setFailureResult
+          )
+        }
+      >
+        <Cancel />
+      </Button>
       <Form.Text className="text-danger">{failureResult}</Form.Text>
     </td>
     <DisplayModal
@@ -229,7 +240,7 @@ const ManageGoalIntent = (props: {
         apiKey={props.apiKey}
       />
     </DisplayModal>
-  </tr>
+  </tr >
 }
 
 export default ManageGoalIntent;

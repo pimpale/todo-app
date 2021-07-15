@@ -2,24 +2,31 @@ import { Table } from 'react-bootstrap';
 import update from 'immutability-helper';
 import ManageGoalIntent from '../components/ManageGoalIntent';
 import CreateGoalIntent from '../components/CreateGoalIntent';
+import ManageGoal from '../components/ManageGoal';
 import { ApiKey } from '@innexgo/frontend-auth-api';
-import { GoalIntentData } from '../utils/utils';
+import { GoalData, GoalIntentData } from '../utils/utils';
 
-type ManageGoalIntentTableProps = {
+type ManageHybridGoalTableProps = {
   goalIntentData: GoalIntentData[],
   setGoalIntentData: (gids: GoalIntentData[]) => void,
+  goalData: GoalData[],
+  setGoalData: (gds: GoalData[]) => void,
   apiKey: ApiKey,
   mutable: boolean,
   addable: boolean,
   showInactive: boolean,
 }
 
-function ManageGoalIntentTable(props: ManageGoalIntentTableProps) {
+function ManageHybridGoalTable(props: ManageHybridGoalTableProps) {
 
   // this list has an object consisting of both the index in the real array and the object constructs a new objec
-  const actives = props.goalIntentData
+  const activeGoalIntents = props.goalIntentData
     .map((gid, i) => ({ gid, i }))
     .filter(({ gid }) => props.showInactive || gid.active);
+
+  const activeGoals = props.goalData
+    .map((gd, i) => ({ gd, i }))
+    .filter(({ gd }) => props.showInactive || gd.status !== "CANCEL");
 
   return <>
     <CreateGoalIntent
@@ -38,10 +45,10 @@ function ManageGoalIntentTable(props: ManageGoalIntentTableProps) {
         </tr>
       </thead>
       <tbody>
-        {actives.length !== 0 ? <> </> :
-          <tr><td className="text-center">No Active GoalIntents</td></tr>
+        {activeGoalIntents.length !== 0 && activeGoals.length !== 0 ? <> </> :
+          <tr><td className="text-center">No Goals Yet</td></tr>
         }
-        {actives
+        {activeGoalIntents
           // reverse in order to see newest first
           .reverse()
           .map(({ gid, i }) =>
@@ -58,9 +65,26 @@ function ManageGoalIntentTable(props: ManageGoalIntentTableProps) {
               mutable={props.mutable}
             />
           )}
+        {activeGoals
+          // reverse in order to see newest first
+          .reverse()
+          .map(({ gd, i }) =>
+            <ManageGoal
+              key={i}
+              mutable={props.mutable}
+              goalData={gd}
+              setGoalData={
+                // kinda like mongodb syntax
+                // read here for more info:
+                // https://stackoverflow.com/questions/29537299/react-how-to-update-state-item1-in-state-using-setstate
+                (gd) => props.setGoalData(update(props.goalData, { [i]: { $set: gd } }))
+              }
+              apiKey={props.apiKey}
+            />
+          )}
       </tbody>
     </Table>
   </>
 }
 
-export default ManageGoalIntentTable;
+export default ManageHybridGoalTable;

@@ -3,7 +3,7 @@ import { Col, Row, Card, Button, Form } from "react-bootstrap";
 import { goalNew, GoalData, timeUtilityFunctionNew, } from "../utils/utils";
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import UtilityPicker from "../components/UtilityPicker"
-import parseDuration from 'parse-duration';
+import { dateTimeDurationValue } from 'ecolect';
 import formatDuration from 'date-fns/formatDuration';
 import intervalToDuration from 'date-fns/intervalToDuration';
 import { isErr } from '@innexgo/frontend-common';

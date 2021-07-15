@@ -357,14 +357,14 @@ const ManageGoal = (props: {
       />
     </td>
     <td>
-      {props.mutable
-        ? <Button variant="link" onClick={_ => setShowEditGoal(true)}><Edit /></Button>
-        : <> </>
-      }
-      {props.goalData.status !== "CANCEL" && props.mutable
-        ? <Button variant="link" onClick={_ => setShowCancelGoal(true)}><Cancel /></Button>
-        : <> </>
-      }
+      <Button variant="link" onClick={_ => setShowEditGoal(true)} hidden={!props.mutable}>
+        <Edit />
+      </Button>
+      <Button variant="link" onClick={_ => setShowCancelGoal(true)}
+        hidden={props.goalData.status == "CANCEL" || !props.mutable}
+      >
+        <Cancel />
+      </Button>
     </td>
     <DisplayModal
       title="Edit Goal"
