@@ -90,7 +90,7 @@ function Login(props: LoginProps) {
   // Notice how Formik is a Generic component that does type checking
   // This helps ensure we make fewer mistakes
   return <>
-    <Formik<LoginValue>
+    <Formik<LoginValue> 
       onSubmit={onSubmit}
       initialStatus=""
       initialValues={{
@@ -98,11 +98,11 @@ function Login(props: LoginProps) {
         email: "",
         password: "",
       }}
-    >
+    > 
       {(fprops) => (
         /* we enable noValidate so that we can delegate validation to Formik */
         /* onSubmit={fprops.handleSubmit} means that Formik will handle form submission */
-        <Form
+        <Form 
           noValidate
           onSubmit={fprops.handleSubmit}>
           {/* Use Bootstrap's Form.Group in order to recieve a consistently styled texbox */}
