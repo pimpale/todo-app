@@ -144,7 +144,7 @@ pub async fn query(
     " LIMIT $20",
     " OFFSET $21",
   ]
-  .join("");
+  .join("\n");
 
   let stmnt = con.prepare(&sql).await?;
 
