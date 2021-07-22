@@ -1,4 +1,7 @@
 import React from 'react';
+import { ApiKey, UserData, userDataView } from '@innexgo/frontend-auth-api';
+import { unwrap } from '@innexgo/frontend-common';
+import { Async, AsyncProps } from 'react-async';
 import { SvgIconComponent, ExitToApp, Menu } from '@material-ui/icons';
 
 // Bootstrap CSS & Js
@@ -35,15 +38,27 @@ const SidebarEntry: React.FunctionComponent<SidebarEntryProps> = props => {
   }
 }
 
+const loadUserData = async (props: AsyncProps<UserData>) => {
+  const userData = await userDataView({
+    creatorUserId: [props.apiKey.creator.userId],
+    apiKey: props.apiKey.key,
+  })
+    .then(unwrap);
+
+  return userData[0];
+}
+
+
+
 const Body: React.FunctionComponent = props => <> {props.children} </>
 
 interface InnerLayoutComposition {
   SidebarEntry: React.FunctionComponent<SidebarEntryProps>
-  Body: React.FunctionComponent 
+  Body: React.FunctionComponent
 }
 
 interface InnerLayoutProps {
-  name: string
+  apiKey: ApiKey
   logoutCallback: () => void
 }
 
@@ -89,15 +104,22 @@ const InnerLayout: React.FunctionComponent<React.PropsWithChildren<InnerLayoutPr
         <div>
           <nav className="bg-dark text-light" style={sidebarStyle}>
             <div className="nav-item nav-link">
-            <Menu style={iconStyle} onClick={_ => setCollapsed(!collapsed)} />
+              <Menu style={iconStyle} onClick={_ => setCollapsed(!collapsed)} />
             </div>
-            {
-              collapsed
-                ? ""
-                : <div className="nav-item nav-link mx-auto my-3">
-                  <h6>Welcome, {props.name}</h6>
-                </div>
-            }
+            <Async promiseFn={loadUserData} apiKey={props.apiKey}>
+              <Async.Pending>
+              </Async.Pending>
+              <Async.Rejected>
+              </Async.Rejected>
+              <Async.Fulfilled<UserData>>{ud =>
+                collapsed
+                  ? false
+                  : <div className="nav-item nav-link mx-auto my-3">
+                    <h6>Welcome, {ud.name}</h6>
+                  </div>
+              }
+              </Async.Fulfilled>
+            </Async>
             {sidebarChildren}
             <div style={sidebarBottom}>
               <button

@@ -13,7 +13,7 @@ import { Row, Col, Tab, Tabs, Container, } from 'react-bootstrap';
 import { GoalData, ExternalEventData, externalEventDataNew, goalDataNew, externalEventView, externalEventDataView, goalDataView } from '../utils/utils';
 import { ApiKey, AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
 
-import { isErr } from '@innexgo/frontend-common';
+import { unwrap, isErr} from '@innexgo/frontend-common';
 
 import UtilityWrapper from '../components/UtilityWrapper';
 
@@ -70,19 +70,16 @@ function UnscheduledGoalCard(props: UnscheduledGoalCardProps) {
 
 
 const loadUnscheduledGoalData = async (props: AsyncProps<GoalData[]>) => {
-  const maybeGoalData = await goalDataView({
+  const goalData = await goalDataView({
     creatorUserId: props.apiKey.creator.userId,
     onlyRecent: true,
     scheduled: false,
     status: "PENDING",
     apiKey: props.apiKey.key,
-  });
+  })
+    .then(unwrap);
 
-  if (isErr(maybeGoalData)) {
-    throw Error(maybeGoalData.Err);
-  }
-
-  return maybeGoalData.Ok;
+  return goalData;
 }
 
 
@@ -123,32 +120,31 @@ function EventCalendar(props: EventCalendarProps) {
       timeZone: string;
     }) => {
 
-    const maybeExternalEventData = await externalEventDataView({
+    const externalEventData = await externalEventDataView({
       creatorUserId: props.apiKey.creator.userId,
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
       onlyRecent: true,
       active: true,
       apiKey: props.apiKey.key
-    });
+    })
+      .then(unwrap);
 
-    const maybeGoalData = await goalDataView({
+    const goalData = await goalDataView({
       creatorUserId: props.apiKey.creator.userId,
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
       onlyRecent: true,
       status: "PENDING",
       apiKey: props.apiKey.key
-    });
+    })
+      .then(unwrap);
 
-    const externalEventData = isErr(maybeExternalEventData)
-      ? []
-      : maybeExternalEventData.Ok.map(externalEventDataToEvent)
 
-    const external = isErr(maybeGoalData)
-      ? []
-      : maybeGoalData.Ok.map(goalDataToEvent);
-    return [...externalEventData, ...external];
+    return [
+      ...externalEventData.map(externalEventDataToEvent),
+      ...goalData.map(goalDataToEvent)
+    ];
   }
 
   //this handler runs any time we recieve a click on an event

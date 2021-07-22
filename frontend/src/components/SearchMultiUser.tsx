@@ -1,36 +1,36 @@
 import { ValueType } from 'react-select';
 import AsyncSelect from 'react-select/async';
-import { User, isAuthErrorCode } from '@innexgo/frontend-auth-api';
+import { UserData, isAuthErrorCode } from '@innexgo/frontend-auth-api';
 
 interface SearchMultiUserProps {
   name: string,
   disabled?: boolean,
-  search: (input:string) => Promise<User[]>,
+  search: (input:string) => Promise<UserData[]>,
   isInvalid: boolean,
-  setFn: (users: User[]) => void
+  setFn: (userData: UserData[]) => void
 }
 
-type UserOption = {
+type UserDataOption = {
   label: string,
-  value: User
+  value: UserData
 }
 
 export default function SearchMultiUser(props: SearchMultiUserProps) {
-  const promiseOptions = async function(input: string): Promise<UserOption[]> {
+  const promiseOptions = async function(input: string): Promise<UserDataOption[]> {
     const results = await props.search(input)
 
     if (isAuthErrorCode(results)) {
       return [];
     }
 
-    return results.map((x: User): UserOption => ({
-      label: `${x.name} -- ${x.email}`,
+    return results.map((x: UserData): UserDataOption => ({
+      label: x.name,
       value: x
     }));
   };
 
 
-  const onChange = (opt: ValueType<UserOption, true>) => {
+  const onChange = (opt: ValueType<UserDataOption, true>) => {
     if (opt == null) {
       props.setFn([]);
     } else {

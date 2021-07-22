@@ -1,36 +1,36 @@
 import AsyncSelect from 'react-select/async';
 import { ValueType } from 'react-select';
-import { isAuthErrorCode, User} from '@innexgo/frontend-auth-api';
+import { isAuthErrorCode, UserData} from '@innexgo/frontend-auth-api';
 
 interface SearchSingleUserProps {
   name: string,
   disabled?:boolean,
-  search: (input: string) => Promise<User[]>,
+  search: (input: string) => Promise<UserData[]>,
   isInvalid: boolean,
-  setFn: (user: User | null) => void
+  setFn: (user: UserData | null) => void
 }
 
-type UserOption = {
+type UserDataOption = {
   label: string,
-  value: User
+  value: UserData
 }
 
 export default function SearchSingleUser(props: SearchSingleUserProps) {
-  const promiseOptions = async function(input: string): Promise<UserOption[]> {
+  const promiseOptions = async function(input: string): Promise<UserDataOption[]> {
     const results = await props.search(input);
 
     if (isAuthErrorCode(results)) {
       return [];
     }
 
-    return results.map((x: User): UserOption => ({
-      label: `${x.name} -- ${x.email}`,
+    return results.map((x: UserData): UserDataOption => ({
+      label: x.name,
       value: x
     }));
   };
 
 
-  const onChange = (opt:  ValueType<UserOption, false>) => {
+  const onChange = (opt:  ValueType<UserDataOption, false>) => {
     if (opt == null) {
       props.setFn(null);
     } else {

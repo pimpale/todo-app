@@ -1443,10 +1443,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.0.tgz#87de7af9c231826fdd68ac7258f77c429e0e5fcf"
   integrity sha512-wdppn25U8z/2yiaT6YGquE6X8sSv7hNMWSXYSSU1jGv/yd6XqjXgTDJ8KP4NgjTXfJ3GbRjeeb8RTV7a/VpM+w==
 
-"@innexgo/frontend-auth-api@^0.2.16":
-  version "0.2.16"
-  resolved "https://registry.yarnpkg.com/@innexgo/frontend-auth-api/-/frontend-auth-api-0.2.16.tgz#19beb78ddebb133d7a7caa3d67f8c9bd2cee349c"
-  integrity sha512-8mVvr5CmAW5XSWj4Bsz+L06wtRnj/nCbxsUGtohFy7WkUI1yevnDPlKXsuB7UNogSyM2APbFLTXyxaxGebdhBw==
+"@innexgo/frontend-auth-api@^0.2.21":
+  version "0.2.21"
+  resolved "https://registry.yarnpkg.com/@innexgo/frontend-auth-api/-/frontend-auth-api-0.2.21.tgz#917367020286dfc0769a3317c27e99383aeefa19"
+  integrity sha512-dlQz8GRiQONo9TbG1UV9wyNmBZ2NR5aAGK3J88lgTHPcc5iOvRaUrKtm4unHa8NMkFZN5oFi6dCALZaL6ZVrjw==
 
 "@innexgo/frontend-common@^0.0.7":
   version "0.0.7"
@@ -9962,6 +9962,11 @@ parse-asn1@^5.0.0, parse-asn1@^5.1.5:
     evp_bytestokey "^1.0.0"
     pbkdf2 "^3.0.3"
     safe-buffer "^5.1.1"
+
+parse-duration@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/parse-duration/-/parse-duration-1.0.0.tgz#8605651745f61088f6fb14045c887526c291858c"
+  integrity sha512-X4kUkCTHU1N/kEbwK9FpUJ0UZQa90VzeczfS704frR30gljxDG0pSziws06XlK+CGRSo/1wtG1mFIdBFQTMQNw==
 
 parse-filepath@^1.0.1:
   version "1.0.2"

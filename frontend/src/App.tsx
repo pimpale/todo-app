@@ -12,7 +12,8 @@ import Error404 from './pages/Error404';
 
 // register
 import Register from './pages/Register';
-import RegisterConfirm from './pages/RegisterConfirm';
+import EmailConfirm from './pages/EmailConfirm';
+import ParentPermissionConfirm from './pages/ParentPermissionConfirm';
 
 // When you forget password
 import ForgotPassword from './pages/ForgotPassword';
@@ -65,7 +66,8 @@ function App() {
         <Route path="/forgot_password" component={ForgotPassword} />
         <Route path="/reset_password" component={ResetPassword} />
         <Route path="/register" component={Register} />
-        <Route path="/register_confirm" component={RegisterConfirm} />
+        <Route path="/email_confirm" component={EmailConfirm} />
+        <Route path="/parent_confirm" component={ParentPermissionConfirm} />
         <AuthenticatedRoute path="/calendar" {...apiKeyGetSetter} component={Calendar} />
         <AuthenticatedRoute path="/dashboard" {...apiKeyGetSetter} component={Dashboard} />
         <AuthenticatedRoute path="/settings" {...apiKeyGetSetter} component={Settings} />
