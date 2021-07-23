@@ -2,8 +2,8 @@
 
 View these guides:
 
-[backend guide](./backend/README.md)
-[frontend guide](./frontend/README.md)
+(backend guide)[./backend/README.md]
+(frontend guide)[./frontend/README.md]
 
 # Terminology
 The goal of the system is to maximize utils over the interval [now, death).
