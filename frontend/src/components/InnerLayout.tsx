@@ -1,4 +1,5 @@
 import React from 'react';
+import Loader from '../components/Loader';
 import { ApiKey, UserData, userDataView } from '@innexgo/frontend-auth-api';
 import { unwrap } from '@innexgo/frontend-common';
 import { Async, AsyncProps } from 'react-async';
@@ -41,6 +42,7 @@ const SidebarEntry: React.FunctionComponent<SidebarEntryProps> = props => {
 const loadUserData = async (props: AsyncProps<UserData>) => {
   const userData = await userDataView({
     creatorUserId: [props.apiKey.creator.userId],
+    onlyRecent: true,
     apiKey: props.apiKey.key,
   })
     .then(unwrap);
@@ -106,20 +108,22 @@ const InnerLayout: React.FunctionComponent<React.PropsWithChildren<InnerLayoutPr
             <div className="nav-item nav-link">
               <Menu style={iconStyle} onClick={_ => setCollapsed(!collapsed)} />
             </div>
-            <Async promiseFn={loadUserData} apiKey={props.apiKey}>
-              <Async.Pending>
-              </Async.Pending>
-              <Async.Rejected>
-              </Async.Rejected>
-              <Async.Fulfilled<UserData>>{ud =>
-                collapsed
-                  ? false
-                  : <div className="nav-item nav-link mx-auto my-3">
-                    <h6>Welcome, {ud.name}</h6>
-                  </div>
-              }
-              </Async.Fulfilled>
-            </Async>
+            <div className="nav-item nav-link mx-auto my-3">
+              <Async promiseFn={loadUserData} apiKey={props.apiKey}>
+                <Async.Pending>
+                  {collapsed ? false : <Loader /> }
+                </Async.Pending>
+                <Async.Rejected>
+                  OOF
+                </Async.Rejected>
+                <Async.Fulfilled<UserData>>{ud =>
+                  collapsed
+                    ? false
+                    : <h6>Welcome, {ud.name}</h6>
+                }
+                </Async.Fulfilled>
+              </Async>
+            </div>
             {sidebarChildren}
             <div style={sidebarBottom}>
               <button

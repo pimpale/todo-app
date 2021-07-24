@@ -1,10 +1,11 @@
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Button, Form, } from 'react-bootstrap'
-import { ApiKey, passwordNewChange, isAuthErrorCode } from '@innexgo/frontend-auth-api';
+import { ApiKey, Password, passwordNewChange} from '@innexgo/frontend-auth-api';
+import {isErr} from '@innexgo/frontend-common';
 
 interface CreatePasswordProps {
   apiKey: ApiKey,
-  onSuccess: () => void
+  onSuccess: (p:Password) => void
 }
 
 function CreatePassword(props: CreatePasswordProps) {
@@ -32,8 +33,8 @@ function CreatePassword(props: CreatePasswordProps) {
       newPassword: values.password1,
       apiKey: props.apiKey.key,
     });
-    if (isAuthErrorCode(passwordChangeResult)) {
-      switch (passwordChangeResult) {
+    if (isErr(passwordChangeResult)) {
+      switch (passwordChangeResult.Err) {
         case "API_KEY_UNAUTHORIZED": {
           setStatus({
             failureMessage: "Please log back in and try again",
@@ -67,7 +68,8 @@ function CreatePassword(props: CreatePasswordProps) {
         failureMessage: "",
         successMessage: "Password successfully changed."
       });
-      props.onSuccess();
+
+      props.onSuccess(passwordChangeResult.Ok);
     }
   }
   return <>
