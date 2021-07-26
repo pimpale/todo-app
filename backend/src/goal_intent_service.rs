@@ -63,21 +63,17 @@ pub async fn query(
   let results = con
     .query(
       " SELECT gi.* FROM goal_intent gi WHERE 1 = 1
-        AND ($1::bigint IS NULL OR gi.goal_intent_id = $1)
-        AND ($2::bigint IS NULL OR gi.creation_time >= $2)
-        AND ($3::bigint IS NULL OR gi.creation_time <= $3)
-        AND ($4::bigint IS NULL OR gi.creator_user_id = $4)
+        AND ($1::bigint[] IS NULL OR gi.goal_intent_id = ANY($1))
+        AND ($2::bigint   IS NULL OR gi.creation_time >= $2)
+        AND ($3::bigint   IS NULL OR gi.creation_time <= $3)
+        AND ($4::bigint[] IS NULL OR gi.creator_user_id = ANY($4))
         ORDER BY gi.goal_intent_id
-        LIMIT $5
-        OFFSET $6
       ",
       &[
         &props.goal_intent_id,
         &props.min_creation_time,
         &props.max_creation_time,
         &props.creator_user_id,
-        &props.count.unwrap_or(100),
-        &props.offset.unwrap_or(0),
       ],
     ).await?
     .into_iter()

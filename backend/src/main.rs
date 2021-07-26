@@ -20,10 +20,17 @@ mod goal_event_service;
 mod goal_intent_data_service;
 mod goal_intent_service;
 mod goal_service;
+mod goal_template_data_service;
+mod goal_template_pattern_service;
+mod goal_template_service;
+mod named_entity_data_service;
+mod named_entity_pattern_service;
+mod named_entity_service;
 mod time_utility_function_service;
 mod todo_app_api;
 mod todo_app_db_types;
 mod todo_app_handlers;
+mod user_generated_code_service;
 
 static SERVICE_NAME: &str = "todo-app-service";
 

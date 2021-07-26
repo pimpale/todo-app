@@ -81,37 +81,33 @@ pub async fn get_by_goal_event_id(
   Ok(result)
 }
 
-// TODO need to fix
-
 pub async fn query(
   con: &mut impl GenericClient,
   props: todo_app_service_api::request::GoalEventViewProps,
 ) -> Result<Vec<GoalEvent>, tokio_postgres::Error> {
-  // TODO prevent getting meaningless duration
-
   let sql = [
-    "SELECT eed.* FROM goal_event eed",
+    "SELECT ge.* FROM goal_event ge",
     if props.only_recent {
       " INNER JOIN
           (SELECT max(goal_event_id) id FROM goal_event GROUP BY goal_id) maxids
-          ON maxids.id = eed.goal_event_id"
+          ON maxids.id = ge.goal_event_id"
     } else {
       ""
     },
     " WHERE 1 = 1",
-    " AND ($1::bigint  IS NULL OR eed.goal_event_id = $1)",
-    " AND ($2::bigint  IS NULL OR eed.creation_time >= $2)",
-    " AND ($3::bigint  IS NULL OR eed.creation_time <= $3)",
-    " AND ($4::bigint  IS NULL OR eed.creator_user_id = $4)",
-    " AND ($5::bigint  IS NULL OR eed.goal_id = $5)",
-    " AND ($8::bigint  IS NULL OR eed.start_time >= $8)",
-    " AND ($9::bigint  IS NULL OR eed.start_time <= $9)",
-    " AND ($10::bigint IS NULL OR eed.end_time >= $10)",
-    " AND ($11::bigint IS NULL OR eed.end_time <= $11)",
-    " AND ($12::bool   IS NULL OR eed.active = $12)",
-    " ORDER BY eed.goal_event_id",
+    " AND ($1::bigint[] IS NULL OR ge.goal_event_id = ANY($1))",
+    " AND ($2::bigint   IS NULL OR ge.creation_time >= $2)",
+    " AND ($3::bigint   IS NULL OR ge.creation_time <= $3)",
+    " AND ($4::bigint[] IS NULL OR ge.creator_user_id = ANY($4))",
+    " AND ($5::bigint[] IS NULL OR ge.goal_id = ANY($5))",
+    " AND ($6::bigint   IS NULL OR ge.start_time >= $6)",
+    " AND ($7::bigint   IS NULL OR ge.start_time <= $7)",
+    " AND ($8::bigint   IS NULL OR ge.end_time >= $8)",
+    " AND ($9::bigint   IS NULL OR ge.end_time <= $9)",
+    " AND ($10::bool    IS NULL OR ge.active = $10)",
+    " ORDER BY ge.goal_event_id",
   ]
-  .join("");
+  .join("\n");
 
   let stmnt = con.prepare(&sql).await?;
 
@@ -124,8 +120,6 @@ pub async fn query(
         &props.max_creation_time,
         &props.creator_user_id,
         &props.goal_id,
-        &props.name,
-        &props.partial_name,
         &props.min_start_time,
         &props.max_start_time,
         &props.min_end_time,

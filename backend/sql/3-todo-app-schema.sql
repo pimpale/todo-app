@@ -76,7 +76,7 @@ create table user_generated_code(
   creator_user_id bigint not null,
   source_code text not null,
   source_lang text not null,
-  wasm_cache text not null
+  wasm_cache bytea not null
 );
 
 
@@ -120,7 +120,7 @@ create table named_entity(
 
 drop table if exists named_entity_data;
 create table named_entity_data(
-  named_entity_data_id 
+  named_entity_data_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null,
   named_entity_id bigint not null,

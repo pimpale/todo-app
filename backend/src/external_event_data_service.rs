@@ -86,14 +86,10 @@ pub async fn get_by_external_event_data_id(
   Ok(result)
 }
 
-// TODO need to fix
-
 pub async fn query(
   con: &mut impl GenericClient,
   props: todo_app_service_api::request::ExternalEventDataViewProps,
 ) -> Result<Vec<ExternalEventData>, tokio_postgres::Error> {
-  // TODO prevent getting meaningless duration
-
   let sql = [
     "SELECT eed.* FROM external_event_data eed",
     if props.only_recent {
@@ -104,23 +100,20 @@ pub async fn query(
       ""
     },
     " WHERE 1 = 1",
-    " AND ($1::bigint  IS NULL OR eed.external_event_data_id = $1)",
-    " AND ($2::bigint  IS NULL OR eed.creation_time >= $2)",
-    " AND ($3::bigint  IS NULL OR eed.creation_time <= $3)",
-    " AND ($4::bigint  IS NULL OR eed.creator_user_id = $4)",
-    " AND ($5::bigint  IS NULL OR eed.external_event_id = $5)",
-    " AND ($6::text    IS NULL OR eed.name = $6)",
-    " AND ($7::text    IS NULL OR eed.name LIKE CONCAT('%',$7,'%'))",
-    " AND ($8::bigint  IS NULL OR eed.start_time >= $8)",
-    " AND ($9::bigint  IS NULL OR eed.start_time <= $9)",
-    " AND ($10::bigint IS NULL OR eed.end_time >= $10)",
-    " AND ($11::bigint IS NULL OR eed.end_time <= $11)",
-    " AND ($12::bool   IS NULL OR eed.active = $12)",
+    " AND ($1::bigint[] IS NULL OR eed.external_event_data_id = ANY($1))",
+    " AND ($2::bigint   IS NULL OR eed.creation_time >= $2)",
+    " AND ($3::bigint   IS NULL OR eed.creation_time <= $3)",
+    " AND ($4::bigint[] IS NULL OR eed.creator_user_id = ANY($4))",
+    " AND ($5::bigint[] IS NULL OR eed.external_event_id = ANY($5))",
+    " AND ($6::text[]   IS NULL OR eed.name = ANY($6))",
+    " AND ($7::bigint   IS NULL OR eed.start_time >= $7)",
+    " AND ($8::bigint   IS NULL OR eed.start_time <= $8)",
+    " AND ($9::bigint   IS NULL OR eed.end_time >= $9)",
+    " AND ($10::bigint  IS NULL OR eed.end_time <= $10)",
+    " AND ($11::bool    IS NULL OR eed.active = $11)",
     " ORDER BY eed.external_event_data_id",
-    " LIMIT $13",
-    " OFFSET $14",
   ]
-  .join("");
+  .join("\n");
 
   let stmnt = con.prepare(&sql).await?;
 
@@ -134,14 +127,11 @@ pub async fn query(
         &props.creator_user_id,
         &props.external_event_id,
         &props.name,
-        &props.partial_name,
         &props.min_start_time,
         &props.max_start_time,
         &props.min_end_time,
         &props.max_end_time,
         &props.active,
-        &props.count.unwrap_or(100),
-        &props.offset.unwrap_or(0),
       ],
     )
     .await?

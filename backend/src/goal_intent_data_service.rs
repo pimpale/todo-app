@@ -76,13 +76,10 @@ pub async fn get_by_goal_intent_data_id(
   Ok(result)
 }
 
-// TODO need to fix
-
 pub async fn query(
   con: &mut impl GenericClient,
   props: todo_app_service_api::request::GoalIntentDataViewProps,
 ) -> Result<Vec<GoalIntentData>, tokio_postgres::Error> {
-  // TODO prevent getting meaningless duration
 
   let sql = [
     "SELECT gid.* FROM goal_intent_data gid",
@@ -94,19 +91,16 @@ pub async fn query(
       ""
     },
     " WHERE 1 = 1",
-    " AND ($1::bigint IS NULL OR gid.goal_intent_data_id = $1)",
-    " AND ($2::bigint IS NULL OR gid.creation_time >= $2)",
-    " AND ($3::bigint IS NULL OR gid.creation_time <= $3)",
-    " AND ($4::bigint IS NULL OR gid.creator_user_id = $4)",
-    " AND ($5::bigint IS NULL OR gid.goal_intent_id = $5)",
-    " AND ($6::text   IS NULL OR gid.name = $6)",
-    " AND ($7::text   IS NULL OR gid.name LIKE CONCAT('%',$7,'%'))",
-    " AND ($8::bool   IS NULL OR gid.active = $8)",
+    " AND ($1::bigint[] IS NULL OR gid.goal_intent_data_id = ANY($1))",
+    " AND ($2::bigint   IS NULL OR gid.creation_time >= $2)",
+    " AND ($3::bigint   IS NULL OR gid.creation_time <= $3)",
+    " AND ($4::bigint[] IS NULL OR gid.creator_user_id = ANY($4))",
+    " AND ($5::bigint[] IS NULL OR gid.goal_intent_id = ANY($5))",
+    " AND ($6::text[]   IS NULL OR gid.name = ANY($6))",
+    " AND ($7::bool     IS NULL OR gid.active = $7)",
     " ORDER BY gid.goal_intent_data_id",
-    " LIMIT $9",
-    " OFFSET $10",
   ]
-  .join("");
+  .join("\n");
 
   let stmnt = con.prepare(&sql).await?;
 
@@ -120,10 +114,7 @@ pub async fn query(
         &props.creator_user_id,
         &props.goal_intent_id,
         &props.name,
-        &props.partial_name,
         &props.active,
-        &props.count.unwrap_or(100),
-        &props.offset.unwrap_or(0),
       ],
     )
     .await?

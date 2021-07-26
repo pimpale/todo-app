@@ -27,7 +27,7 @@ dependencies = [
 [[package]]
 name = "auth-service-api"
 version = "0.7.7"
-source = "git+https://github.com/innexgo/auth-service-api#b1f4987422562946fbf012941339a268fe6af499"
+source = "git+https://github.com/innexgo/auth-service-api#15fe0245b25babcfbe0fdb1b4cc76b35c9253959"
 dependencies = [
  "reqwest",
  "serde",
@@ -1375,7 +1375,7 @@ dependencies = [
 [[package]]
 name = "todo-app-service-api"
 version = "0.0.1"
-source = "git+https://github.com/pimpale/todo-app-service-api#5849d81b10ae78521e1551e96e8a9bf39978011e"
+source = "git+https://github.com/pimpale/todo-app-service-api#f34fc8450913d382446f03210c5d3dfa18e8abf4"
 dependencies = [
  "auth-service-api",
  "serde",
