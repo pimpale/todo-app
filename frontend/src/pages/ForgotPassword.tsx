@@ -1,7 +1,8 @@
 import React from 'react';
 import { Formik, FormikHelpers } from 'formik'
 import { Button, Card, Form, } from 'react-bootstrap'
-import { passwordResetNew, isAuthErrorCode } from '@innexgo/frontend-auth-api';
+import { passwordResetNew} from '@innexgo/frontend-auth-api';
+import {isErr} from '@innexgo/frontend-common';
 
 import SimpleLayout from '../components/SimpleLayout';
 
@@ -27,8 +28,8 @@ function ForgotPasswordForm(props:ForgotPasswordFormProps) {
       userEmail: values.email
     });
 
-    if (isAuthErrorCode(maybePasswordResetKey)) {
-      switch (maybePasswordResetKey) {
+    if (isErr(maybePasswordResetKey)) {
+      switch (maybePasswordResetKey.Err) {
         case "USER_NONEXISTENT": {
           setErrors({ email: "No such user exists." });
           break;

@@ -2,21 +2,21 @@ import React from 'react';
 import { Card, Button, Form } from "react-bootstrap";
 import SimpleLayout from '../components/SimpleLayout';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
-import { User, userNew} from '@innexgo/frontend-auth-api';
+import { Email , emailNew } from '@innexgo/frontend-auth-api';
 import { isErr } from '@innexgo/frontend-common';
 
-type CreateUserProps = {
+type CreateEmailProps = {
   verificationChallengeKey: string;
-  postSubmit: (user: User) => void;
+  postSubmit: (email: Email) => void;
 }
 
-function CreateUser(props: CreateUserProps) {
-  type CreateUserValue = {}
+function CreateEmail(props: CreateEmailProps) {
+  type CreateEmailValue = {}
 
-  const onSubmit = async (_: CreateUserValue,
-    fprops: FormikHelpers<CreateUserValue>) => {
+  const onSubmit = async (_: CreateEmailValue,
+    fprops: FormikHelpers<CreateEmailValue>) => {
 
-    let errors: FormikErrors<CreateUserValue> = {};
+    let errors: FormikErrors<CreateEmailValue> = {};
 
     // Validate input
 
@@ -26,27 +26,41 @@ function CreateUser(props: CreateUserProps) {
       return;
     }
 
-    const maybeUser = await userNew({
+    const maybeEmail = await emailNew({
       verificationChallengeKey: props.verificationChallengeKey,
     });
 
-    if (isErr(maybeUser)) {
-      switch (maybeUser.Err) {
+    if (isErr(maybeEmail)) {
+      switch (maybeEmail.Err) {
         case "VERIFICATION_CHALLENGE_NONEXISTENT": {
+         fprops.setStatus({
+           failureResult: "This link is invalid.",
+           successResult: ""
+          });
+          break;
+        }
+        case "VERIFICATION_CHALLENGE_USED": {
           fprops.setStatus({
-            failureResult: "This registration link is invalid.",
+            failureResult: "This link has already been used.",
+            successResult: ""
+          });
+          break;
+        }
+        case "VERIFICATION_CHALLENGE_WRONG_KIND": {
+          fprops.setStatus({
+            failureResult: "This link is the wrong kind.",
             successResult: ""
           });
           break;
         }
         case "VERIFICATION_CHALLENGE_TIMED_OUT": {
           fprops.setStatus({
-            failureResult: "This registration link has timed out.",
+            failureResult: "This link has timed out.",
             successResult: ""
           });
           break;
         }
-        case "USER_EXISTENT": {
+        case "EMAIL_EXISTENT": {
           fprops.setStatus({
             failureResult: "This user already exists.",
             successResult: ""
@@ -66,14 +80,14 @@ function CreateUser(props: CreateUserProps) {
 
     fprops.setStatus({
       failureResult: "",
-      successResult: "User Created"
+      successResult: "Email Created"
     });
     // execute callback
-    props.postSubmit(maybeUser.Ok);
+    props.postSubmit(maybeEmail.Ok);
   }
 
   return <>
-    <Formik<CreateUserValue>
+    <Formik<CreateEmailValue>
       onSubmit={onSubmit}
       initialValues={{
         name: "",
@@ -100,22 +114,22 @@ function CreateUser(props: CreateUserProps) {
 }
 
 
-function RegisterConfirm() {
+function EmailConfirm() {
 
-  const [user, setUser] = React.useState<User | null>(null);
+  const [email, setEmail] = React.useState<Email | null>(null);
 
   return (
     <SimpleLayout>
       <div className="h-100 w-100 d-flex">
         <Card className="mx-auto my-auto">
           <Card.Body>
-            <Card.Title>Complete Account Registration</Card.Title>
+            <Card.Title>Change Email</Card.Title>
             {
-              user !== null
-                ? <Card.Text> Your account ({user.email}), has been created. Click <a href="/">here</a> to login.</Card.Text>
-                : <CreateUser
+              email !== null
+                ? <Card.Text> Your email ({email.verificationChallenge.email}), has been confirmed. Click <a href="/">here</a> to login.</Card.Text>
+                : <CreateEmail
                   verificationChallengeKey={new URLSearchParams(window.location.search).get("verificationChallengeKey") ?? ""}
-                  postSubmit={(u: User) => setUser(u)}
+                  postSubmit={e => setEmail(e)}
                 />
             }
           </Card.Body>
@@ -125,4 +139,4 @@ function RegisterConfirm() {
   )
 }
 
-export default RegisterConfirm;
+export default EmailConfirm;

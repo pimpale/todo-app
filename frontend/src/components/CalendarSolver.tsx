@@ -12,7 +12,8 @@ import { GoalData, goalDataView, goalDataNew, timeUtilityFunctionNew, INT_MAX, }
 import { isErr } from '@innexgo/frontend-common';
 
 
-import { assert, findLastIndex } from '@innexgo/frontend-common';
+import { findLastIndex } from '@innexgo/frontend-common';
+import assert from 'assert';
 
 type SolverDataPoint = {
   startTime: number,

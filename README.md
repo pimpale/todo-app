@@ -3,7 +3,6 @@
 View these guides:
 
 (backend guide)[./backend/README.md]
-
 (frontend guide)[./frontend/README.md]
 
 # Terminology

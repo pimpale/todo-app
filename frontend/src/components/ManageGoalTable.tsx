@@ -49,20 +49,23 @@ function ManageGoalTable(props: ManageGoalTableProps) {
         {actives.length !== 0 ? <> </> :
           <tr><td colSpan={5} className="text-center">No Goals</td></tr>
         }
-        {actives.map(({ gd, i }) =>
-          <ManageGoal
-            key={i}
-            mutable={props.mutable}
-            goalData={gd}
-            setGoalData={
-              // kinda like mongodb syntax
-              // read here for more info:
-              // https://stackoverflow.com/questions/29537299/react-how-to-update-state-item1-in-state-using-setstate
-              (gd) => props.setGoalData(update(props.goalData, { [i]: { $set: gd } }))
-            }
-            apiKey={props.apiKey}
-          />
-        )}
+        {actives
+          // reverse in order to see newest first
+          .reverse()
+          .map(({ gd, i }) =>
+            <ManageGoal
+              key={i}
+              mutable={props.mutable}
+              goalData={gd}
+              setGoalData={
+                // kinda like mongodb syntax
+                // read here for more info:
+                // https://stackoverflow.com/questions/29537299/react-how-to-update-state-item1-in-state-using-setstate
+                (gd) => props.setGoalData(update(props.goalData, { [i]: { $set: gd } }))
+              }
+              apiKey={props.apiKey}
+            />
+          )}
       </tbody>
     </Table>
     <DisplayModal
