@@ -16,6 +16,7 @@ use auth_service_api::client::AuthService;
 mod external_event_data_service;
 mod external_event_service;
 mod goal_data_service;
+mod goal_event_service;
 mod goal_intent_data_service;
 mod goal_intent_service;
 mod goal_service;

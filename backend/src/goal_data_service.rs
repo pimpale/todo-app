@@ -13,14 +13,9 @@ impl From<tokio_postgres::row::Row> for GoalData {
       creator_user_id: row.get("creator_user_id"),
       goal_id: row.get("goal_id"),
       name: row.get("name"),
-      tags: row.get("tags"),
       duration_estimate: row.get("duration_estimate"),
       time_utility_function_id: row.get("time_utility_function_id"),
       parent_goal_id: row.get("parent_goal_id"),
-      time_span: match (row.get("start_time"), row.get("end_time")) {
-        (Some(start_time), Some(end_time)) => Some((start_time, end_time)),
-        _ => None,
-      },
       status: (row.get::<_, i64>("status") as u8).try_into().unwrap(),
     }
   }
@@ -32,11 +27,9 @@ pub async fn add(
   creator_user_id: i64,
   goal_id: i64,
   name: String,
-  tags: Vec<String>,
   duration_estimate: i64,
   time_utility_function_id: i64,
   parent_goal_id: Option<i64>,
-  time_span: Option<(i64, i64)>,
   status: request::GoalDataStatusKind,
 ) -> Result<GoalData, tokio_postgres::Error> {
   let creation_time = current_time_millis();
@@ -49,15 +42,12 @@ pub async fn add(
            creator_user_id,
            goal_id,
            name,
-           tags,
            duration_estimate,
            time_utility_function_id,
            parent_goal_id,
-           start_time,
-           end_time,
            status
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING goal_data_id
       ",
       &[
@@ -65,12 +55,9 @@ pub async fn add(
         &creator_user_id,
         &goal_id,
         &name,
-        &tags,
         &duration_estimate,
         &time_utility_function_id,
         &parent_goal_id,
-        &time_span.map(|x| x.0),
-        &time_span.map(|x| x.1),
         &(status.clone() as i64),
       ],
     )
@@ -84,11 +71,9 @@ pub async fn add(
     creator_user_id,
     goal_id,
     name,
-    tags,
     duration_estimate,
     time_utility_function_id,
     parent_goal_id,
-    time_span,
     status,
   })
 }

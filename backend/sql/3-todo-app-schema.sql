@@ -63,9 +63,50 @@ create table goal_event(
   creation_time bigint not null,
   creator_user_id bigint not null,
   goal_id bigint not null,
-  -- invariant: start_time < end_time
   start_time bigint not null,
   end_time bigint not null,
+  active bool not null
+);
+
+-- Maybe compiled functions
+drop table if exists user_generated_code;
+create table user_generated_code(
+  user_generated_code_id bigserial primary key,
+  creation_time bigint not null,
+  creator_user_id bigint not null,
+  source_code text not null,
+  source_lang text not null,
+  wasm_cache text not null
+);
+
+
+-- how words trigger goal generation:
+-- when we see a pattern, we invoke the 
+drop table if exists goal_template;
+create table goal_template(
+  goal_template_id bigserial primary key,
+  creation_time bigint not null,
+  creator_user_id bigint not null
+);
+
+drop table if exists goal_template_data;
+create table goal_template_data(
+  goal_template_data_id bigserial primary key,
+  creation_time bigint not null,
+  creator_user_id bigint not null,
+  name text not null,
+  -- this function is passed in an array of entities, and returns a goal_data
+  user_generated_code_id bigint not null,
+  active bool not null
+);
+
+drop table if exists goal_template_pattern;
+create table goal_template_pattern(
+  goal_template_pattern_id bigserial primary key,
+  creation_time bigint not null,
+  creator_user_id bigint not null,
+  goal_template_id bigint not null,
+  pattern text not null,
   active bool not null
 );
 
@@ -98,48 +139,6 @@ create table named_entity_pattern(
   pattern text not null,
   active bool not null
 );
-
--- how words trigger goal generation:
--- when we see a pattern, we invoke the 
-drop table if exists goal_template;
-create table goal_template(
-  goal_template_id bigserial primary key,
-  creation_time bigint not null,
-  creator_user_id bigint not null
-);
-
-drop table if exists goal_template_data;
-create table goal_template_data(
-  goal_template_data_id bigserial primary key,
-  creation_time bigint not null,
-  creator_user_id bigint not null,
-  name text not null,
-  -- this function is passed in an array of entities, and returns a goal_data
-  user_generated_code_id bigint not null,
-  active bool not null
-);
-
-drop table if exists goal_template_pattern;
-create table goal_template_pattern(
-  goal_template_pattern_id bigserial primary key,
-  creation_time bigint not null,
-  creator_user_id bigint not null,
-  goal_template_id bigint not null,
-  pattern text not null,
-  active bool not null
-);
-
-
-drop table if exists user_generated_code;
-create table user_generated_code(
-  user_generated_code_id bigserial primary key,
-  creation_time bigint not null,
-  creator_user_id bigint not null,
-  source_code text not null,
-  source_lang text not null,
-  wasm_cache text not null
-);
-
 
 drop table if exists external_event;
 create table external_event(
