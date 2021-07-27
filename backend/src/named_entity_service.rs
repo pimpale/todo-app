@@ -1,4 +1,4 @@
-use super::todo_app_db_types::*;
+use super::db_types::*;
 use super::utils::current_time_millis;
 use tokio_postgres::GenericClient;
 use todo_app_service_api::request;

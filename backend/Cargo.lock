@@ -1220,9 +1220,9 @@ dependencies = [
 
 [[package]]
 name = "siphasher"
-version = "0.3.5"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cbce6d4507c7e4a3962091436e56e95290cb71fa302d0d270e32130b75fbff27"
+checksum = "729a25c17d72b06c68cb47955d44fda88ad2d3e7d77e025663fdd69b93dd71a1"
 
 [[package]]
 name = "slab"
@@ -1375,7 +1375,7 @@ dependencies = [
 [[package]]
 name = "todo-app-service-api"
 version = "0.0.1"
-source = "git+https://github.com/pimpale/todo-app-service-api#f34fc8450913d382446f03210c5d3dfa18e8abf4"
+source = "git+https://github.com/pimpale/todo-app-service-api#980d62798a5b75f3a0b7942c3badd381a9aeb17f"
 dependencies = [
  "auth-service-api",
  "serde",

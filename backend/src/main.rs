@@ -27,10 +27,11 @@ mod named_entity_data_service;
 mod named_entity_pattern_service;
 mod named_entity_service;
 mod time_utility_function_service;
-mod todo_app_api;
-mod todo_app_db_types;
-mod todo_app_handlers;
 mod user_generated_code_service;
+
+mod api;
+mod db_types;
+mod handlers;
 
 static SERVICE_NAME: &str = "todo-app-service";
 
@@ -98,7 +99,7 @@ async fn main() {
     });
   });
 
-  let api = todo_app_api::api(Config { site_external_url }, db, auth_service);
+  let api = api::api(Config { site_external_url }, db, auth_service);
 
   warp::serve(api.with(log)).run(([0, 0, 0, 0], port)).await;
 }
