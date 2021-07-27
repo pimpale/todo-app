@@ -1438,15 +1438,15 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.0.tgz#87de7af9c231826fdd68ac7258f77c429e0e5fcf"
   integrity sha512-wdppn25U8z/2yiaT6YGquE6X8sSv7hNMWSXYSSU1jGv/yd6XqjXgTDJ8KP4NgjTXfJ3GbRjeeb8RTV7a/VpM+w==
 
-"@innexgo/frontend-auth-api@^0.2.23":
-  version "0.2.23"
-  resolved "https://registry.yarnpkg.com/@innexgo/frontend-auth-api/-/frontend-auth-api-0.2.23.tgz#007a7c2f6b4cca77a619204b0fa7dc3de483def8"
-  integrity sha512-Vd7CE1RVsjqiAwfbKTLugWXJScWcPx5L8iUgQ8A73pmuvU7NsOQxPkhhJLy8UOdy392eC8TqmS6hDs8K2Kot3Q==
+"@innexgo/frontend-auth-api@^0.2.24":
+  version "0.2.24"
+  resolved "https://registry.yarnpkg.com/@innexgo/frontend-auth-api/-/frontend-auth-api-0.2.24.tgz#d4b084d1ad7ed760e48ec2723a3539da7a3812cf"
+  integrity sha512-QNxjFqKj6mnrLANi7Azk3017BVdVSKdFcqCA1S/Q6w1U1i6vu36kqOQ57U5cmiMaJrZVVq1C0vTTBewvjV7RqA==
 
-"@innexgo/frontend-common@^0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@innexgo/frontend-common/-/frontend-common-0.0.7.tgz#13d1321cf7404c9fbed17794ca440b591fcd8cb1"
-  integrity sha512-laulKRn82eDttGQHtd6v90wItsrnB0tLznkdLtYzMB0g56PxkvaGpCI+FETinKmgWvwph8JxPz+YloVPLVSWNA==
+"@innexgo/frontend-common@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@innexgo/frontend-common/-/frontend-common-0.0.8.tgz#b7c35d36afc9919d000e6298192992987abe716d"
+  integrity sha512-Ba7iRQy7Ok8x1gk7w7+4191K1bPs0YBS9CmuDzmT1vC0kV13x3jXwQXgAoZqNLw0U/+DmFwcrmmx8Q7jItGNSA==
 
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"

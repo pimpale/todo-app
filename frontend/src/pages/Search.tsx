@@ -1,9 +1,10 @@
 import React from 'react'
 import { Button, Container, Form, Row, Col } from 'react-bootstrap';
 import DashboardLayout from '../components/DashboardLayout';
+import { ManageGoalData } from '../components/ManageGoal';
 import ManageGoalTable from '../components/ManageGoalTable';
-import { GoalData, goalDataView } from '../utils/utils';
-import { isErr } from '@innexgo/frontend-common';
+import { GoalData, goalDataView, GoalEvent, goalEventView } from '../utils/utils';
+import { isErr, unwrap } from '@innexgo/frontend-common';
 
 import { ApiKey, AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
 
@@ -11,7 +12,7 @@ import { Formik, FormikHelpers, FormikErrors } from 'formik'
 
 type SearchProps = {
   apiKey: ApiKey;
-  postSubmit: (a: GoalData[]) => void;
+  postSubmit: (a: { gd: GoalData, ge: GoalEvent | undefined }[]) => void;
 }
 
 function SearchForm(props: SearchProps) {
@@ -30,16 +31,15 @@ function SearchForm(props: SearchProps) {
     }
 
     const maybeGoalData = await goalDataView({
-      creatorUserId: props.apiKey.creator.userId,
+      creatorUserId: [props.apiKey.creator.userId],
+      status: ["PENDING"],
       onlyRecent: true,
-      partialName: values.search,
-      status: "PENDING",
       apiKey: props.apiKey.key,
     });
 
     if (isErr(maybeGoalData)) {
       switch (maybeGoalData.Err) {
-        case "API_KEY_UNAUTHORIZED": {
+        case "UNAUTHORIZED": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out.",
             successResult: ""
@@ -48,7 +48,7 @@ function SearchForm(props: SearchProps) {
         }
         default: {
           fprops.setStatus({
-            failureResult: "An unknown or network error has occured while trying to register.",
+            failureResult: "An unknown or network error has occured while trying to update goal.",
             successResult: ""
           });
           break;
@@ -57,12 +57,28 @@ function SearchForm(props: SearchProps) {
       return;
     }
 
+    const goalData = maybeGoalData.Ok
+      // filter for name match
+      .filter(gd => gd.name.includes(values.search));
+
+    const goalEvents = await goalEventView({
+      goalId: goalData.map(gd => gd.goal.goalId),
+      onlyRecent: true,
+      apiKey: props.apiKey.key
+    }).then(unwrap);
+
+    const data = goalData
+      // join goal event
+      .map(gd => ({ gd, ge: goalEvents.find(ge => ge.goal.goalId === gd.goal.goalId) }));
+
+
+    // execute callback
+    props.postSubmit(data);
+
     fprops.setStatus({
       failureResult: "",
       successResult: "Successfully searched"
     });
-    // execute callback
-    props.postSubmit(maybeGoalData.Ok);
   }
 
   return <>
@@ -103,18 +119,18 @@ function SearchForm(props: SearchProps) {
 }
 
 function Search(props: AuthenticatedComponentProps) {
-  const [search, setSearch] = React.useState<GoalData[]>([]);
+  const [searchResults, setSearchResults] = React.useState<ManageGoalData[]>([]);
   return <DashboardLayout {...props}>
     <Container fluid className="py-4 px-4">
       <SearchForm
         apiKey={props.apiKey}
-        postSubmit={setSearch}
+        postSubmit={setSearchResults}
       />
       <Row className="justify-content-md-center">
         <Col md={8}>
           <ManageGoalTable
-            goalData={search}
-            setGoalData={setSearch}
+            data={searchResults}
+            setData={setSearchResults}
             apiKey={props.apiKey}
             addable={false}
             mutable

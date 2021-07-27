@@ -1,9 +1,9 @@
 use super::db_types::*;
 use super::utils::current_time_millis;
 use std::convert::From;
-use tokio_postgres::GenericClient;
 use std::convert::TryInto;
 use todo_app_service_api::request;
+use tokio_postgres::GenericClient;
 
 impl From<tokio_postgres::row::Row> for NamedEntityData {
   // select * from named_entity_data order only, otherwise it will fail
@@ -87,24 +87,21 @@ pub async fn query(
   props: todo_app_service_api::request::NamedEntityDataViewProps,
 ) -> Result<Vec<NamedEntityData>, tokio_postgres::Error> {
   let sql = [
-    "SELECT gtd.* FROM named_entity_data gtd",
     if props.only_recent {
-      " INNER JOIN
-          (SELECT max(named_entity_data_id) id FROM named_entity_data GROUP BY named_entity_id) maxids
-          ON maxids.id = gtd.named_entity_data_id"
+      "SELECT ned.* FROM recent_named_entity_data ned"
     } else {
-      ""
+      "SELECT ned.* FROM named_entity_data ned"
     },
     " WHERE 1 = 1",
-    " AND ($1::bigint[]  IS NULL OR gtd.named_entity_data_id = ANY($1))",
-    " AND ($2::bigint    IS NULL OR gtd.creation_time >= $2)",
-    " AND ($3::bigint    IS NULL OR gtd.creation_time <= $3)",
-    " AND ($4::bigint[]  IS NULL OR gtd.creator_user_id = ANY($4))",
-    " AND ($5::bigint[]  IS NULL OR gtd.named_entity_id = ANY($5))",
-    " AND ($6::text[]    IS NULL OR gtd.name = ANY($6))",
-    " AND ($7::bigint[]  IS NULL OR gtd.kind = ANY($7))",
-    " AND ($8::bool      IS NULL OR gtd.active = $8)",
-    " ORDER BY gtd.named_entity_data_id",
+    " AND ($1::bigint[]  IS NULL OR ned.named_entity_data_id = ANY($1))",
+    " AND ($2::bigint    IS NULL OR ned.creation_time >= $2)",
+    " AND ($3::bigint    IS NULL OR ned.creation_time <= $3)",
+    " AND ($4::bigint[]  IS NULL OR ned.creator_user_id = ANY($4))",
+    " AND ($5::bigint[]  IS NULL OR ned.named_entity_id = ANY($5))",
+    " AND ($6::text[]    IS NULL OR ned.name = ANY($6))",
+    " AND ($7::bigint[]  IS NULL OR ned.kind = ANY($7))",
+    " AND ($8::bool      IS NULL OR ned.active = $8)",
+    " ORDER BY ned.named_entity_data_id",
   ]
   .join("\n");
 
@@ -120,7 +117,9 @@ pub async fn query(
         &props.creator_user_id,
         &props.named_entity_id,
         &props.name,
-        &props .kind .map(|x| x.into_iter().map(|x| x as i64).collect::<Vec<i64>>()),
+        &props
+          .kind
+          .map(|x| x.into_iter().map(|x| x as i64).collect::<Vec<i64>>()),
         &props.active,
       ],
     )

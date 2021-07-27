@@ -2,15 +2,15 @@ import React from 'react'
 import { Table } from 'react-bootstrap';
 import update from 'immutability-helper';
 import DisplayModal from '../components/DisplayModal';
-import { GoalData } from '../utils/utils';
 import { Add } from '@material-ui/icons'
-import ManageGoal from '../components/ManageGoal';
+import ManageGoal, { ManageGoalData } from '../components/ManageGoal';
 import CreateGoal from '../components/CreateGoal';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 
+
 type ManageGoalTableProps = {
-  goalData: GoalData[],
-  setGoalData: (gds: GoalData[]) => void,
+  data: ManageGoalData[],
+  setData: (d: ManageGoalData[]) => void,
   apiKey: ApiKey,
   mutable: boolean,
   addable: boolean,
@@ -20,9 +20,11 @@ type ManageGoalTableProps = {
 function ManageGoalTable(props: ManageGoalTableProps) {
   const [showCreateGoal, setShowCreateGoal] = React.useState(false);
 
-  const actives = props.goalData
-    .map((gd, i) => ({ gd, i }))
-    .filter(({ gd }) => props.showInactive || gd.status !== "CANCEL");
+  const actives = props.data
+    // enumerate data + index
+    .map((d, i) => ({ d, i }))
+    // filter inactive
+    .filter(({ d }) => props.showInactive || d.gd.status !== "CANCEL")
 
   return <>
     <Table hover bordered>
@@ -52,17 +54,12 @@ function ManageGoalTable(props: ManageGoalTableProps) {
         {actives
           // reverse in order to see newest first
           .reverse()
-          .map(({ gd, i }) =>
+          .map(({ d, i }) =>
             <ManageGoal
               key={i}
               mutable={props.mutable}
-              goalData={gd}
-              setGoalData={
-                // kinda like mongodb syntax
-                // read here for more info:
-                // https://stackoverflow.com/questions/29537299/react-how-to-update-state-item1-in-state-using-setstate
-                (gd) => props.setGoalData(update(props.goalData, { [i]: { $set: gd } }))
-              }
+              data={d}
+              setData={(d) => props.setData(update(props.data, { [i]: { $set: d } }))}
               apiKey={props.apiKey}
             />
           )}
@@ -77,8 +74,8 @@ function ManageGoalTable(props: ManageGoalTableProps) {
         apiKey={props.apiKey}
         postSubmit={(gd) => {
           setShowCreateGoal(false);
-          // add gd to the goal data
-          props.setGoalData(update(props.goalData, { $push: [gd] }));
+          // add d to the goal data
+          props.setData(update(props.data, { $push: [{ gd: gd, ge: undefined }] }));
         }}
       />
     </DisplayModal>

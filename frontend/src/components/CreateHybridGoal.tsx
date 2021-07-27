@@ -40,7 +40,7 @@ function CreateHybridGoal(props: CreateHybridGoalProps) {
 
     if (isErr(maybeGoalIntentData)) {
       switch (maybeGoalIntentData.Err) {
-        case "API_KEY_NONEXISTENT": {
+        case "UNAUTHORIZED": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
             successResult: ""

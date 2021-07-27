@@ -37,16 +37,9 @@ function EditExternalEventData(props: EditExternalEventDataProps) {
 
     if (isErr(maybeExternalEventData)) {
       switch (maybeExternalEventData.Err) {
-        case "API_KEY_NONEXISTENT": {
+        case "UNAUTHORIZED": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
-            successResult: ""
-          });
-          break;
-        }
-        case "API_KEY_UNAUTHORIZED": {
-          fprops.setStatus({
-            failureResult: "You are not authorized to modify this event.",
             successResult: ""
           });
           break;
@@ -143,16 +136,9 @@ function ArchiveExternalEvent(props: ArchiveExternalEventProps) {
 
     if (isErr(maybeExternalEventData)) {
       switch (maybeExternalEventData.Err) {
-        case "API_KEY_NONEXISTENT": {
+        case "UNAUTHORIZED": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
-            successResult: ""
-          });
-          break;
-        }
-        case "API_KEY_UNAUTHORIZED": {
-          fprops.setStatus({
-            failureResult: "You are not authorized to manage this event.",
             successResult: ""
           });
           break;

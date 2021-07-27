@@ -55,9 +55,9 @@ function CreateGoal(props: CreateGoalProps) {
 
     if (isErr(maybeTimeUtilFunction)) {
       switch (maybeTimeUtilFunction.Err) {
-        case "API_KEY_NONEXISTENT": {
+        case "UNAUTHORIZED": {
           fprops.setStatus({
-            failureResult: "You have been automatically logged out. Please relogin.",
+            failureResult: "Unable to authenticate request. Please relogin.",
             successResult: ""
           });
           break;
@@ -84,7 +84,6 @@ function CreateGoal(props: CreateGoalProps) {
 
     let maybeGoalData = await goalNew({
       name: values.name,
-      tags: [] as string[],
       durationEstimate: durationEstimate!,
       timeUtilityFunctionId: tuf.timeUtilityFunctionId,
       timeSpan: props.span,
@@ -94,7 +93,7 @@ function CreateGoal(props: CreateGoalProps) {
 
     if (isErr(maybeGoalData)) {
       switch (maybeGoalData.Err) {
-        case "API_KEY_NONEXISTENT": {
+        case "UNAUTHORIZED": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
             successResult: ""

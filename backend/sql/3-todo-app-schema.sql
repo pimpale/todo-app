@@ -7,14 +7,14 @@ CREATE DATABASE todo_app;
 -- Creator User Id (if applicable)
 -- Everything else
 
-drop table if exists goal_intent;
+drop table if exists goal_intent cascade;
 create table goal_intent(
   goal_intent_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null
 );
 
-drop table if exists goal_intent_data;
+drop table if exists goal_intent_data cascade;
 create table goal_intent_data(
   goal_intent_data_id bigserial primary key,
   creation_time bigint not null,
@@ -24,7 +24,16 @@ create table goal_intent_data(
   active bool not null
 );
 
-drop table if exists goal;
+create view recent_goal_intent_data as
+  select gid.* from goal_intent_data gid
+  inner join (
+   select max(goal_intent_data_id) id 
+   from goal_intent_data 
+   group by goal_intent_id
+  ) maxids
+  on maxids.id = gid.goal_intent_data_id;
+
+drop table if exists goal cascade;
 create table goal(
   goal_id bigserial primary key,
   creation_time bigint not null,
@@ -32,7 +41,7 @@ create table goal(
   goal_intent_id bigint -- NULLABLE
 );
 
-drop table if exists time_utility_function;
+drop table if exists time_utility_function cascade;
 create table time_utility_function(
   time_utility_function_id bigserial primary key,
   creation_time bigint not null,
@@ -44,7 +53,7 @@ create table time_utility_function(
 );
 
 -- invariant: goal_id is valid
-drop table if exists goal_data;
+drop table if exists goal_data cascade;
 create table goal_data(
   goal_data_id bigserial primary key,
   creation_time bigint not null,
@@ -57,7 +66,16 @@ create table goal_data(
   status bigint not null -- enum
 );
 
-drop table if exists goal_event;
+create view recent_goal_data as
+  select gd.* from goal_data gd
+  inner join (
+   select max(goal_data_id) id 
+   from goal_data 
+   group by goal_id
+  ) maxids
+  on maxids.id = gd.goal_data_id;
+
+drop table if exists goal_event cascade;
 create table goal_event(
   goal_event_id bigserial primary key,
   creation_time bigint not null,
@@ -68,8 +86,18 @@ create table goal_event(
   active bool not null
 );
 
+create view recent_goal_event as
+  select ge.* from goal_event ge
+  inner join (
+   select max(goal_event_id) id 
+   from goal_event 
+   group by goal_id
+  ) maxids
+  on maxids.id = ge.goal_event_id;
+
+
 -- Maybe compiled functions
-drop table if exists user_generated_code;
+drop table if exists user_generated_code cascade;
 create table user_generated_code(
   user_generated_code_id bigserial primary key,
   creation_time bigint not null,
@@ -82,25 +110,35 @@ create table user_generated_code(
 
 -- how words trigger goal generation:
 -- when we see a pattern, we invoke the 
-drop table if exists goal_template;
+drop table if exists goal_template cascade;
 create table goal_template(
   goal_template_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null
 );
 
-drop table if exists goal_template_data;
+drop table if exists goal_template_data cascade;
 create table goal_template_data(
   goal_template_data_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null,
+  goal_template_id bigint not null,
   name text not null,
   -- this function is passed in an array of entities, and returns a goal_data
   user_generated_code_id bigint not null,
   active bool not null
 );
 
-drop table if exists goal_template_pattern;
+create view recent_goal_template_data as
+  select gtd.* from goal_template_data gtd
+  inner join (
+   select max(goal_template_data_id) id 
+   from goal_template_data 
+   group by goal_template_id
+  ) maxids
+  on maxids.id = gtd.goal_template_data_id;
+
+drop table if exists goal_template_pattern cascade;
 create table goal_template_pattern(
   goal_template_pattern_id bigserial primary key,
   creation_time bigint not null,
@@ -110,15 +148,24 @@ create table goal_template_pattern(
   active bool not null
 );
 
+create view recent_goal_template_pattern as
+  select gtp.* from goal_template_pattern gtp
+  inner join (
+   select max(goal_template_pattern_id) id 
+   from goal_template_pattern 
+   group by goal_template_id, pattern
+  ) maxids
+  on maxids.id = gtp.goal_template_pattern_id;
+
 -- a named entity is basically a tag, we use it for searching for objects
-drop table if exists named_entity; 
+drop table if exists named_entity cascade;  
 create table named_entity(
   named_entity_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null
 );
 
-drop table if exists named_entity_data;
+drop table if exists named_entity_data cascade;
 create table named_entity_data(
   named_entity_data_id bigserial primary key,
   creation_time bigint not null,
@@ -129,8 +176,17 @@ create table named_entity_data(
   active bool not null
 );
 
+create view recent_named_entity_data as
+  select ned.* from named_entity_data ned
+  inner join (
+   select max(named_entity_data_id) id 
+   from named_entity_data 
+   group by named_entity_id
+  ) maxids
+  on maxids.id = ned.named_entity_data_id;
+
 -- different names to call entities
-drop table if exists named_entity_pattern;
+drop table if exists named_entity_pattern cascade;
 create table named_entity_pattern(
   named_entity_pattern_id bigserial primary key,
   creation_time bigint not null,
@@ -140,14 +196,24 @@ create table named_entity_pattern(
   active bool not null
 );
 
-drop table if exists external_event;
+create view recent_named_entity_pattern as
+  select nep.* from named_entity_pattern nep
+  inner join (
+   select max(named_entity_pattern_id) id 
+   from named_entity_pattern 
+   group by named_entity_id, pattern
+  ) maxids
+  on maxids.id = nep.named_entity_pattern_id;
+
+
+drop table if exists external_event cascade;
 create table external_event(
   extenal_event_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null
 );
 
-drop table if exists external_event_data;
+drop table if exists external_event_data cascade;
 create table external_event_data(
   external_event_data_id bigserial primary key,
   creation_time bigint not null,
@@ -158,3 +224,13 @@ create table external_event_data(
   end_time bigint not null,
   active bool not null
 );
+
+create view recent_external_event_data as
+  select eed.* from external_event_data eed
+  inner join (
+   select max(external_event_data_id) id 
+   from external_event_data 
+   group by external_event_id
+  ) maxids
+  on maxids.id = eed.external_event_data_id;
+

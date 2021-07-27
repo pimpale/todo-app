@@ -80,13 +80,10 @@ pub async fn query(
   props: todo_app_service_api::request::NamedEntityPatternViewProps,
 ) -> Result<Vec<NamedEntityPattern>, tokio_postgres::Error> {
   let sql = [
-    "SELECT nep.* FROM named_entity_pattern nep",
     if props.only_recent {
-      " INNER JOIN
-          (SELECT max(named_entity_pattern_id) id FROM named_entity_pattern GROUP BY named_entity_id) maxids
-          ON maxids.id = nep.named_entity_pattern_id"
+      "SELECT nep.* FROM recent_named_entity_pattern nep"
     } else {
-      ""
+      "SELECT nep.* FROM named_entity_pattern nep"
     },
     " WHERE 1 = 1",
     " AND ($1::bigint[]  IS NULL OR nep.named_entity_pattern_id = ANY($1))",

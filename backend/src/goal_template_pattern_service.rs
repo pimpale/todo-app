@@ -81,13 +81,10 @@ pub async fn query(
   props: todo_app_service_api::request::GoalTemplatePatternViewProps,
 ) -> Result<Vec<GoalTemplatePattern>, tokio_postgres::Error> {
   let sql = [
-    "SELECT gtp.* FROM goal_template_pattern gtp",
     if props.only_recent {
-      " INNER JOIN
-          (SELECT max(goal_template_pattern_id) id FROM goal_template_pattern GROUP BY goal_template_id) maxids
-          ON maxids.id = gtp.goal_template_pattern_id"
+      "SELECT gtp.* FROM recent_goal_template_pattern gtp"
     } else {
-      ""
+      "SELECT gtp.* FROM goal_template_pattern gtp"
     },
     " WHERE 1 = 1",
     " AND ($1::bigint[]  IS NULL OR gtp.goal_template_pattern_id = ANY($1))",

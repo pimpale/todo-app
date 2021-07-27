@@ -1,6 +1,6 @@
 import { Card } from "react-bootstrap";
 import { EventContentArg, EventInput } from "@fullcalendar/react"
-import { GoalData, ExternalEventData } from '../utils/utils';
+import { GoalData, GoalEvent, ExternalEventData } from '../utils/utils';
 
 export function externalEventDataToEvent(eed: ExternalEventData): EventInput {
   return {
@@ -13,14 +13,15 @@ export function externalEventDataToEvent(eed: ExternalEventData): EventInput {
   }
 }
 
-export function goalDataToEvent(gd: GoalData): EventInput {
+export function goalDataToEvent(gd: GoalData, ge:GoalEvent): EventInput {
   return {
     id: `GoalData:${gd.goal.goalId}`,
-    start: new Date(gd.timeSpan![0]),
-    end: new Date(gd.timeSpan![1]),
+    start: new Date(ge.startTime),
+    end: new Date(ge.endTime),
     color: "#00000000",
     borderColor: "#00000000",
     goalData: gd,
+    goalEvent: ge,
   }
 }
 

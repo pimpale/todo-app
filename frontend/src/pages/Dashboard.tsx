@@ -5,34 +5,53 @@ import Section from '../components/Section';
 import ErrorMessage from '../components/ErrorMessage';
 import DashboardLayout from '../components/DashboardLayout';
 import ManageHybridGoalTable from '../components/ManageHybridGoalTable';
+import { ManageGoalData } from '../components/ManageGoal';
 import Loader from '../components/Loader';
-import { GoalIntentData, goalIntentDataView, GoalData, goalDataView } from '../utils/utils';
+import { GoalIntentData, goalIntentDataView, GoalData, goalDataView, GoalEvent, goalEventView } from '../utils/utils';
 import { unwrap } from '@innexgo/frontend-common';
 
 import { AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
 
 type DashboardData = {
   goalIntentData: GoalIntentData[],
-  goalData: GoalData[],
+  data: ManageGoalData[],
 }
 
-const loadDashboardData = async (props: AsyncProps<DashboardData>) => ({
-  goalIntentData: await goalIntentDataView({
-    creatorUserId: props.apiKey.creator.userId,
+const loadDashboardData = async (props: AsyncProps<DashboardData>) => {
+  const goalIntentData = await goalIntentDataView({
+    creatorUserId: [props.apiKey.creator.userId],
     onlyRecent: true,
     active: true,
     responded: false,
     apiKey: props.apiKey.key,
   })
-    .then(unwrap),
-  goalData: await goalDataView({
-    creatorUserId: props.apiKey.creator.userId,
+    .then(unwrap);
+
+  const goalData =
+    await goalDataView({
+      creatorUserId: [props.apiKey.creator.userId],
+      status: ["PENDING"],
+      onlyRecent: true,
+      apiKey: props.apiKey.key,
+    })
+      .then(unwrap);
+
+  const goalEvents = await goalEventView({
+    goalId: goalData.map(gd => gd.goal.goalId),
     onlyRecent: true,
-    status: "PENDING",
     apiKey: props.apiKey.key,
   })
     .then(unwrap)
-})
+
+  const data = goalData
+    // join goal event
+    .map(gd => ({ gd, ge: goalEvents.find(ge => ge.goal.goalId === gd.goal.goalId) }));
+
+  return {
+    goalIntentData,
+    data,
+  }
+}
 
 function Dashboard(props: AuthenticatedComponentProps) {
   return <DashboardLayout {...props}>
@@ -50,8 +69,8 @@ function Dashboard(props: AuthenticatedComponentProps) {
                   <ManageHybridGoalTable
                     goalIntentData={dd.goalIntentData}
                     setGoalIntentData={(gids) => setData(update(dd, { goalIntentData: { $set: gids } }))}
-                    goalData={dd.goalData}
-                    setGoalData={(gds) => setData(update(dd, { goalData: { $set: gds } }))}
+                    data={dd.data}
+                    setData={(d) => setData(update(dd, { data: { $set: d } }))}
                     apiKey={props.apiKey}
                     mutable
                     addable

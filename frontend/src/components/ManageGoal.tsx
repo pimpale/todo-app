@@ -1,8 +1,9 @@
 import React from 'react';
+import update from 'immutability-helper';
 import { Col, Row, Card, Form, Button } from 'react-bootstrap';
 import DisplayModal from '../components/DisplayModal';
 import UtilityPicker from '../components/UtilityPicker';
-import { GoalData, timeUtilityFunctionNew, goalDataNew } from '../utils/utils';
+import { GoalData, GoalEvent, timeUtilityFunctionNew, goalDataNew } from '../utils/utils';
 import { isErr } from '@innexgo/frontend-common';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { Edit, Cancel, } from '@material-ui/icons';
@@ -12,6 +13,7 @@ import formatDuration from 'date-fns/formatDuration';
 import intervalToDuration from 'date-fns/intervalToDuration';
 import format from 'date-fns/format';
 
+export type ManageGoalData = { gd: GoalData, ge: GoalEvent | undefined };
 
 type EditGoalProps = {
   goalData: GoalData,
@@ -23,9 +25,7 @@ function EditGoal(props: EditGoalProps) {
 
   type EditGoalValue = {
     name: string,
-    tags: string[],
     durationEstimate: string,
-    span?: [number, number],
     points: { x: number, y: number }[]
   }
 
@@ -62,7 +62,7 @@ function EditGoal(props: EditGoalProps) {
 
     if (isErr(maybeTimeUtilFunction)) {
       switch (maybeTimeUtilFunction.Err) {
-        case "API_KEY_NONEXISTENT": {
+        case "UNAUTHORIZED": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
             successResult: ""
@@ -89,26 +89,19 @@ function EditGoal(props: EditGoalProps) {
     const maybeGoalData = await goalDataNew({
       goalId: props.goalData.goal.goalId,
       name: values.name,
-      tags: values.tags,
       durationEstimate: durationEstimate!,
       timeUtilityFunctionId: maybeTimeUtilFunction.Ok.timeUtilityFunctionId,
-      timeSpan: values.span,
       status: props.goalData.status,
       apiKey: props.apiKey.key,
     })
 
+    // TODO also modify time
+
     if (isErr(maybeGoalData)) {
       switch (maybeGoalData.Err) {
-        case "API_KEY_NONEXISTENT": {
+        case "UNAUTHORIZED": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
-            successResult: ""
-          });
-          break;
-        }
-        case "API_KEY_UNAUTHORIZED": {
-          fprops.setStatus({
-            failureResult: "You are not authorized to modify this goal.",
             successResult: ""
           });
           break;
@@ -145,8 +138,6 @@ function EditGoal(props: EditGoalProps) {
       onSubmit={onSubmit}
       initialValues={{
         name: props.goalData.name,
-        tags: props.goalData.tags,
-        span: props.goalData.timeSpan,
         durationEstimate: formatDuration(
           intervalToDuration({
             start: 0,
@@ -237,26 +228,16 @@ function CancelGoal(props: CancelGoalProps) {
       goalId: props.goalData.goal.goalId,
       apiKey: props.apiKey.key,
       name: props.goalData.name,
-      tags: props.goalData.tags,
       durationEstimate: props.goalData.durationEstimate,
       timeUtilityFunctionId: props.goalData.timeUtilityFunction.timeUtilityFunctionId,
-      timeSpan: props.goalData.timeSpan,
-
       status: "CANCEL",
     });
 
     if (isErr(maybeGoalData)) {
       switch (maybeGoalData.Err) {
-        case "API_KEY_NONEXISTENT": {
+        case "UNAUTHORIZED": {
           fprops.setStatus({
             failureResult: "You have been automatically logged out. Please relogin.",
-            successResult: ""
-          });
-          break;
-        }
-        case "API_KEY_UNAUTHORIZED": {
-          fprops.setStatus({
-            failureResult: "You are not authorized to manage this goal.",
             successResult: ""
           });
           break;
@@ -317,8 +298,8 @@ function CancelGoal(props: CancelGoalProps) {
 }
 
 const ManageGoal = (props: {
-  goalData: GoalData,
-  setGoalData: (gd: GoalData) => void,
+  data: ManageGoalData,
+  setData: (d: ManageGoalData) => void,
   mutable: boolean,
   apiKey: ApiKey,
 }) => {
@@ -328,27 +309,30 @@ const ManageGoal = (props: {
 
   return <tr>
     <td>
-      {props.goalData.name}
+      {props.data.gd.name}
       <br />
-      <small>{props.goalData.status}</small>
+      <small>{props.data.gd.status}</small>
     </td>
     <td>
-      {props.goalData.timeSpan ? format(props.goalData.timeSpan[0], "p EEE, MMM do") : "NOT SCHEDULED"}
+      {props.data.ge !== undefined
+        ? format(props.data.ge.startTime, "p EEE, MMM do")
+        : "NOT SCHEDULED"
+      }
       <br />
       <small>Estimate: {
         formatDuration(intervalToDuration({
           start: 0,
-          end: props.goalData.durationEstimate
+          end: props.data.gd.durationEstimate
         }))
       }</small>
     </td>
     <td>
       <UtilityPicker
         span={[
-          Math.min(...props.goalData.timeUtilityFunction.startTimes) - 100000,
-          Math.max(...props.goalData.timeUtilityFunction.startTimes) + 100000
+          Math.min(...props.data.gd.timeUtilityFunction.startTimes) - 100000,
+          Math.max(...props.data.gd.timeUtilityFunction.startTimes) + 100000
         ]}
-        points={props.goalData.timeUtilityFunction.startTimes.map((t, i) => ({ x: t, y: props.goalData.timeUtilityFunction.utils[i] }))}
+        points={props.data.gd.timeUtilityFunction.startTimes.map((t, i) => ({ x: t, y: props.data.gd.timeUtilityFunction.utils[i] }))}
         setPoints={() => null}
         mutable={
           // this one is for viewing only
@@ -361,7 +345,7 @@ const ManageGoal = (props: {
         <Edit />
       </Button>
       <Button variant="link" onClick={_ => setShowCancelGoal(true)}
-        hidden={props.goalData.status == "CANCEL" || !props.mutable}
+        hidden={props.data.gd.status == "CANCEL" || !props.mutable}
       >
         <Cancel />
       </Button>
@@ -372,10 +356,10 @@ const ManageGoal = (props: {
       onClose={() => setShowEditGoal(false)}
     >
       <EditGoal
-        goalData={props.goalData}
+        goalData={props.data.gd}
         setGoalData={(gd) => {
           setShowEditGoal(false);
-          props.setGoalData(gd);
+          props.setData(update(props.data, {gd: {$set: gd }}));
         }}
         apiKey={props.apiKey}
       />
@@ -386,11 +370,11 @@ const ManageGoal = (props: {
       onClose={() => setShowCancelGoal(false)}
     >
       <CancelGoal
-        goalData={props.goalData}
+        goalData={props.data.gd}
         apiKey={props.apiKey}
         setGoalData={(gd) => {
           setShowCancelGoal(false);
-          props.setGoalData(gd);
+          props.setData(update(props.data, {gd: {$set: gd }}));
         }}
       />
     </DisplayModal>

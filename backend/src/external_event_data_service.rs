@@ -91,13 +91,10 @@ pub async fn query(
   props: todo_app_service_api::request::ExternalEventDataViewProps,
 ) -> Result<Vec<ExternalEventData>, tokio_postgres::Error> {
   let sql = [
-    "SELECT eed.* FROM external_event_data eed",
     if props.only_recent {
-      " INNER JOIN
-          (SELECT max(external_event_data_id) id FROM external_event_data GROUP BY external_event_id) maxids
-          ON maxids.id = eed.external_event_data_id"
+      "SELECT eed.* FROM recent_external_event_data eed"
     } else {
-      ""
+      "SELECT eed.* FROM external_event_data eed"
     },
     " WHERE 1 = 1",
     " AND ($1::bigint[] IS NULL OR eed.external_event_data_id = ANY($1))",

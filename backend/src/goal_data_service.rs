@@ -97,14 +97,13 @@ pub async fn query(
   props: todo_app_service_api::request::GoalDataViewProps,
 ) -> Result<Vec<GoalData>, tokio_postgres::Error> {
   let sql = [
-    "SELECT gd.* FROM goal_data gd",
-    " JOIN goal g ON gd.goal_id = g.goal_id",
     if props.only_recent {
-      " INNER JOIN (SELECT max(goal_data_id) id FROM goal_data GROUP BY goal_id) maxids
-        ON maxids.id = gd.goal_data_id"
+      "SELECT gd.* FROM recent_goal_data gd"
     } else {
-      ""
+      "SELECT gd.* FROM goal_data gd"
     },
+    " INNER JOIN goal g ON gd.goal_id = g.goal_id",
+    " LEFT JOIN recent_goal_event ge ON ge.goal_id = gd.goal_id",
     " WHERE 1 = 1",
     " AND ($1::bigint[]  IS NULL OR gd.goal_data_id = ANY($1))",
     " AND ($2::bigint    IS NULL OR gd.creation_time >= $2)",
@@ -115,8 +114,10 @@ pub async fn query(
     " AND ($7::bigint    IS NULL OR gd.duration_estimate >= $7)",
     " AND ($8::bigint    IS NULL OR gd.duration_estimate <= $8)",
     " AND ($9::bigint[]  IS NULL OR gd.time_utility_function_id = ANY($9))",
-    " AND ($10::bigint[] IS NULL OR gd.status = ANY($10))",
-    " AND ($11::bigint[] IS NULL OR g.goal_intent_id = ANY($11) IS TRUE)",
+    " AND ($10::bigint[] IS NULL OR gd.parent_goal_id = ANY($10))",
+    " AND ($11::bigint[] IS NULL OR gd.status = ANY($11))",
+    " AND ($12::bigint[] IS NULL OR g.goal_intent_id = ANY($12) IS TRUE)",
+    " AND ($13::bool     IS NULL OR ge.active = $13 IS TRUE)",
     " ORDER BY gd.goal_data_id",
   ]
   .join("\n");
@@ -137,8 +138,11 @@ pub async fn query(
         &props.max_duration_estimate,
         &props.time_utility_function_id,
         &props.parent_goal_id,
-        &props .status .map(|x| x.into_iter().map(|x| x as i64).collect::<Vec<i64>>()),
+        &props
+          .status
+          .map(|x| x.into_iter().map(|x| x as i64).collect::<Vec<i64>>()),
         &props.goal_intent_id,
+        &props.scheduled,
       ],
     )
     .await?

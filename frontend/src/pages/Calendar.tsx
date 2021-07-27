@@ -10,16 +10,17 @@ import ErrorMessage from '../components/ErrorMessage';
 
 import { Async, AsyncProps } from 'react-async';
 import { Row, Col, Tab, Tabs, Container, } from 'react-bootstrap';
-import { GoalData, ExternalEventData, externalEventDataNew, goalDataNew, externalEventView, externalEventDataView, goalDataView } from '../utils/utils';
+import { goalEventNew, goalEventView, GoalData, ExternalEventData, externalEventDataNew, goalDataNew, externalEventView, externalEventDataView, goalDataView } from '../utils/utils';
 import { ApiKey, AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
 
-import { unwrap, isErr} from '@innexgo/frontend-common';
+import { unwrap, isErr } from '@innexgo/frontend-common';
 
 import UtilityWrapper from '../components/UtilityWrapper';
 
 import CreateExternalEvent from '../components/CreateExternalEvent';
 import CreateGoal from '../components/CreateGoal';
 import ManageExternalEvent from '../components/ManageExternalEvent';
+import {ManageGoalData} from '../components/ManageGoal';
 import ManageGoalTable from '../components/ManageGoalTable';
 import DisplayModal from '../components/DisplayModal';
 
@@ -71,10 +72,10 @@ function UnscheduledGoalCard(props: UnscheduledGoalCardProps) {
 
 const loadUnscheduledGoalData = async (props: AsyncProps<GoalData[]>) => {
   const goalData = await goalDataView({
-    creatorUserId: props.apiKey.creator.userId,
-    onlyRecent: true,
+    creatorUserId: [props.apiKey.creator.userId],
+    status: ["PENDING"],
     scheduled: false,
-    status: "PENDING",
+    onlyRecent: true,
     apiKey: props.apiKey.key,
   })
     .then(unwrap);
@@ -106,7 +107,7 @@ function EventCalendar(props: EventCalendarProps) {
   }
 
   // the currently selected data
-  const [selectedManageGoalData, setSelectedManageGoalData] = React.useState<GoalData | null>(null);
+  const [selectedManageGoalData, setSelectedManageGoalData] = React.useState<ManageGoalData| null>(null);
   const [selectedManageExternalEventData, setSelectedManageExternalEventData] = React.useState<ExternalEventData | null>(null);
 
   const calendarRef = React.useRef<FullCalendar | null>(null);
@@ -121,21 +122,29 @@ function EventCalendar(props: EventCalendarProps) {
     }) => {
 
     const externalEventData = await externalEventDataView({
-      creatorUserId: props.apiKey.creator.userId,
+      creatorUserId: [props.apiKey.creator.userId],
+      minStartTime: args.start.valueOf(),
+      maxStartTime: args.end.valueOf(),
+      active: true,
+      onlyRecent: true,
+      apiKey: props.apiKey.key
+    })
+      .then(unwrap);
+
+    // TODO fetch goalEvent and unite
+    const goalEvents = await goalEventView({
+      creatorUserId: [props.apiKey.creator.userId],
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
       onlyRecent: true,
-      active: true,
       apiKey: props.apiKey.key
     })
       .then(unwrap);
 
     const goalData = await goalDataView({
-      creatorUserId: props.apiKey.creator.userId,
-      minStartTime: args.start.valueOf(),
-      maxStartTime: args.end.valueOf(),
+      goalId: goalEvents.map(x => x.goal.goalId),
+      status: ["PENDING"],
       onlyRecent: true,
-      status: "PENDING",
       apiKey: props.apiKey.key
     })
       .then(unwrap);
@@ -143,7 +152,11 @@ function EventCalendar(props: EventCalendarProps) {
 
     return [
       ...externalEventData.map(externalEventDataToEvent),
-      ...goalData.map(goalDataToEvent)
+      ...goalData
+        // join goalevents
+        .map(gd => ({ gd, ge: goalEvents.find(ge => ge.goal.goalId === gd.goal.goalId)! }))
+        // convert to event
+        .map(({ gd, ge }) => goalDataToEvent(gd, ge))
     ];
   }
 
@@ -157,7 +170,7 @@ function EventCalendar(props: EventCalendarProps) {
         break;
       }
       case "GoalData": {
-        setSelectedManageGoalData(props.goalData);
+        setSelectedManageGoalData({gd:props.goalData, ge: props.goalEvent});
         break;
       }
     }
@@ -183,22 +196,18 @@ function EventCalendar(props: EventCalendarProps) {
         break;
       }
       case "GoalData": {
-        const ogd = oldEventProps.goalData;
-        const maybeGoalData = await goalDataNew({
-          goalId: ogd.goal.goalId,
-          name: ogd.name,
-          tags: ogd.tags,
-          durationEstimate: ogd.durationEstimate,
-          timeUtilityFunctionId: ogd.timeUtilityFunction.timeUtilityFunctionId,
-          parentGoalId: ogd.parentGoalId,
-          timeSpan: [event.start!.valueOf(), event.end!.valueOf()],
-          status: ogd.status,
-          apiKey: props.apiKey.key
-        })
-        if (isErr(maybeGoalData)) {
+        const oge = oldEventProps.goalEvent;
+        const maybeGoalEvent = await goalEventNew({
+          goalId: oge.goalId,
+          startTime: event.start!.valueOf(),
+          endTime: event.end!.valueOf(),
+          active: oge.active,
+          apiKey: props.apiKey.key,
+        });
+        if (isErr(maybeGoalEvent)) {
           revert();
         } else {
-          event.setExtendedProp("goalData", maybeGoalData.Ok);
+          event.setExtendedProp("goalEvent", maybeGoalEvent.Ok);
         }
         break;
       }
@@ -346,8 +355,8 @@ function EventCalendar(props: EventCalendarProps) {
         onClose={() => setSelectedManageGoalData(null)}
       >
         <ManageGoalTable
-          goalData={[selectedManageGoalData]}
-          setGoalData={() => setSelectedManageGoalData(null)}
+          data={[selectedManageGoalData]}
+          setData={() => setSelectedManageGoalData(null)}
           apiKey={props.apiKey}
           mutable
           addable={false}

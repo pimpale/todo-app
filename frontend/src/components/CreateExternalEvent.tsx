@@ -49,9 +49,9 @@ function CreateExternalEvent(props: CreateExternalEventProps) {
 
     if (isErr(maybeExternalEvent)) {
       switch (maybeExternalEvent.Err) {
-        case "API_KEY_NONEXISTENT": {
+        case "UNAUTHORIZED": {
           fprops.setStatus({
-            failureResult: "You have been automatically logged out. Please relogin.",
+            failureResult: "Unable to authenticate. Please relogin.",
             successResult: ""
           });
           break;

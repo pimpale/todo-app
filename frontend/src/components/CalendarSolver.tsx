@@ -7,12 +7,12 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import CalendarCard from '../components/CalendarCard';
 import { ApiKey } from '@innexgo/frontend-auth-api';
-import { GoalData, goalDataView, goalDataNew, timeUtilityFunctionNew, INT_MAX, } from '../utils/utils';
+import { GoalData, goalDataView, goalEventView, goalEventNew, INT_MAX, } from '../utils/utils';
 
-import { isErr } from '@innexgo/frontend-common';
+import { unwrap } from '@innexgo/frontend-common';
 
 
-import { findLastIndex } from '@innexgo/frontend-common';
+import { findFirstIndex, findLastIndex } from '@innexgo/frontend-common';
 import assert from 'assert';
 
 type SolverDataPoint = {
@@ -52,14 +52,14 @@ const sgdValue = (sgd: SolverGoalData) => {
     "sgd's end time must be less than at least one point in tuf")
 
   // here, we interpolate a point we can begin integrating at
-  const fi = sgd.tuf.findIndex(p => p.startTime > sgd.startTime)
+  const fi = findFirstIndex(sgd.tuf, p => p.startTime > sgd.startTime)!
   const ftr = {
     startTime: sgd.startTime,
     utils: lerp(sgd.tuf[fi - 1], sgd.tuf[fi], sgd.startTime)
   };
 
   // here, we interpolate the last point to integrate at
-  const li = findLastIndex(sgd.tuf, p => p.startTime < sgd.endTime);
+  const li = findLastIndex(sgd.tuf, p => p.startTime < sgd.endTime)!;
   const ltr = {
     startTime: sgd.endTime,
     utils: lerp(sgd.tuf[li], sgd.tuf[li + 1], sgd.endTime)
@@ -139,28 +139,14 @@ function ICalendarSolver(props: ICalendarSolverProps) {
           click: async () => {
             // for each element in the middle of the array:
             for (const sgd of dataRef.current.slice(1, -1)) {
-              const maybeTimeUtilFunction = await timeUtilityFunctionNew({
-                startTimes: sgd.tuf.map(p => Math.floor(p.startTime)),
-                utils: sgd.tuf.map(p => p.utils),
+              const ge = await goalEventNew({
+                goalId: sgd.data.goal.goalId,
+                startTime: sgd.startTime,
+                endTime: sgd.endTime,
+                active: true,
                 apiKey: props.apiKey.key,
               })
-
-              // do better error handling later
-              if (isErr(maybeTimeUtilFunction)) {
-                console.log(maybeTimeUtilFunction);
-                continue;
-              }
-
-              const maybeGoalData = await goalDataNew({
-                goalId: sgd.data.goal.goalId,
-                name: sgd.data.name,
-                tags: sgd.data.tags,
-                durationEstimate: Math.floor(sgd.data.durationEstimate),
-                timeUtilityFunctionId: maybeTimeUtilFunction.Ok.timeUtilityFunctionId,
-                timeSpan: [Math.floor(sgd.startTime), Math.floor(sgd.endTime)],
-                status: "PENDING",
-                apiKey: props.apiKey.key,
-              });
+                .then(unwrap);
 
               // TODO report errors
             }
@@ -201,22 +187,26 @@ function ICalendarSolver(props: ICalendarSolverProps) {
 
 
 const loadSolverData = async (props: AsyncProps<SolverGoalData[]>) => {
-  const maybeGoalData = await goalDataView({
-    creatorUserId: props.apiKey.creator.userId,
-    onlyRecent: true,
+  const goalData = await goalDataView({
+    creatorUserId: [props.apiKey.creator.userId],
+    status: ["PENDING"],
     scheduled: true,
-    status: "PENDING",
+    onlyRecent: true,
     apiKey: props.apiKey.key
-  });
+  })
+    .then(unwrap);
 
-  if (isErr(maybeGoalData)) {
-    throw Error(maybeGoalData.Err);
-  }
+  const goalEvents = await goalEventView({
+    goalId: goalData.map(gd => gd.goal.goalId),
+    onlyRecent: true,
+    apiKey: props.apiKey.key,
+  })
+    .then(unwrap);
 
-  let x: SolverGoalData[] = maybeGoalData.Ok
-    .map(goal => {
-      const startTimes = goal.timeUtilityFunction.startTimes;
-      const utils = goal.timeUtilityFunction.utils;
+  let x: SolverGoalData[] = goalData
+    .map(gd => {
+      const startTimes = gd.timeUtilityFunction.startTimes;
+      const utils = gd.timeUtilityFunction.utils;
 
       const tuf = startTimes
         // zip with utils
@@ -224,11 +214,13 @@ const loadSolverData = async (props: AsyncProps<SolverGoalData[]>) => {
         // sort by startTime
         .sort((a, b) => a.startTime - b.startTime);
 
+      const event = goalEvents.find(x => x.goal.goalId === gd.goal.goalId)!;
+
       return {
-        data: goal,
-        startTime: goal.timeSpan![0],
-        endTime: goal.timeSpan![1],
-        duration: goal.durationEstimate,
+        data: gd,
+        startTime: event.startTime,
+        endTime: event.endTime,
+        duration: gd.durationEstimate,
         tuf: [
           {
             startTime: 0,

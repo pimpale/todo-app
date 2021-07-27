@@ -45,14 +45,7 @@ function EditGoalIntent(props: EditGoalIntentProps) {
 
     if (isErr(maybeGoalIntentData)) {
       switch (maybeGoalIntentData.Err) {
-        case "API_KEY_NONEXISTENT": {
-          fprops.setStatus({
-            failureResult: "You have been automatically logged out. Please relogin.",
-            successResult: ""
-          });
-          break;
-        }
-        case "API_KEY_UNAUTHORIZED": {
+        case "UNAUTHORIZED": {
           fprops.setStatus({
             failureResult: "You are not authorized to modify this goalIntent.",
             successResult: ""
@@ -145,11 +138,7 @@ const cancelGoalIntent = async (
 
   if (isErr(maybeGoalIntentData)) {
     switch (maybeGoalIntentData.Err) {
-      case "API_KEY_NONEXISTENT": {
-        setFailureResult("You have been automatically logged out. Please relogin.");
-        break;
-      }
-      case "API_KEY_UNAUTHORIZED": {
+      case "UNAUTHORIZED": {
         setFailureResult("You are not authorized to manage this goalIntent.");
         break;
       }
