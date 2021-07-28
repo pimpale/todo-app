@@ -13832,6 +13832,16 @@ window-size@0.1.0:
   resolved "https://registry.yarnpkg.com/window-size/-/window-size-0.1.0.tgz#5438cd2ea93b202efa3a19fe8887aee7c94f9c9d"
   integrity sha1-VDjNLqk7IC76Ohn+iIeu58lPnJ0=
 
+wink-eng-lite-web-model@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/wink-eng-lite-web-model/-/wink-eng-lite-web-model-1.2.1.tgz#026f0f8f47d4f60334f2ab28bd4e8938eeaf80af"
+  integrity sha512-5z6yLfOtAzIae1EcggkntxboEXPSfHyVwMnj9OmtoZxFA+Av1hNJbbshdC3kMwGtfFNW2CbcJkfH9SINmv6dig==
+
+wink-nlp@^1.7.2:
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/wink-nlp/-/wink-nlp-1.7.2.tgz#4f39eb8c4abf83f83af2e3b6bdcb9488c4c58c3b"
+  integrity sha512-ocTGO6Rw6myDVDSckUOz/3kKMTVdebD30YhmBJEdb5+qaJTddbOJFislvnJwXApI4vu45Igq9QfP0RN6VgU+xQ==
+
 word-wrap@^1.2.3, word-wrap@~1.2.3:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/word-wrap/-/word-wrap-1.2.3.tgz#610636f6b1f703891bd34771ccb17fb93b47079c"

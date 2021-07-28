@@ -19,7 +19,7 @@ create table goal_intent_data(
   goal_intent_data_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null,
-  goal_intent_id bigint not null,
+  goal_intent_id bigint not null references goal_intent(goal_intent_id),
   name text not null,
   active bool not null
 );
@@ -38,7 +38,7 @@ create table goal(
   goal_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null,
-  goal_intent_id bigint -- NULLABLE
+  goal_intent_id bigint references goal_intent(goal_intent_id)
 );
 
 drop table if exists time_utility_function cascade;
@@ -58,7 +58,7 @@ create table goal_data(
   goal_data_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null,
-  goal_id bigint not null,
+  goal_id bigint not null references goal(goal_id),
   name text not null,
   duration_estimate bigint not null,
   time_utility_function_id bigint not null,
@@ -80,7 +80,7 @@ create table goal_event(
   goal_event_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null,
-  goal_id bigint not null,
+  goal_id bigint not null references goal(goal_id),
   start_time bigint not null,
   end_time bigint not null,
   active bool not null
@@ -122,10 +122,10 @@ create table goal_template_data(
   goal_template_data_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null,
-  goal_template_id bigint not null,
+  goal_template_id bigint not null references goal_template(goal_template_id),
   name text not null,
   -- this function is passed in an array of entities, and returns a goal_data
-  user_generated_code_id bigint not null,
+  user_generated_code_id bigint not null references user_generated_code(user_generated_code_id),
   active bool not null
 );
 
@@ -143,7 +143,7 @@ create table goal_template_pattern(
   goal_template_pattern_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null,
-  goal_template_id bigint not null,
+  goal_template_id bigint not null references goal_template(goal_template_id),
   pattern text not null,
   active bool not null
 );
@@ -170,7 +170,7 @@ create table named_entity_data(
   named_entity_data_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null,
-  named_entity_id bigint not null,
+  named_entity_id bigint not null references named_entity(named_entity_id),
   name text not null, -- must be unique wrt to user
   kind bigint not null,
   active bool not null
@@ -191,7 +191,7 @@ create table named_entity_pattern(
   named_entity_pattern_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null,
-  named_entity_id bigint not null,
+  named_entity_id bigint not null references named_entity(named_entity_id),
   pattern text not null,
   active bool not null
 );
@@ -208,7 +208,7 @@ create view recent_named_entity_pattern as
 
 drop table if exists external_event cascade;
 create table external_event(
-  extenal_event_id bigserial primary key,
+  external_event_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null
 );
@@ -218,7 +218,7 @@ create table external_event_data(
   external_event_data_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null,
-  external_event_id bigint not null,
+  external_event_id bigint not null references external_event(external_event_id),
   name text not null,
   start_time bigint not null,
   end_time bigint not null,

@@ -1,7 +1,7 @@
 import { Table } from 'react-bootstrap';
 import update from 'immutability-helper';
 import ManageGoalIntent from '../components/ManageGoalIntent';
-import CreateGoalIntent from '../components/CreateGoalIntent';
+import CreateHybridGoal from '../components/CreateHybridGoal';
 import ManageGoal, { ManageGoalData } from '../components/ManageGoal';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { GoalIntentData } from '../utils/utils';
@@ -33,7 +33,7 @@ function ManageHybridGoalTable(props: ManageHybridGoalTableProps) {
     .filter(({ d }) => props.showInactive || d.gd.status !== "CANCEL")
 
   return <>
-    <CreateGoalIntent
+    <CreateHybridGoal
       apiKey={props.apiKey}
       postSubmit={(gid) => {
         props.setGoalIntentData(update(props.goalIntentData, { $push: [gid] }));

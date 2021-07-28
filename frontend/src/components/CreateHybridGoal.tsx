@@ -1,16 +1,29 @@
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Form } from "react-bootstrap";
-import { goalIntentNew,GoalIntentData } from "../utils/utils";
+import { goalIntentNew, GoalIntentData } from "../utils/utils";
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { isErr } from '@innexgo/frontend-common';
+import winkNlp from 'wink-nlp';
+import model from 'wink-eng-lite-web-model';
 
+const nlp = winkNlp(model);
+const doc = nlp.readDoc("once upon a time, there was a thing");
+const its = nlp.its;
+const as = nlp.as;
 
 type CreateHybridGoalProps = {
   apiKey: ApiKey;
-  postSubmit: (gid:GoalIntentData) => void;
+  postSubmit: (gid: GoalIntentData) => void;
 }
 
+
 function CreateHybridGoal(props: CreateHybridGoalProps) {
+
+  let q = doc.tokens().out(its.contractionFlag, as.bigrams);
+
+  console.log(q);
+
+
   type CreateHybridGoalValue = {
     name: string,
   }
@@ -49,7 +62,7 @@ function CreateHybridGoal(props: CreateHybridGoalProps) {
         }
         default: {
           fprops.setStatus({
-            failureResult: "An unknown or network error has occured while trying to create goalIntent.",
+            failureResult: "An unknown or network error has occured while trying to create goal intent.",
             successResult: ""
           });
           break;
@@ -59,7 +72,7 @@ function CreateHybridGoal(props: CreateHybridGoalProps) {
     }
 
     // clear input
-    fprops.setFieldValue('name', '');
+    fprops.setFieldValue("name", "");
     // execute callback
     props.postSubmit(maybeGoalIntentData.Ok);
   }
