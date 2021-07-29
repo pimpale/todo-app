@@ -1,9 +1,7 @@
 declare module 'wink-eng-lite-web-model' {
-  export type ModelAddons = {
-      // TODO
-  }
+  export type ModelAddons = unknown
 
-  type Model = {
+  export type Model = {
     core: unknown,
     addons: ModelAddons
   };

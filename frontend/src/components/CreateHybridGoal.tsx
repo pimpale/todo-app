@@ -4,12 +4,9 @@ import { goalIntentNew, GoalIntentData } from "../utils/utils";
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { isErr } from '@innexgo/frontend-common';
 import winkNlp from 'wink-nlp';
+import BM25Vectorizer from 'wink-nlp/utilities/bm25-vectorizer';
 import model from 'wink-eng-lite-web-model';
 
-const nlp = winkNlp(model);
-const doc = nlp.readDoc("once upon a time, there was a thing");
-const its = nlp.its;
-const as = nlp.as;
 
 type CreateHybridGoalProps = {
   apiKey: ApiKey;
@@ -18,10 +15,7 @@ type CreateHybridGoalProps = {
 
 
 function CreateHybridGoal(props: CreateHybridGoalProps) {
-
-  let q = doc.tokens().out(its.contractionFlag, as.bigrams);
-
-  console.log(q);
+  console.log(model);
 
 
   type CreateHybridGoalValue = {
