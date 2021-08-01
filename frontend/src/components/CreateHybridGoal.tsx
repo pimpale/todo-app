@@ -1,22 +1,29 @@
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Form } from "react-bootstrap";
-import { goalIntentNew, GoalIntentData } from "../utils/utils";
+import { goalIntentNew, GoalIntentData, GoalTemplateData, GoalTemplatePattern, NamedEntityData, NamedEntityPattern } from "../utils/utils";
 import { ApiKey } from '@innexgo/frontend-auth-api';
-import { isErr } from '@innexgo/frontend-common';
+import { isErr, unwrap } from '@innexgo/frontend-common';
 import winkNlp from 'wink-nlp';
-import BM25Vectorizer from 'wink-nlp/utilities/bm25-vectorizer';
 import model from 'wink-eng-lite-web-model';
 
+export type HybridNamedEntityData = {
+  ned: NamedEntityData,
+  nep: NamedEntityPattern[],
+}
+
+export type HybridGoalTemplateData = {
+  gtd: GoalTemplateData,
+  gtp: GoalTemplatePattern[],
+}
 
 type CreateHybridGoalProps = {
   apiKey: ApiKey;
+  tags: HybridNamedEntityData[];
+  templates: HybridGoalTemplateData[];
   postSubmit: (gid: GoalIntentData) => void;
 }
 
-
 function CreateHybridGoal(props: CreateHybridGoalProps) {
-  console.log(model);
-
 
   type CreateHybridGoalValue = {
     name: string,
@@ -40,10 +47,61 @@ function CreateHybridGoal(props: CreateHybridGoalProps) {
       return;
     }
 
+    // instantiate nlp
+    let nlp = winkNlp(model);
+    const its = nlp.its;
+
+    nlp.learnCustomEntities(
+      props.templates.map(x => ({
+        name: `GoalTemplate:${x.gtd.goalTemplateDataId}`,
+        patterns: x.gtp.map(x => x.pattern)
+      }))
+    );
+
+    nlp.learnCustomEntities([
+      {
+        name: "before deadline",
+        patterns: [
+          "[by|before] [DATE|TIME]",
+          "[by|before] [TIME] [DATE]",
+          "[by|before] [DATE] [TIME]",
+        ]
+      },
+      {
+        name: "before goal",
+        patterns: ["before [HASHTAG]",]
+      },
+      {
+        name: "after goal",
+        patterns: [
+          "after [HASHTAG]",
+        ]
+      },
+      {
+        name: "child goal",
+        patterns: [
+          "for [HASHTAG]",
+          "@[HASHTAG]",
+        ]
+      },
+      {
+        name: "interval",
+        patterns: [
+          "[DURATION|DATE|TIME]",
+          "[TIME] [DATE]",
+          "[DATE] [TIME]",
+        ]
+      }
+    ]);
+
+    let doc = nlp.readDoc(values.name);
+    // recognize
+    doc.customEntities().each(x => console.log(x.out(its.detail)));
+
     let maybeGoalIntentData = await goalIntentNew({
       name: values.name,
       apiKey: props.apiKey.key,
-    })
+    });
 
     if (isErr(maybeGoalIntentData)) {
       switch (maybeGoalIntentData.Err) {

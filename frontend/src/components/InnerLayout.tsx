@@ -41,7 +41,7 @@ const SidebarEntry: React.FunctionComponent<SidebarEntryProps> = props => {
 
 const loadUserData = async (props: AsyncProps<UserData>) => {
   const userData = await userDataView({
-    creatorUserId: [props.apiKey.creator.userId],
+    creatorUserId: [props.apiKey.creatorUserId],
     onlyRecent: true,
     apiKey: props.apiKey.key,
   })

@@ -72,7 +72,7 @@ function UnscheduledGoalCard(props: UnscheduledGoalCardProps) {
 
 const loadUnscheduledGoalData = async (props: AsyncProps<GoalData[]>) => {
   const goalData = await goalDataView({
-    creatorUserId: [props.apiKey.creator.userId],
+    creatorUserId: [props.apiKey.creatorUserId],
     status: ["PENDING"],
     scheduled: false,
     onlyRecent: true,
@@ -122,7 +122,7 @@ function EventCalendar(props: EventCalendarProps) {
     }) => {
 
     const externalEventData = await externalEventDataView({
-      creatorUserId: [props.apiKey.creator.userId],
+      creatorUserId: [props.apiKey.creatorUserId],
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
       active: true,
@@ -133,7 +133,7 @@ function EventCalendar(props: EventCalendarProps) {
 
     // TODO fetch goalEvent and unite
     const goalEvents = await goalEventView({
-      creatorUserId: [props.apiKey.creator.userId],
+      creatorUserId: [props.apiKey.creatorUserId],
       minStartTime: args.start.valueOf(),
       maxStartTime: args.end.valueOf(),
       onlyRecent: true,

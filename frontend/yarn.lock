@@ -1438,10 +1438,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.0.tgz#87de7af9c231826fdd68ac7258f77c429e0e5fcf"
   integrity sha512-wdppn25U8z/2yiaT6YGquE6X8sSv7hNMWSXYSSU1jGv/yd6XqjXgTDJ8KP4NgjTXfJ3GbRjeeb8RTV7a/VpM+w==
 
-"@innexgo/frontend-auth-api@^0.2.24":
-  version "0.2.24"
-  resolved "https://registry.yarnpkg.com/@innexgo/frontend-auth-api/-/frontend-auth-api-0.2.24.tgz#d4b084d1ad7ed760e48ec2723a3539da7a3812cf"
-  integrity sha512-QNxjFqKj6mnrLANi7Azk3017BVdVSKdFcqCA1S/Q6w1U1i6vu36kqOQ57U5cmiMaJrZVVq1C0vTTBewvjV7RqA==
+"@innexgo/frontend-auth-api@^0.2.25":
+  version "0.2.25"
+  resolved "https://registry.yarnpkg.com/@innexgo/frontend-auth-api/-/frontend-auth-api-0.2.25.tgz#a6e1e7ffd76b3b335cdb33f965636d9a35e0313e"
+  integrity sha512-SGDZX6GJGRv1EmZkFiOXUUmSnk7I+4hVP3gxO9wSQa3ZpDyYGoAOFS8FQIhUFHhLBeh81W7XhxpnvAKdH2dZeA==
 
 "@innexgo/frontend-common@^0.0.8":
   version "0.0.8"
@@ -13837,10 +13837,10 @@ wink-eng-lite-web-model@^1.2.1:
   resolved "https://registry.yarnpkg.com/wink-eng-lite-web-model/-/wink-eng-lite-web-model-1.2.1.tgz#026f0f8f47d4f60334f2ab28bd4e8938eeaf80af"
   integrity sha512-5z6yLfOtAzIae1EcggkntxboEXPSfHyVwMnj9OmtoZxFA+Av1hNJbbshdC3kMwGtfFNW2CbcJkfH9SINmv6dig==
 
-wink-nlp@^1.7.2:
-  version "1.7.2"
-  resolved "https://registry.yarnpkg.com/wink-nlp/-/wink-nlp-1.7.2.tgz#4f39eb8c4abf83f83af2e3b6bdcb9488c4c58c3b"
-  integrity sha512-ocTGO6Rw6myDVDSckUOz/3kKMTVdebD30YhmBJEdb5+qaJTddbOJFislvnJwXApI4vu45Igq9QfP0RN6VgU+xQ==
+wink-nlp@^1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/wink-nlp/-/wink-nlp-1.8.0.tgz#ca920f0b711a1ce5ff680ef34b46efff0db99b6d"
+  integrity sha512-lDsplTYlEgmj8UFyQoYY/L57wJMR19vcQt2I6jhiNMETs9OmJeTBdYloEu6jJRKVaBdSIUFZIkOHN9qKHrYxpQ==
 
 word-wrap@^1.2.3, word-wrap@~1.2.3:
   version "1.2.3"

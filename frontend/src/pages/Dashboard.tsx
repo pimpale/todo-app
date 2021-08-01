@@ -4,10 +4,11 @@ import update from 'immutability-helper';
 import Section from '../components/Section';
 import ErrorMessage from '../components/ErrorMessage';
 import DashboardLayout from '../components/DashboardLayout';
+import { HybridGoalTemplateData, HybridNamedEntityData } from '../components/CreateHybridGoal';
 import ManageHybridGoalTable from '../components/ManageHybridGoalTable';
 import { ManageGoalData } from '../components/ManageGoal';
 import Loader from '../components/Loader';
-import { GoalIntentData, goalIntentDataView, GoalData, goalDataView, GoalEvent, goalEventView } from '../utils/utils';
+import { GoalIntentData, goalIntentDataView, goalDataView, goalEventView, namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, } from '../utils/utils';
 import { unwrap } from '@innexgo/frontend-common';
 
 import { AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
@@ -15,11 +16,13 @@ import { AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
 type DashboardData = {
   goalIntentData: GoalIntentData[],
   data: ManageGoalData[],
+  tags: HybridNamedEntityData[],
+  templates: HybridGoalTemplateData[],
 }
 
 const loadDashboardData = async (props: AsyncProps<DashboardData>) => {
   const goalIntentData = await goalIntentDataView({
-    creatorUserId: [props.apiKey.creator.userId],
+    creatorUserId: [props.apiKey.creatorUserId],
     onlyRecent: true,
     active: true,
     responded: false,
@@ -29,7 +32,7 @@ const loadDashboardData = async (props: AsyncProps<DashboardData>) => {
 
   const goalData =
     await goalDataView({
-      creatorUserId: [props.apiKey.creator.userId],
+      creatorUserId: [props.apiKey.creatorUserId],
       status: ["PENDING"],
       onlyRecent: true,
       apiKey: props.apiKey.key,
@@ -43,13 +46,62 @@ const loadDashboardData = async (props: AsyncProps<DashboardData>) => {
   })
     .then(unwrap)
 
-  const data = goalData
-    // join goal event
-    .map(gd => ({ gd, ge: goalEvents.find(ge => ge.goal.goalId === gd.goal.goalId) }));
+
+  // join goal data to goal events
+  const data = goalData.map(gd => ({
+    gd,
+    ge: goalEvents.find(ge => ge.goal.goalId === gd.goal.goalId)
+  }));
+
+  const goalTemplateData = await goalTemplateDataView({
+    creatorUserId: [props.apiKey.creatorUserId],
+    active: true,
+    onlyRecent: true,
+    apiKey: props.apiKey.key,
+  })
+    .then(unwrap)
+
+  const namedEntityData = await namedEntityDataView({
+    creatorUserId: [props.apiKey.creatorUserId],
+    active: true,
+    onlyRecent: true,
+    apiKey: props.apiKey.key,
+  })
+    .then(unwrap)
+
+  const namedEntityPatterns = await namedEntityPatternView({
+    namedEntityId: namedEntityData.map(gtd => gtd.namedEntity.namedEntityId),
+    active: true,
+    onlyRecent: true,
+    apiKey: props.apiKey.key
+  })
+    .then(unwrap);
+
+  // group patterns by tag
+  const tags = namedEntityData.map(ned => ({
+    ned,
+    nep: namedEntityPatterns.filter(nep => nep.namedEntity.namedEntityId === ned.namedEntity.namedEntityId)
+  }));
+
+  const goalTemplatePatterns = await goalTemplatePatternView({
+    goalTemplateId: goalTemplateData.map(gtd => gtd.goalTemplate.goalTemplateId),
+    active: true,
+    onlyRecent: true,
+    apiKey: props.apiKey.key
+  })
+    .then(unwrap);
+
+  // group patterns by template
+  const templates = goalTemplateData.map(gtd => ({
+    gtd,
+    gtp: goalTemplatePatterns.filter(gtp => gtp.goalTemplate.goalTemplateId === gtd.goalTemplate.goalTemplateId)
+  }));
 
   return {
     goalIntentData,
     data,
+    tags,
+    templates,
   }
 }
 
@@ -71,6 +123,8 @@ function Dashboard(props: AuthenticatedComponentProps) {
                     setGoalIntentData={(gids) => setData(update(dd, { goalIntentData: { $set: gids } }))}
                     data={dd.data}
                     setData={(d) => setData(update(dd, { data: { $set: d } }))}
+                    tags={dd.tags}
+                    templates={dd.templates}
                     apiKey={props.apiKey}
                     mutable
                     addable
