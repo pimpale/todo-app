@@ -60,9 +60,8 @@ create table goal_data(
   creator_user_id bigint not null,
   goal_id bigint not null references goal(goal_id),
   name text not null,
-  duration_estimate bigint not null,
+  duration_estimate bigint, -- if null, then is abstract
   time_utility_function_id bigint not null,
-  abstract bool not null, -- whether the goal can't be sensibly turned into an event
   status bigint not null -- enum
 );
 
@@ -103,19 +102,17 @@ create table goal_dependency(
   creator_user_id bigint not null,
   goal_id bigint not null references goal(goal_id),
   dependent_goal_id bigint not null references goal(goal_id), -- the goal waits for this goal to resolve before marking is allowed
-  cascade_success bool not null, -- whether a success marks dependent goals as successes
-  cascade_failure bool not null, -- whether a failure marks dependent goals as failures
   active bool not null
 );
 
 create view recent_goal_dependency as
-  select ge.* from goal_dependency ge
+  select gd.* from goal_dependency gd
   inner join (
    select max(goal_dependency_id) id 
    from goal_dependency 
    group by goal_id, dependent_goal_id
   ) maxids
-  on maxids.id = ge.goal_dependency_id;
+  on maxids.id = gd.goal_dependency_id;
 
 
 -- Maybe compiled functions
@@ -128,7 +125,6 @@ create table user_generated_code(
   source_lang text not null,
   wasm_cache bytea not null
 );
-
 
 -- how words trigger goal generation:
 -- when we see a pattern, we invoke the 
@@ -146,9 +142,8 @@ create table goal_template_data(
   creator_user_id bigint not null,
   goal_template_id bigint not null references goal_template(goal_template_id),
   name text not null,
-  -- this function is run when a goal is templated
-  user_generated_code_id bigint not null references user_generated_code(user_generated_code_id),
-  duration_estimate bigint not null,
+  duration_estimate bigint, -- NULLABLE if null, then is abstract
+  user_generated_code_id bigint not null references user_generated_code(user_generated_code_id), -- this function is run when a goal is templated
   active bool not null
 );
 

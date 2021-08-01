@@ -35,9 +35,8 @@ pub struct GoalData {
   pub creator_user_id: i64,
   pub goal_id: i64,
   pub name: String,
-  pub duration_estimate: i64,
+  pub duration_estimate: Option<i64>,
   pub time_utility_function_id: i64,
-  pub parent_goal_id: Option<i64>,
   pub status: GoalDataStatusKind,
 }
 
@@ -67,6 +66,7 @@ pub struct GoalTemplateData {
   pub goal_template_id: i64,
   pub name: String,
   pub user_generated_code_id: i64,
+  pub duration_estimate: Option<i64>,
   pub active: bool,
 }
 
@@ -77,6 +77,16 @@ pub struct GoalTemplatePattern {
   pub creator_user_id: i64,
   pub goal_template_id: i64,
   pub pattern: String,
+  pub active: bool,
+}
+
+#[derive(Clone, Debug)]
+pub struct GoalDependency {
+  pub goal_dependency_id: i64,
+  pub creation_time: i64,
+  pub creator_user_id: i64,
+  pub goal_id: i64,
+  pub dependent_goal_id: i64,
   pub active: bool,
 }
 
@@ -109,6 +119,15 @@ pub struct NamedEntityPattern {
   pub active: bool,
 }
 
+#[derive(Clone, Debug)]
+pub struct GoalEntityTag {
+  pub goal_entity_tag_id: i64,
+  pub creation_time: i64,
+  pub creator_user_id: i64,
+  pub named_entity_id: i64,
+  pub goal_id: i64,
+  pub active: bool,
+}
 
 #[derive(Clone, Debug)]
 pub struct UserGeneratedCode {
