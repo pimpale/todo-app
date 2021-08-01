@@ -50,9 +50,8 @@ export interface GoalData {
   creatorUserId: number,
   goal: Goal
   name: string,
-  durationEstimate: number,
+  durationEstimate?: number,
   timeUtilityFunction: TimeUtilityFunction,
-  parentGoal?: Goal,
   status: GoalDataStatusKind
 }
 
@@ -66,6 +65,14 @@ export interface GoalEvent {
   active: boolean,
 }
 
+export interface GoalDependency {
+  goalDependencyId: number,
+  creationTime: number,
+  creatorUserId: number,
+  goal: Goal,
+  dependent_goal: Goal,
+  active: boolean,
+}
 
 export interface ExternalEvent {
   externalEventId: number,
@@ -96,6 +103,7 @@ export interface GoalTemplateData {
   creatorUserId: number,
   goalTemplate: GoalTemplate,
   name: string,
+  durationEstimate?: number,
   userGeneratedCode: UserGeneratedCode,
   active: boolean,
 }
@@ -144,6 +152,15 @@ export interface NamedEntityPattern {
   creatorUserId: number,
   namedEntity: NamedEntity,
   pattern: string,
+  active: boolean,
+}
+
+export interface GoalEntityTag {
+  goalEntityTagId: number,
+  creationTime: number,
+  creatorUserId: number,
+  namedEntity: NamedEntity,
+  goal: Goal,
   active: boolean,
 }
 
@@ -229,10 +246,9 @@ export function goalIntentDataNew(props: GoalIntentDataNewProps): Promise<Result
 
 export interface GoalNewProps {
   name: string,
-  durationEstimate: number,
+  durationEstimate?: number,
   timeUtilityFunctionId: number,
   goalIntentId?: number,
-  parentGoalId?: number,
   timeSpan?: [startTime: number, endTime: number],
   apiKey: string,
 }
@@ -244,9 +260,8 @@ export function goalNew(props: GoalNewProps): Promise<Result<GoalData, TodoAppEr
 export interface GoalDataNewProps {
   goalId: number,
   name: string,
-  durationEstimate: number,
+  durationEstimate?: number,
   timeUtilityFunctionId: number,
-  parentGoalId?: number,
   status: GoalDataStatusKind,
   apiKey: string,
 }
@@ -265,6 +280,30 @@ export interface GoalEventNewProps {
 
 export function goalEventNew(props: GoalEventNewProps): Promise<Result<GoalEvent, TodoAppErrorCode>> {
   return fetchApiOrNetworkError("todo_app/goal_event/new", props);
+}
+
+
+export interface GoalDependencyNewProps {
+  goalId: number,
+  dependentGoalId: number,
+  active: boolean,
+  apiKey: string,
+}
+
+export function goalDependencyNew(props: GoalDependencyNewProps): Promise<Result<GoalDependency, TodoAppErrorCode>> {
+  return fetchApiOrNetworkError("todo_app/goal_dependency/new", props);
+}
+
+
+export interface GoalEntityTagNewProps {
+  goalId: number,
+  namedEntityId: number,
+  active: boolean,
+  apiKey: string,
+}
+
+export function goalEntityTagNew(props: GoalEntityTagNewProps): Promise<Result<GoalEntityTag, TodoAppErrorCode>> {
+  return fetchApiOrNetworkError("todo_app/goal_entity_tag/new", props);
 }
 
 export interface TimeUtilityFunctionNewProps {
@@ -290,6 +329,7 @@ export function userGeneratedCodeNew(props: UserGeneratedCodeNewProps): Promise<
 
 export interface GoalTemplateNewProps {
   name: string,
+  durationEstimate?: number,
   userGeneratedCodeId: number,
   apiKey: string,
 }
@@ -302,6 +342,7 @@ export function goalTemplateNew(props: GoalTemplateNewProps): Promise<Result<Goa
 export interface GoalTemplateDataNewProps {
   goalTemplateId: number,
   name: string,
+  durationEstimate?: number,
   userGeneratedCodeId: number,
   active: boolean,
   apiKey: string,
@@ -408,8 +449,8 @@ export interface GoalDataViewProps {
   name?: string[],
   minDurationEstimate?: number,
   maxDurationEstimate?: number,
+  concrete?: boolean,
   timeUtilityFunctionId?: number[],
-  parentGoalId?: number[],
   status?: GoalDataStatusKind[],
   onlyRecent: boolean,
   goalIntentId?: number[],
@@ -441,6 +482,22 @@ export function goalEventView(props: GoalEventViewProps): Promise<Result<GoalEve
   return fetchApiOrNetworkError("todo_app/goal_event/view", props);
 }
 
+export interface GoalDependencyViewProps {
+  goalDependencyId?: number[],
+  minCreationTime?: number,
+  maxCreationTime?: number,
+  creatorUserId?: number[],
+  goalId?: number[],
+  dependentGoalId?: number[],
+  active?: boolean,
+  onlyRecent: boolean,
+  apiKey: string,
+}
+
+export function goalDependencyView(props: GoalDependencyViewProps): Promise<Result<GoalDependency[], TodoAppErrorCode>> {
+  return fetchApiOrNetworkError("todo_app/goal_dependency/view", props);
+}
+
 export interface GoalTemplateViewProps {
   goalTemplateId?: number[],
   minCreationTime?: number,
@@ -460,6 +517,9 @@ export interface GoalTemplateDataViewProps {
   creatorUserId?: number[],
   goalTemplateId?: number[],
   name?: string[],
+  minDurationEstimate?: number,
+  maxDurationEstimate?: number,
+  concrete?: boolean,
   userGeneratedCodeId?: number[],
   active?: boolean,
   onlyRecent: boolean,
@@ -543,7 +603,6 @@ export function userGeneratedCodeView(props: UserGeneratedCodeViewProps): Promis
   return fetchApiOrNetworkError("todo_app/user_generated_code/view", props);
 }
 
-
 export interface NamedEntityViewProps {
   namedEntityId?: number[],
   minCreationTime?: number,
@@ -586,6 +645,22 @@ export interface NamedEntityPatternViewProps {
 }
 
 export function namedEntityPatternView(props: NamedEntityPatternViewProps): Promise<Result<NamedEntityPattern[], TodoAppErrorCode>> {
+  return fetchApiOrNetworkError("todo_app/named_entity_pattern/view", props);
+}
+
+export interface GoalEntityTagViewProps {
+  goalEntityTagId?: number[],
+  minCreationTime?: number,
+  maxCreationTime?: number,
+  creatorUserId?: number[],
+  namedEntityId?: number[],
+  goalId?: number[],
+  active?: boolean,
+  onlyRecent: boolean,
+  apiKey: string,
+}
+
+export function goalEntityTagView(props: GoalEntityTagViewProps): Promise<Result<GoalEntityTag[], TodoAppErrorCode>> {
   return fetchApiOrNetworkError("todo_app/named_entity_pattern/view", props);
 }
 

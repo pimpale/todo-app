@@ -12,6 +12,7 @@ impl From<tokio_postgres::row::Row> for GoalTemplateData {
       creator_user_id: row.get("creator_user_id"),
       goal_template_id: row.get("goal_template_id"),
       name: row.get("name"),
+      duration_estimate: row.get("duration_estimate"),
       user_generated_code_id: row.get("user_generated_code_id"),
       active: row.get("active"),
     }

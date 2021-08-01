@@ -12,6 +12,8 @@ use super::utils;
 use super::external_event_data_service;
 use super::external_event_service;
 use super::goal_data_service;
+use super::goal_dependency_service;
+use super::goal_entity_tag_service;
 use super::goal_event_service;
 use super::goal_intent_data_service;
 use super::goal_intent_service;
@@ -134,18 +136,6 @@ async fn fill_goal_data(
   .map_err(report_postgres_err)?
   .ok_or(response::TodoAppError::TimeUtilityFunctionNonexistent)?;
 
-  let parent_goal = match goal_data.parent_goal_id {
-    Some(parent_goal_id) => {
-      let goal = goal_service::get_by_goal_id(con, parent_goal_id)
-        .await
-        .map_err(report_postgres_err)?
-        .ok_or(response::TodoAppError::GoalNonexistent)?;
-
-      Some(fill_goal(con, goal).await?)
-    }
-    _ => None,
-  };
-
   Ok(response::GoalData {
     goal_data_id: goal_data.goal_data_id,
     creation_time: goal_data.creation_time,
@@ -154,7 +144,6 @@ async fn fill_goal_data(
     name: goal_data.name,
     duration_estimate: goal_data.duration_estimate,
     time_utility_function: fill_time_utility_function(con, time_utility_function).await?,
-    parent_goal,
     status: goal_data.status,
   })
 }
@@ -176,6 +165,55 @@ async fn fill_goal_event(
     start_time: goal_event.start_time,
     end_time: goal_event.end_time,
     active: goal_event.active,
+  })
+}
+
+async fn fill_goal_dependency(
+  con: &mut tokio_postgres::Client,
+  goal_dependency: GoalDependency,
+) -> Result<response::GoalDependency, response::TodoAppError> {
+  let goal = goal_service::get_by_goal_id(con, goal_dependency.goal_id)
+    .await
+    .map_err(report_postgres_err)?
+    .ok_or(response::TodoAppError::GoalNonexistent)?;
+
+  let dependent_goal = goal_service::get_by_goal_id(con, goal_dependency.dependent_goal_id)
+    .await
+    .map_err(report_postgres_err)?
+    .ok_or(response::TodoAppError::GoalNonexistent)?;
+
+  Ok(response::GoalDependency {
+    goal_dependency_id: goal_dependency.goal_dependency_id,
+    creation_time: goal_dependency.creation_time,
+    creator_user_id: goal_dependency.creator_user_id,
+    goal: fill_goal(con, goal).await?,
+    dependent_goal: fill_goal(con, dependent_goal).await?,
+    active: goal_dependency.active,
+  })
+}
+
+async fn fill_goal_entity_tag(
+  con: &mut tokio_postgres::Client,
+  goal_entity_tag: GoalEntityTag,
+) -> Result<response::GoalEntityTag, response::TodoAppError> {
+  let goal = goal_service::get_by_goal_id(con, goal_entity_tag.goal_id)
+    .await
+    .map_err(report_postgres_err)?
+    .ok_or(response::TodoAppError::GoalNonexistent)?;
+
+  let named_entity =
+    named_entity_service::get_by_named_entity_id(con, goal_entity_tag.named_entity_id)
+      .await
+      .map_err(report_postgres_err)?
+      .ok_or(response::TodoAppError::NamedEntityNonexistent)?;
+
+  Ok(response::GoalEntityTag {
+    goal_entity_tag_id: goal_entity_tag.goal_entity_tag_id,
+    creation_time: goal_entity_tag.creation_time,
+    creator_user_id: goal_entity_tag.creator_user_id,
+    goal: fill_goal(con, goal).await?,
+    named_entity: fill_named_entity(con, named_entity).await?,
+    active: goal_entity_tag.active,
   })
 }
 
@@ -227,6 +265,7 @@ async fn fill_goal_template_data(
     creator_user_id: goal_template_data.creator_user_id,
     goal_template: fill_goal_template(con, goal_template).await?,
     name: goal_template_data.name,
+    duration_estimate: goal_template_data.duration_estimate,
     user_generated_code: fill_user_generated_code(con, user_generated_code).await?,
     active: goal_template_data.active,
   })
@@ -541,10 +580,6 @@ pub async fn goal_new(
   // validate api key
   let user = get_user_if_api_key_valid(&auth_service, props.api_key).await?;
 
-  let con = &mut *db.lock().await;
-
-  let mut sp = con.transaction().await.map_err(report_postgres_err)?;
-
   // validate start and end time
   if let Some((start_time, end_time)) = props.time_span {
     if start_time < 0 {
@@ -554,6 +589,17 @@ pub async fn goal_new(
       return Err(response::TodoAppError::NegativeDuration);
     }
   }
+
+  // validate duration if exists
+  if let Some(duration_estimate) = props.duration_estimate {
+    if duration_estimate <= 0 {
+      return Err(response::TodoAppError::NegativeDuration);
+    }
+  }
+
+  let con = &mut *db.lock().await;
+
+  let mut sp = con.transaction().await.map_err(report_postgres_err)?;
 
   // ensure time utility function exists and belongs to you
   let time_utility_function = time_utility_function_service::get_by_time_utility_function_id(
@@ -566,18 +612,6 @@ pub async fn goal_new(
   // validate intent is owned by correct user
   if time_utility_function.creator_user_id != user.user_id {
     return Err(response::TodoAppError::TimeUtilityFunctionNonexistent);
-  }
-
-  // validate that parent exists and belongs to you
-  if let Some(parent_goal_id) = props.parent_goal_id {
-    let goal = goal_service::get_by_goal_id(&mut sp, parent_goal_id)
-      .await
-      .map_err(report_postgres_err)?
-      .ok_or(response::TodoAppError::GoalNonexistent)?;
-    // validate intent is owned by correct user
-    if goal.creator_user_id != user.user_id {
-      return Err(response::TodoAppError::GoalNonexistent);
-    }
   }
 
   // validate that intent exists and belongs to you
@@ -605,7 +639,6 @@ pub async fn goal_new(
     props.name,
     props.duration_estimate,
     props.time_utility_function_id,
-    props.parent_goal_id,
     request::GoalDataStatusKind::Pending,
   )
   .await
@@ -640,6 +673,13 @@ pub async fn goal_data_new(
   // validate api key
   let user = get_user_if_api_key_valid(&auth_service, props.api_key).await?;
 
+  // validate duration if exists
+  if let Some(duration_estimate) = props.duration_estimate {
+    if duration_estimate <= 0 {
+      return Err(response::TodoAppError::NegativeDuration);
+    }
+  }
+
   let con = &mut *db.lock().await;
 
   let mut sp = con.transaction().await.map_err(report_postgres_err)?;
@@ -655,18 +695,6 @@ pub async fn goal_data_new(
   // validate intent is owned by correct user
   if time_utility_function.creator_user_id != user.user_id {
     return Err(response::TodoAppError::TimeUtilityFunctionNonexistent);
-  }
-
-  // validate that parent exists and belongs to you
-  if let Some(parent_goal_id) = props.parent_goal_id {
-    let goal = goal_service::get_by_goal_id(&mut sp, parent_goal_id)
-      .await
-      .map_err(report_postgres_err)?
-      .ok_or(response::TodoAppError::GoalNonexistent)?;
-    // validate intent is owned by correct user
-    if goal.creator_user_id != user.user_id {
-      return Err(response::TodoAppError::GoalNonexistent);
-    }
   }
 
   // ensure that goal exists and belongs to you
@@ -687,7 +715,6 @@ pub async fn goal_data_new(
     props.name,
     props.duration_estimate,
     props.time_utility_function_id,
-    props.parent_goal_id,
     props.status,
   )
   .await
@@ -734,7 +761,7 @@ pub async fn goal_event_new(
   let goal_event = goal_event_service::add(
     &mut sp,
     user.user_id,
-    goal.goal_id,
+    props.goal_id,
     props.start_time,
     props.end_time,
     props.active,
@@ -748,6 +775,55 @@ pub async fn goal_event_new(
   fill_goal_event(con, goal_event).await
 }
 
+pub async fn goal_dependency_new(
+  _config: Config,
+  db: Db,
+  auth_service: AuthService,
+  props: request::GoalDependencyNewProps,
+) -> Result<response::GoalDependency, response::TodoAppError> {
+  // validate api key
+  let user = get_user_if_api_key_valid(&auth_service, props.api_key).await?;
+
+  let con = &mut *db.lock().await;
+
+  let mut sp = con.transaction().await.map_err(report_postgres_err)?;
+
+  // ensure that goal exists and belongs to you
+  let goal = goal_service::get_by_goal_id(&mut sp, props.goal_id)
+    .await
+    .map_err(report_postgres_err)?
+    .ok_or(response::TodoAppError::GoalNonexistent)?;
+  // validate intent is owned by correct user
+  if goal.creator_user_id != user.user_id {
+    return Err(response::TodoAppError::GoalNonexistent);
+  }
+
+  let dependent_goal = goal_service::get_by_goal_id(&mut sp, props.dependent_goal_id)
+    .await
+    .map_err(report_postgres_err)?
+    .ok_or(response::TodoAppError::GoalNonexistent)?;
+  // validate intent is owned by correct user
+  if dependent_goal.creator_user_id != user.user_id {
+    return Err(response::TodoAppError::GoalNonexistent);
+  }
+
+  // create goal dependency
+  let goal_dependency = goal_dependency_service::add(
+    &mut sp,
+    user.user_id,
+    props.goal_id,
+    props.dependent_goal_id,
+    props.active,
+  )
+  .await
+  .map_err(report_postgres_err)?;
+
+  sp.commit().await.map_err(report_postgres_err)?;
+
+  // return json
+  fill_goal_dependency(con, goal_dependency).await
+}
+
 pub async fn goal_template_new(
   _config: Config,
   db: Db,
@@ -756,6 +832,13 @@ pub async fn goal_template_new(
 ) -> Result<response::GoalTemplateData, response::TodoAppError> {
   // validate api key
   let user = get_user_if_api_key_valid(&auth_service, props.api_key).await?;
+
+  // validate duration if exists
+  if let Some(duration_estimate) = props.duration_estimate {
+    if duration_estimate <= 0 {
+      return Err(response::TodoAppError::NegativeDuration);
+    }
+  }
 
   let con = &mut *db.lock().await;
 
@@ -785,6 +868,7 @@ pub async fn goal_template_new(
     user.user_id,
     goal_template.goal_template_id,
     props.name,
+    props.duration_estimate,
     props.user_generated_code_id,
     true,
   )
@@ -805,6 +889,13 @@ pub async fn goal_template_data_new(
 ) -> Result<response::GoalTemplateData, response::TodoAppError> {
   // validate api key
   let user = get_user_if_api_key_valid(&auth_service, props.api_key).await?;
+
+  // validate duration if exists
+  if let Some(duration_estimate) = props.duration_estimate {
+    if duration_estimate <= 0 {
+      return Err(response::TodoAppError::NegativeDuration);
+    }
+  }
 
   let con = &mut *db.lock().await;
 
@@ -840,6 +931,7 @@ pub async fn goal_template_data_new(
     user.user_id,
     props.goal_template_id,
     props.name,
+    props.duration_estimate,
     props.user_generated_code_id,
     props.active,
   )
@@ -891,6 +983,56 @@ pub async fn goal_template_pattern_new(
 
   // return json
   fill_goal_template_pattern(con, goal_template_pattern).await
+}
+
+pub async fn goal_entity_tag_new(
+  _config: Config,
+  db: Db,
+  auth_service: AuthService,
+  props: request::GoalEntityTagNewProps,
+) -> Result<response::GoalEntityTag, response::TodoAppError> {
+  // validate api key
+  let user = get_user_if_api_key_valid(&auth_service, props.api_key).await?;
+
+  let con = &mut *db.lock().await;
+
+  let mut sp = con.transaction().await.map_err(report_postgres_err)?;
+
+  // validate that goal exists and belongs to you
+  let goal = goal_service::get_by_goal_id(&mut sp, props.goal_id)
+    .await
+    .map_err(report_postgres_err)?
+    .ok_or(response::TodoAppError::GoalNonexistent)?;
+  // validate entity is owned by correct user
+  if goal.creator_user_id != user.user_id {
+    return Err(response::TodoAppError::GoalNonexistent);
+  }
+
+  // validate that named  entity exists and belongs to you
+  let named_entity = named_entity_service::get_by_named_entity_id(&mut sp, props.named_entity_id)
+    .await
+    .map_err(report_postgres_err)?
+    .ok_or(response::TodoAppError::NamedEntityNonexistent)?;
+  // validate entity is owned by correct user
+  if named_entity.creator_user_id != user.user_id {
+    return Err(response::TodoAppError::NamedEntityNonexistent);
+  }
+
+  // create goal_entity tag
+  let goal_entity_tag = goal_entity_tag_service::add(
+    &mut sp,
+    user.user_id,
+    props.named_entity_id,
+    props.goal_id,
+    props.active,
+  )
+  .await
+  .map_err(report_postgres_err)?;
+
+  sp.commit().await.map_err(report_postgres_err)?;
+
+  // return json
+  fill_goal_entity_tag(con, goal_entity_tag).await
 }
 
 pub async fn named_entity_new(
@@ -1329,6 +1471,60 @@ pub async fn goal_event_view(
   }
 
   Ok(resp_goal_events)
+}
+
+pub async fn goal_dependency_view(
+  _config: Config,
+  db: Db,
+  auth_service: AuthService,
+  props: request::GoalDependencyViewProps,
+) -> Result<Vec<response::GoalDependency>, response::TodoAppError> {
+  // validate api key
+  let user = get_user_if_api_key_valid(&auth_service, props.api_key.clone()).await?;
+
+  let con = &mut *db.lock().await;
+  // get users
+  let goal_dependency = goal_dependency_service::query(con, props)
+    .await
+    .map_err(report_postgres_err)?;
+
+  // return goal_dependencys
+  let mut resp_goal_dependencys = vec![];
+  for u in goal_dependency
+    .into_iter()
+    .filter(|u| u.creator_user_id == user.user_id)
+  {
+    resp_goal_dependencys.push(fill_goal_dependency(con, u).await?);
+  }
+
+  Ok(resp_goal_dependencys)
+}
+
+pub async fn goal_entity_tag_view(
+  _config: Config,
+  db: Db,
+  auth_service: AuthService,
+  props: request::GoalEntityTagViewProps,
+) -> Result<Vec<response::GoalEntityTag>, response::TodoAppError> {
+  // validate api key
+  let user = get_user_if_api_key_valid(&auth_service, props.api_key.clone()).await?;
+
+  let con = &mut *db.lock().await;
+  // get users
+  let goal_entity_tag = goal_entity_tag_service::query(con, props)
+    .await
+    .map_err(report_postgres_err)?;
+
+  // return goal_entity_tags
+  let mut resp_goal_entity_tags = vec![];
+  for u in goal_entity_tag
+    .into_iter()
+    .filter(|u| u.creator_user_id == user.user_id)
+  {
+    resp_goal_entity_tags.push(fill_goal_entity_tag(con, u).await?);
+  }
+
+  Ok(resp_goal_entity_tags)
 }
 
 pub async fn time_utility_function_view(
