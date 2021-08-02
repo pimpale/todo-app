@@ -2,15 +2,20 @@ import { Table } from 'react-bootstrap';
 import update from 'immutability-helper';
 import ManageGoalIntent from '../components/ManageGoalIntent';
 import CreateHybridGoal from '../components/CreateHybridGoal';
+import {TemplateData} from '../components/ManageGoalTemplate';
+import {TagData} from '../components/ManageNamedEntity';
 import ManageGoal, { ManageGoalData } from '../components/ManageGoal';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { GoalIntentData } from '../utils/utils';
+
 
 type ManageHybridGoalTableProps = {
   goalIntentData: GoalIntentData[],
   setGoalIntentData: (gids: GoalIntentData[]) => void,
   data: ManageGoalData[],
   setData: (d: ManageGoalData[]) => void,
+  tags: TagData[],
+  templates: TemplateData[],
   apiKey: ApiKey,
   mutable: boolean,
   addable: boolean,
@@ -33,12 +38,16 @@ function ManageHybridGoalTable(props: ManageHybridGoalTableProps) {
     .filter(({ d }) => props.showInactive || d.gd.status !== "CANCEL")
 
   return <>
-    <CreateHybridGoal
-      apiKey={props.apiKey}
-      postSubmit={(gid) => {
-        props.setGoalIntentData(update(props.goalIntentData, { $push: [gid] }));
-      }}
-    />
+    {!props.addable ? false :
+      <CreateHybridGoal
+        apiKey={props.apiKey}
+        tags={props.tags}
+        templates={props.templates}
+        postSubmit={(gid) => {
+          props.setGoalIntentData(update(props.goalIntentData, { $push: [gid] }));
+        }}
+      />
+    }
     <Table hover bordered>
       <thead>
         <tr>
@@ -50,8 +59,8 @@ function ManageHybridGoalTable(props: ManageHybridGoalTableProps) {
       </thead>
       <tbody>
         {activeGoalIntents.length === 0 && activeGoalDataEvents.length === 0
-            ? <tr><td className="text-center" colSpan={4}>No Goals Yet</td></tr>
-            : <> </>
+          ? <tr><td className="text-center" colSpan={4}>No Goals Yet</td></tr>
+          : <> </>
         }
         {activeGoalIntents
           // reverse in order to see newest first
@@ -73,7 +82,7 @@ function ManageHybridGoalTable(props: ManageHybridGoalTableProps) {
         {activeGoalDataEvents
           // reverse in order to see newest first
           .reverse()
-          .map(({ d, i}) =>
+          .map(({ d, i }) =>
             <ManageGoal
               key={i}
               mutable={props.mutable}

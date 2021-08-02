@@ -60,9 +60,8 @@ create table goal_data(
   creator_user_id bigint not null,
   goal_id bigint not null references goal(goal_id),
   name text not null,
-  duration_estimate bigint not null,
+  duration_estimate bigint, -- if null, then is abstract
   time_utility_function_id bigint not null,
-  parent_goal_id bigint, -- NULLABLE
   status bigint not null -- enum
 );
 
@@ -95,6 +94,26 @@ create view recent_goal_event as
   ) maxids
   on maxids.id = ge.goal_event_id;
 
+-- represents a goal that must have status SUCCESS 
+drop table if exists goal_dependency cascade;
+create table goal_dependency(
+  goal_dependency_id bigserial primary key,
+  creation_time bigint not null,
+  creator_user_id bigint not null,
+  goal_id bigint not null references goal(goal_id),
+  dependent_goal_id bigint not null references goal(goal_id), -- the goal waits for this goal to resolve before marking is allowed
+  active bool not null
+);
+
+create view recent_goal_dependency as
+  select gd.* from goal_dependency gd
+  inner join (
+   select max(goal_dependency_id) id 
+   from goal_dependency 
+   group by goal_id, dependent_goal_id
+  ) maxids
+  on maxids.id = gd.goal_dependency_id;
+
 
 -- Maybe compiled functions
 drop table if exists user_generated_code cascade;
@@ -106,7 +125,6 @@ create table user_generated_code(
   source_lang text not null,
   wasm_cache bytea not null
 );
-
 
 -- how words trigger goal generation:
 -- when we see a pattern, we invoke the 
@@ -124,8 +142,8 @@ create table goal_template_data(
   creator_user_id bigint not null,
   goal_template_id bigint not null references goal_template(goal_template_id),
   name text not null,
-  -- this function is passed in an array of entities, and returns a goal_data
-  user_generated_code_id bigint not null references user_generated_code(user_generated_code_id),
+  duration_estimate bigint, -- NULLABLE if null, then is abstract
+  user_generated_code_id bigint not null references user_generated_code(user_generated_code_id), -- this function is run when a goal is templated
   active bool not null
 );
 
@@ -204,6 +222,26 @@ create view recent_named_entity_pattern as
    group by named_entity_id, pattern
   ) maxids
   on maxids.id = nep.named_entity_pattern_id;
+
+-- joining named entity to goal
+drop table if exists goal_entity_tag cascade;
+create table goal_entity_tag(
+  goal_entity_tag_id bigserial primary key,
+  creation_time bigint not null,
+  creator_user_id bigint not null,
+  named_entity_id bigint not null references named_entity(named_entity_id),
+  goal_id bigint not null references goal(goal_id),
+  active bool not null
+);
+
+create view recent_goal_entity_tag as
+  select get.* from goal_entity_tag get
+  inner join (
+   select max(goal_entity_tag_id) id 
+   from goal_entity_tag 
+   group by goal_id, named_entity_id
+  ) maxids
+  on maxids.id = get.goal_entity_tag_id;
 
 
 drop table if exists external_event cascade;

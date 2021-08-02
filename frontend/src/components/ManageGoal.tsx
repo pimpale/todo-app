@@ -138,12 +138,14 @@ function EditGoal(props: EditGoalProps) {
       onSubmit={onSubmit}
       initialValues={{
         name: props.goalData.name,
-        durationEstimate: formatDuration(
-          intervalToDuration({
-            start: 0,
-            end: props.goalData.durationEstimate
-          })
-        ),
+        durationEstimate: props.goalData.durationEstimate === undefined
+          ? ""
+          : formatDuration(
+            intervalToDuration({
+              start: 0,
+              end: props.goalData.durationEstimate
+            })
+          ),
         points: props.goalData.timeUtilityFunction.startTimes.map((t, i) => ({ x: t, y: props.goalData.timeUtilityFunction.utils[i] }))
       }}
       initialStatus={{
@@ -319,12 +321,15 @@ const ManageGoal = (props: {
         : "NOT SCHEDULED"
       }
       <br />
-      <small>Estimate: {
-        formatDuration(intervalToDuration({
-          start: 0,
-          end: props.data.gd.durationEstimate
-        }))
-      }</small>
+      {props.data.gd.durationEstimate === undefined
+        ? false
+        : <small>Estimate: {
+          formatDuration(intervalToDuration({
+            start: 0,
+            end: props.data.gd.durationEstimate
+          }))
+        }</small>
+      }
     </td>
     <td>
       <UtilityPicker
@@ -359,7 +364,7 @@ const ManageGoal = (props: {
         goalData={props.data.gd}
         setGoalData={(gd) => {
           setShowEditGoal(false);
-          props.setData(update(props.data, {gd: {$set: gd }}));
+          props.setData(update(props.data, { gd: { $set: gd } }));
         }}
         apiKey={props.apiKey}
       />
@@ -374,7 +379,7 @@ const ManageGoal = (props: {
         apiKey={props.apiKey}
         setGoalData={(gd) => {
           setShowCancelGoal(false);
-          props.setData(update(props.data, {gd: {$set: gd }}));
+          props.setData(update(props.data, { gd: { $set: gd } }));
         }}
       />
     </DisplayModal>

@@ -12,6 +12,7 @@ impl From<tokio_postgres::row::Row> for GoalTemplateData {
       creator_user_id: row.get("creator_user_id"),
       goal_template_id: row.get("goal_template_id"),
       name: row.get("name"),
+      duration_estimate: row.get("duration_estimate"),
       user_generated_code_id: row.get("user_generated_code_id"),
       active: row.get("active"),
     }
@@ -24,6 +25,7 @@ pub async fn add(
   creator_user_id: i64,
   goal_template_id: i64,
   name: String,
+  duration_estimate: Option<i64>,
   user_generated_code_id: i64,
   active: bool,
 ) -> Result<GoalTemplateData, tokio_postgres::Error> {
@@ -37,10 +39,11 @@ pub async fn add(
            creator_user_id,
            goal_template_id,
            name,
+           duration_estimate,
            user_generated_code_id,
            active
        )
-       VALUES ($1, $2, $3, $4, $5, $6)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING goal_template_data_id
       ",
       &[
@@ -48,6 +51,7 @@ pub async fn add(
         &creator_user_id,
         &goal_template_id,
         &name,
+        &duration_estimate,
         &user_generated_code_id,
         &active,
       ],
@@ -62,6 +66,7 @@ pub async fn add(
     goal_template_id,
     name,
     user_generated_code_id,
+    duration_estimate,
     active,
   })
 }
@@ -98,8 +103,11 @@ pub async fn query(
     " AND ($4::bigint[]  IS NULL OR gtd.creator_user_id = ANY($4))",
     " AND ($5::bigint[]  IS NULL OR gtd.goal_template_id = ANY($5))",
     " AND ($6::text[]    IS NULL OR gtd.name = ANY($6))",
-    " AND ($7::bigint[]  IS NULL OR gtd.user_generated_code_id = ANY($7))",
-    " AND ($8::bool      IS NULL OR gtd.active = $8)",
+    " AND ($7::bigint    IS NULL OR gtd.duration_estimate >= $7)",
+    " AND ($8::bigint    IS NULL OR gtd.duration_estimate <= $8)",
+    " AND ($9::bool      IS NULL OR gtd.duration_estimate IS NOT NULL)",
+    " AND ($10::bigint[] IS NULL OR gtd.user_generated_code_id = ANY($10))",
+    " AND ($11::bool     IS NULL OR gtd.active = $11)",
     " ORDER BY gtd.goal_template_data_id",
   ]
   .join("\n");
@@ -116,6 +124,9 @@ pub async fn query(
         &props.creator_user_id,
         &props.goal_template_id,
         &props.name,
+        &props.min_duration_estimate,
+        &props.max_duration_estimate,
+        &props.concrete,
         &props.user_generated_code_id,
         &props.active,
       ],

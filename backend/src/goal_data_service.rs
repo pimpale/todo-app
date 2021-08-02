@@ -15,7 +15,6 @@ impl From<tokio_postgres::row::Row> for GoalData {
       name: row.get("name"),
       duration_estimate: row.get("duration_estimate"),
       time_utility_function_id: row.get("time_utility_function_id"),
-      parent_goal_id: row.get("parent_goal_id"),
       status: (row.get::<_, i64>("status") as u8).try_into().unwrap(),
     }
   }
@@ -27,9 +26,8 @@ pub async fn add(
   creator_user_id: i64,
   goal_id: i64,
   name: String,
-  duration_estimate: i64,
+  duration_estimate: Option<i64>,
   time_utility_function_id: i64,
-  parent_goal_id: Option<i64>,
   status: request::GoalDataStatusKind,
 ) -> Result<GoalData, tokio_postgres::Error> {
   let creation_time = current_time_millis();
@@ -44,10 +42,9 @@ pub async fn add(
            name,
            duration_estimate,
            time_utility_function_id,
-           parent_goal_id,
            status
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING goal_data_id
       ",
       &[
@@ -57,7 +54,6 @@ pub async fn add(
         &name,
         &duration_estimate,
         &time_utility_function_id,
-        &parent_goal_id,
         &(status.clone() as i64),
       ],
     )
@@ -73,7 +69,6 @@ pub async fn add(
     name,
     duration_estimate,
     time_utility_function_id,
-    parent_goal_id,
     status,
   })
 }
@@ -113,8 +108,8 @@ pub async fn query(
     " AND ($6::text[]    IS NULL OR gd.name = ANY($6))",
     " AND ($7::bigint    IS NULL OR gd.duration_estimate >= $7)",
     " AND ($8::bigint    IS NULL OR gd.duration_estimate <= $8)",
-    " AND ($9::bigint[]  IS NULL OR gd.time_utility_function_id = ANY($9))",
-    " AND ($10::bigint[] IS NULL OR gd.parent_goal_id = ANY($10))",
+    " AND ($9::bool      IS NULL OR gd.duration_estimate IS NOT NULL)",
+    " AND ($10::bigint[] IS NULL OR gd.time_utility_function_id = ANY($10))",
     " AND ($11::bigint[] IS NULL OR gd.status = ANY($11))",
     " AND ($12::bigint[] IS NULL OR g.goal_intent_id = ANY($12) IS TRUE)",
     " AND ($13::bool     IS NULL OR ge.active = $13 IS TRUE)",
@@ -136,8 +131,8 @@ pub async fn query(
         &props.name,
         &props.min_duration_estimate,
         &props.max_duration_estimate,
+        &props.concrete,
         &props.time_utility_function_id,
-        &props.parent_goal_id,
         &props
           .status
           .map(|x| x.into_iter().map(|x| x as i64).collect::<Vec<i64>>()),

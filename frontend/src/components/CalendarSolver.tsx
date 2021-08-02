@@ -188,7 +188,7 @@ function ICalendarSolver(props: ICalendarSolverProps) {
 
 const loadSolverData = async (props: AsyncProps<SolverGoalData[]>) => {
   const goalData = await goalDataView({
-    creatorUserId: [props.apiKey.creator.userId],
+    creatorUserId: [props.apiKey.creatorUserId],
     status: ["PENDING"],
     scheduled: true,
     onlyRecent: true,

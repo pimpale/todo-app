@@ -31,7 +31,7 @@ function SearchForm(props: SearchProps) {
     }
 
     const maybeGoalData = await goalDataView({
-      creatorUserId: [props.apiKey.creator.userId],
+      creatorUserId: [props.apiKey.creatorUserId],
       status: ["PENDING"],
       onlyRecent: true,
       apiKey: props.apiKey.key,

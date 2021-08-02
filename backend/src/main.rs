@@ -20,6 +20,8 @@ mod goal_event_service;
 mod goal_intent_data_service;
 mod goal_intent_service;
 mod goal_service;
+mod goal_dependency_service;
+mod goal_entity_tag_service;
 mod goal_template_data_service;
 mod goal_template_pattern_service;
 mod goal_template_service;

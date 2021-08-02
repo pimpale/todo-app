@@ -96,21 +96,21 @@ function UtilityPicker(props: UtilityPickerProps) {
       },
     },
     scales: {
-      xAxes: [{
+      x: {
         type: 'linear',
         min: start,
         max: end,
         ticks: {
           callback: (v: number) => format(v, "hh:mm a")
         }
-      }],
-      yAxes: [{
+      },
+      y: {
         type: 'linear',
         beginAtZero: true,
         steps: 1,
         stepValue: 1,
         max: 120
-      }],
+      },
     },
     legend: {
       display: false
@@ -197,7 +197,7 @@ function UtilityPicker(props: UtilityPickerProps) {
       </Col>
     </Row>
     <Line
-      options={lineOptions}
+      options={lineOptions as any}
       data={lineData} />
   </>
 }

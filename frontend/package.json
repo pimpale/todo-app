@@ -11,7 +11,7 @@
     "@fullcalendar/list": "^5.5.0",
     "@fullcalendar/react": "^5.5.0",
     "@fullcalendar/timegrid": "^5.5.1",
-    "@innexgo/frontend-auth-api": "^0.2.24",
+    "@innexgo/frontend-auth-api": "^0.2.25",
     "@innexgo/frontend-common": "^0.0.8",
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
@@ -49,7 +49,7 @@
     "typeface-ubuntu": "^1.1.13",
     "typescript": "^4.2.2",
     "wink-eng-lite-web-model": "^1.2.1",
-    "wink-nlp": "^1.7.2"
+    "wink-nlp": "^1.8.0"
   },
   "devDependencies": {
     "concurrently": "^6.2.0",
