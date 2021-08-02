@@ -3,7 +3,7 @@ import update from 'immutability-helper';
 import { Col, Row, Card, Form, Button } from 'react-bootstrap';
 import DisplayModal from '../components/DisplayModal';
 import UtilityPicker from '../components/UtilityPicker';
-import { GoalTemplateData, GoalTemplatePattern, timeUtilityFunctionNew, goalTemplateDataNew } from '../utils/utils';
+import { GoalTemplateData, GoalTemplatePattern,  goalTemplateDataNew } from '../utils/utils';
 import { isErr } from '@innexgo/frontend-common';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { Edit, Cancel, } from '@material-ui/icons';
@@ -13,7 +13,7 @@ import formatDuration from 'date-fns/formatDuration';
 import intervalToDuration from 'date-fns/intervalToDuration';
 import format from 'date-fns/format';
 
-export type TemplateData  = {
+export type TemplateData = {
   gtd: GoalTemplateData,
   gtp: GoalTemplatePattern[],
 }
@@ -29,7 +29,7 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
   type EditGoalTemplateValue = {
     name: string,
     durationEstimate: string,
-    points: { x: number, y: number }[]
+    abstract:boolean,
   }
 
   const onSubmit = async (values: EditGoalTemplateValue,
@@ -55,46 +55,12 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
       return;
     }
 
-    // TODO: check if utility function has been changed before creating a new one
-    // this will be more efficient
-    const maybeTimeUtilFunction = await timeUtilityFunctionNew({
-      startTimes: values.points.map(p => p.x),
-      utils: values.points.map(p => p.y),
-      apiKey: props.apiKey.key,
-    })
-
-    if (isErr(maybeTimeUtilFunction)) {
-      switch (maybeTimeUtilFunction.Err) {
-        case "UNAUTHORIZED": {
-          fprops.setStatus({
-            failureResult: "You have been automatically logged out. Please relogin.",
-            successResult: ""
-          });
-          break;
-        }
-        case "TIME_UTILITY_FUNCTION_NOT_VALID": {
-          fprops.setErrors({
-            points: "Utility function is invalid."
-          });
-          break;
-        }
-        default: {
-          fprops.setStatus({
-            failureResult: "An unknown or network error has occured while trying to create utility function.",
-            successResult: ""
-          });
-          break;
-        }
-      }
-      return;
-    }
-
     const maybeGoalTemplateData = await goalTemplateDataNew({
-      goalTemplateId: props.goalTemplateData.goalTemplate.goalTemplateId,
+      goalTemplateId: props.data.gtd.goalTemplate.goalTemplateId,
       name: values.name,
-      durationEstimate: durationEstimate!,
-      timeUtilityFunctionId: maybeTimeUtilFunction.Ok.timeUtilityFunctionId,
-      status: props.goalTemplateData.status,
+      durationEstimate: durationEstimate === null ? undefined : durationEstimate,
+      userGeneratedCodeId: props.data.gtd.userGeneratedCode.userGeneratedCodeId,
+      active: props.data.gtd.active,
       apiKey: props.apiKey.key,
     })
 
@@ -109,7 +75,7 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
           });
           break;
         }
-        case "GOALTemplate_NONEXISTENT": {
+        case "GOAL_TEMPLATE_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "This goalTemplate does not exist.",
             successResult: ""
@@ -133,23 +99,23 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
     });
 
     // execute callback
-    props.setGoalTemplateData(maybeGoalTemplateData.Ok);
+    props.setData({ gtd: maybeGoalTemplateData.Ok, gtp: props.data.gtp });
   }
 
   return <>
     <Formik<EditGoalTemplateValue>
       onSubmit={onSubmit}
       initialValues={{
-        name: props.goalTemplateData.name,
-        durationEstimate: props.goalTemplateData.durationEstimate === undefined
+        name: props.data.gtd.name,
+        abstract: props.data.gtd.durationEstimate === undefined,
+        durationEstimate: props.data.gtd.durationEstimate === undefined
           ? ""
           : formatDuration(
             intervalToDuration({
               start: 0,
-              end: props.goalTemplateData.durationEstimate
+              end: props.data.gtd.durationEstimate
             })
           ),
-        points: props.goalTemplateData.timeUtilityFunction.startTimes.map((t, i) => ({ x: t, y: props.goalTemplateData.timeUtilityFunction.utils[i] }))
       }}
       initialStatus={{
         failureResult: "",
@@ -189,22 +155,6 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
                 <Form.Control.Feedback type="invalid">{fprops.errors.durationEstimate}</Form.Control.Feedback>
               </Form.Group>
             </Row>
-            <Form.Group>
-              <Card>
-                <Card.Body>
-                  <UtilityPicker
-                    span={[
-                      Math.min(...fprops.values.points.map(p => p.x)) - 100000,
-                      Math.max(...fprops.values.points.map(p => p.x)) + 100000
-                    ]}
-                    points={fprops.values.points}
-                    setPoints={p => fprops.setFieldValue("points", p)}
-                    mutable
-                  />
-                </Card.Body>
-              </Card>
-              <Form.Text className="text-danger">{fprops.errors.points}</Form.Text>
-            </Form.Group>
             <Button type="submit">Submit</Button>
             <br />
             <Form.Text className="text-danger">{fprops.status.failureResult}</Form.Text>
@@ -233,9 +183,9 @@ function CancelGoalTemplate(props: CancelGoalTemplateProps) {
       goalTemplateId: props.goalTemplateData.goalTemplate.goalTemplateId,
       apiKey: props.apiKey.key,
       name: props.goalTemplateData.name,
+      userGeneratedCodeId: props.goalTemplateData.userGeneratedCode.userGeneratedCodeId,
       durationEstimate: props.goalTemplateData.durationEstimate,
-      timeUtilityFunctionId: props.goalTemplateData.timeUtilityFunction.timeUtilityFunctionId,
-      status: "CANCEL",
+      active: false,
     });
 
     if (isErr(maybeGoalTemplateData)) {
@@ -247,7 +197,7 @@ function CancelGoalTemplate(props: CancelGoalTemplateProps) {
           });
           break;
         }
-        case "GOALTemplate_NONEXISTENT": {
+        case "GOAL_TEMPLATE_NONEXISTENT": {
           fprops.setStatus({
             failureResult: "This goalTemplate does not exist.",
             successResult: ""
@@ -332,7 +282,7 @@ const ManageGoalTemplate = (props: {
         <Edit />
       </Button>
       <Button variant="link" onClick={_ => setShowCancelGoalTemplate(true)}
-        hidden={props.data.gtd.status == "CANCEL" || !props.mutable}
+        hidden={!(props.data.gtd.active && props.mutable)}
       >
         <Cancel />
       </Button>
@@ -343,10 +293,10 @@ const ManageGoalTemplate = (props: {
       onClose={() => setShowEditGoalTemplate(false)}
     >
       <EditGoalTemplate
-        goalTemplateData={props.data.gtd}
-        setGoalTemplateData={(gtd) => {
+        data={props.data}
+        setData={(gtd) => {
           setShowEditGoalTemplate(false);
-          props.setData(update(props.data, { gtd: { $set: gtd } }));
+          props.setData(update(props.data, { $set: gtd }));
         }}
         apiKey={props.apiKey}
       />

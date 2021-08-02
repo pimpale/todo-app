@@ -85,10 +85,8 @@ function Settings(props: AuthenticatedComponentProps) {
                 </Async.Rejected>
                 <Async.Fulfilled<SettingsData>>{dd =>
                   <ManageGoalTemplateTable
-                    data={dd.data}
-                    setData={(d) => setData(update(dd, { data: { $set: d } }))}
-                    tags={dd.tags}
                     templates={dd.templates}
+                    setTemplates={(d) => setData(update(dd, { templates: { $set: d } }))}
                     apiKey={props.apiKey}
                     mutable
                     addable
