@@ -4,7 +4,8 @@ import update from 'immutability-helper';
 import Section from '../components/Section';
 import ErrorMessage from '../components/ErrorMessage';
 import DashboardLayout from '../components/DashboardLayout';
-import { HybridGoalTemplateData, HybridNamedEntityData } from '../components/CreateHybridGoal';
+import { TemplateData } from '../components/ManageGoalTemplate';
+import { TagData } from '../components/ManageNamedEntity';
 import ManageHybridGoalTable from '../components/ManageHybridGoalTable';
 import { ManageGoalData } from '../components/ManageGoal';
 import Loader from '../components/Loader';
@@ -16,8 +17,8 @@ import { AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
 type DashboardData = {
   goalIntentData: GoalIntentData[],
   data: ManageGoalData[],
-  tags: HybridNamedEntityData[],
-  templates: HybridGoalTemplateData[],
+  tags: TagData[],
+  templates: TemplateData[],
 }
 
 const loadDashboardData = async (props: AsyncProps<DashboardData>) => {

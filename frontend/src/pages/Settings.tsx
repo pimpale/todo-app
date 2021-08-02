@@ -1,47 +1,107 @@
-import React from 'react';
-import { Form, Container } from 'react-bootstrap'
-
-import UtilityWrapper from '../components/UtilityWrapper';
-
+import { Row, Container, Col } from 'react-bootstrap';
+import { Async, AsyncProps } from 'react-async';
+import update from 'immutability-helper';
+import Section from '../components/Section';
+import ErrorMessage from '../components/ErrorMessage';
 import DashboardLayout from '../components/DashboardLayout';
-import CreatePassword from '../components/CreatePassword';
-import ManageUserData from '../components/ManageUserData';
+import { TemplateData } from '../components/ManageGoalTemplate';
+import { TagData } from '../components/ManageNamedEntity';
+import ManageGoalTemplateTable from '../components/ManageGoalTemplateTable';
+import Loader from '../components/Loader';
+import { namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, } from '../utils/utils';
+import { unwrap } from '@innexgo/frontend-common';
+
 import { AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
 
-function Settings(props: AuthenticatedComponentProps) {
-  // TODO actually add backend components to handle changing the name properly
-  // Also, make the name and email and password changes into one box initially
-  // Then, when you click on them to change, a modal should pop up
-  // IMO this would look better than the tiny boxes we have now
+type SettingsData = {
+  tags: TagData[],
+  templates: TemplateData[],
+}
 
-  const [passwdSuccess, setPasswdSuccess] = React.useState(false);
-  const [nameSuccess, setNameSuccess] = React.useState(false);
+const loadSettingsData = async (props: AsyncProps<SettingsData>) => {
+
+  const goalTemplateData = await goalTemplateDataView({
+    creatorUserId: [props.apiKey.creatorUserId],
+    active: true,
+    onlyRecent: true,
+    apiKey: props.apiKey.key,
+  })
+    .then(unwrap)
+
+  const namedEntityData = await namedEntityDataView({
+    creatorUserId: [props.apiKey.creatorUserId],
+    active: true,
+    onlyRecent: true,
+    apiKey: props.apiKey.key,
+  })
+    .then(unwrap)
+
+  const namedEntityPatterns = await namedEntityPatternView({
+    namedEntityId: namedEntityData.map(gtd => gtd.namedEntity.namedEntityId),
+    active: true,
+    onlyRecent: true,
+    apiKey: props.apiKey.key
+  })
+    .then(unwrap);
+
+  // group patterns by tag
+  const tags = namedEntityData.map(ned => ({
+    ned,
+    nep: namedEntityPatterns.filter(nep => nep.namedEntity.namedEntityId === ned.namedEntity.namedEntityId)
+  }));
+
+  const goalTemplatePatterns = await goalTemplatePatternView({
+    goalTemplateId: goalTemplateData.map(gtd => gtd.goalTemplate.goalTemplateId),
+    active: true,
+    onlyRecent: true,
+    apiKey: props.apiKey.key
+  })
+    .then(unwrap);
+
+  // group patterns by template
+  const templates = goalTemplateData.map(gtd => ({
+    gtd,
+    gtp: goalTemplatePatterns.filter(gtp => gtp.goalTemplate.goalTemplateId === gtd.goalTemplate.goalTemplateId)
+  }));
+
+  return {
+    tags,
+    templates,
+  }
+}
+
+
+function Settings(props: AuthenticatedComponentProps) {
   return <DashboardLayout {...props}>
     <Container fluid className="py-4 px-4">
-      <div className="mx-3 my-3">
-        <UtilityWrapper title="Change Password">
-          <span>
-            Shows basic information about this course.
-          </span>
-          {passwdSuccess
-            ? <Form.Text className="text-success">Password changed successfully</Form.Text>
-            : <CreatePassword apiKey={props.apiKey} onSuccess={() => setPasswdSuccess(true)} />
-          }
-        </UtilityWrapper>
-      </div>
-      <div className="mx-3 my-3">
-        <UtilityWrapper title="Change Name">
-          <span>
-            Change your name
-          </span>
-          {nameSuccess
-            ? <Form.Text className="text-success">Name changed successfully</Form.Text>
-            : <ManageUserData apiKey={props.apiKey} onSuccess={() => setNameSuccess(true)} />
-          }
-        </UtilityWrapper>
-      </div>
+      <Row className="justify-content-md-center">
+        <Col md={6}>
+          <Section id="goalIntents" name="My Goals">
+            <Async promiseFn={loadSettingsData} apiKey={props.apiKey}>
+              {({ setData }) => <>
+                <Async.Pending><Loader /></Async.Pending>
+                <Async.Rejected>
+                  {e => <ErrorMessage error={e} />}
+                </Async.Rejected>
+                <Async.Fulfilled<SettingsData>>{dd =>
+                  <ManageGoalTemplateTable
+                    data={dd.data}
+                    setData={(d) => setData(update(dd, { data: { $set: d } }))}
+                    tags={dd.tags}
+                    templates={dd.templates}
+                    apiKey={props.apiKey}
+                    mutable
+                    addable
+                    showInactive={false}
+                  />
+                }</Async.Fulfilled>
+              </>}
+            </Async>
+          </Section>
+        </Col>
+      </Row>
     </Container>
   </DashboardLayout>
 }
-
 export default Settings;
+

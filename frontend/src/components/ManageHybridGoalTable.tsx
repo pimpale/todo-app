@@ -1,7 +1,8 @@
 import { Table } from 'react-bootstrap';
 import update from 'immutability-helper';
 import ManageGoalIntent from '../components/ManageGoalIntent';
-import CreateHybridGoal, { HybridGoalTemplateData, HybridNamedEntityData } from '../components/CreateHybridGoal';
+import CreateHybridGoal from '../components/CreateHybridGoal';
+import {TagData, TemplateData} from '../components/ManageGoalTemplate';
 import ManageGoal, { ManageGoalData } from '../components/ManageGoal';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { GoalIntentData } from '../utils/utils';
@@ -12,8 +13,8 @@ type ManageHybridGoalTableProps = {
   setGoalIntentData: (gids: GoalIntentData[]) => void,
   data: ManageGoalData[],
   setData: (d: ManageGoalData[]) => void,
-  tags: HybridNamedEntityData[],
-  templates: HybridGoalTemplateData[],
+  tags: TagData[],
+  templates: TemplateData[],
   apiKey: ApiKey,
   mutable: boolean,
   addable: boolean,

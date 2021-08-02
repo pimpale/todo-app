@@ -334,7 +334,7 @@ export interface GoalTemplateNewProps {
   apiKey: string,
 }
 
-export function goalTemplateNew(props: GoalTemplateNewProps): Promise<Result<GoalTemplate, TodoAppErrorCode>> {
+export function goalTemplateNew(props: GoalTemplateNewProps): Promise<Result<GoalTemplateData, TodoAppErrorCode>> {
   return fetchApiOrNetworkError("todo_app/goal_template/new", props);
 }
 

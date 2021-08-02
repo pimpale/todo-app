@@ -28,6 +28,9 @@ import Dashboard from './pages/Dashboard';
 // settings
 import Settings from './pages/Settings';
 
+// account
+import Account from './pages/Account';
+
 // search
 import Search from './pages/Search';
 
@@ -71,6 +74,7 @@ function App() {
         <AuthenticatedRoute path="/calendar" {...apiKeyGetSetter} component={Calendar} />
         <AuthenticatedRoute path="/dashboard" {...apiKeyGetSetter} component={Dashboard} />
         <AuthenticatedRoute path="/settings" {...apiKeyGetSetter} component={Settings} />
+        <AuthenticatedRoute path="/account" {...apiKeyGetSetter} component={Account} />
         <AuthenticatedRoute path="/search" {...apiKeyGetSetter} component={Search} />
         <Route path="/" component={Error404} />
       </Switch>

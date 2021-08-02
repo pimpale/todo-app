@@ -1,25 +1,18 @@
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Form } from "react-bootstrap";
-import { goalIntentNew, GoalIntentData, GoalTemplateData, GoalTemplatePattern, NamedEntityData, NamedEntityPattern } from "../utils/utils";
+import { goalIntentNew, GoalIntentData, } from "../utils/utils";
+import { TemplateData } from '../components/ManageGoalTemplate';
+import { TagData } from '../components/ManageNamedEntity';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { isErr, unwrap } from '@innexgo/frontend-common';
 import winkNlp from 'wink-nlp';
 import model from 'wink-eng-lite-web-model';
 
-export type HybridNamedEntityData = {
-  ned: NamedEntityData,
-  nep: NamedEntityPattern[],
-}
-
-export type HybridGoalTemplateData = {
-  gtd: GoalTemplateData,
-  gtp: GoalTemplatePattern[],
-}
 
 type CreateHybridGoalProps = {
   apiKey: ApiKey;
-  tags: HybridNamedEntityData[];
-  templates: HybridGoalTemplateData[];
+  tags: TagData[];
+  templates: TemplateData[];
   postSubmit: (gid: GoalIntentData) => void;
 }
 
@@ -93,6 +86,7 @@ function CreateHybridGoal(props: CreateHybridGoalProps) {
         ]
       }
     ]);
+
 
     let doc = nlp.readDoc(values.name);
     // recognize

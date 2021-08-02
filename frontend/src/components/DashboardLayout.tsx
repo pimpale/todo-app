@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dashboard, Event, Settings, Search } from '@material-ui/icons';
+import { Dashboard, Event, Settings, Search, Person} from '@material-ui/icons';
 import { AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
 
 import InnerLayout from '../components/InnerLayout';
@@ -10,6 +10,7 @@ export default function DashboardLayout(props: React.PropsWithChildren<Authentic
     <InnerLayout.SidebarEntry label="Calendar" icon={Event} href="/calendar" />
     <InnerLayout.SidebarEntry label="Search" icon={Search} href="/search" />
     <InnerLayout.SidebarEntry label="Settings" icon={Settings} href="/settings" />
+    <InnerLayout.SidebarEntry label="Account" icon={Person} href="/account" />
     <InnerLayout.Body>
       {props.children}
     </InnerLayout.Body>

@@ -239,7 +239,7 @@ create view recent_goal_entity_tag as
   inner join (
    select max(goal_entity_tag_id) id 
    from goal_entity_tag 
-   group by goal_entity_id, named_entity_id
+   group by goal_id, named_entity_id
   ) maxids
   on maxids.id = get.goal_entity_tag_id;
 
