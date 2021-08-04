@@ -2,8 +2,8 @@ import React from 'react';
 import update from 'immutability-helper';
 import { Col, Row, Badge, Form, Button } from 'react-bootstrap';
 import DisplayModal from '../components/DisplayModal';
-import { GoalTemplateData, GoalTemplatePattern, goalTemplateDataNew } from '../utils/utils';
-import { isErr } from '@innexgo/frontend-common';
+import { GoalTemplateData, GoalTemplatePattern, goalTemplateDataNew, goalTemplatePatternNew } from '../utils/utils';
+import { isErr, unwrap } from '@innexgo/frontend-common';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { Edit, Cancel, } from '@material-ui/icons';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
@@ -64,8 +64,6 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
       apiKey: props.apiKey.key,
     })
 
-    // TODO also modify time
-
     if (isErr(maybeGoalTemplateData)) {
       switch (maybeGoalTemplateData.Err) {
         case "UNAUTHORIZED": {
@@ -93,13 +91,48 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
       return;
     }
 
+    let goalTemplateData = maybeGoalTemplateData.Ok;
+
+
+    // the most recent server side saved patterns
+    const currentPatterns = props.data.gtp.map(gtp => gtp.pattern);
+
+    // this will be our returned set of patterns
+    // start with all goals that were unchanged
+    let gtp = props.data.gtp.filter(x => values.patterns.includes(x.pattern));
+
+    // to add contains all the patterns that will be added
+    const toAdd = values.patterns.filter(x => !currentPatterns.includes(x));
+
+    for (const pattern of toAdd) {
+      const goalTemplatePattern = await goalTemplatePatternNew({
+        goalTemplateId: goalTemplateData.goalTemplate.goalTemplateId,
+        pattern,
+        active: true,
+        apiKey: props.apiKey.key
+      }).then(unwrap);
+      // add it to new most recent data
+      gtp.push(goalTemplatePattern);
+    }
+
+    // this is all the patterns tht will be deactivated
+    const toRemove = currentPatterns.filter(x => !values.patterns.includes(x));
+    for (const pattern of toRemove) {
+      await goalTemplatePatternNew({
+        goalTemplateId: goalTemplateData.goalTemplate.goalTemplateId,
+        pattern,
+        active: false,
+        apiKey: props.apiKey.key
+      }).then(unwrap);
+    }
+
     fprops.setStatus({
       failureResult: "",
       successResult: "GoalTemplate Successfully Modified"
     });
 
     // execute callback
-    props.setData({ gtd: maybeGoalTemplateData.Ok, gtp: props.data.gtp });
+    props.setData({ gtd: goalTemplateData, gtp });
   }
 
   return <>
@@ -116,7 +149,7 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
               end: props.data.gtd.durationEstimate
             })
           ),
-        patterns: [],
+        patterns: props.data.gtp.map(gtp => gtp.pattern),
       }}
       initialStatus={{
         failureResult: "",
@@ -160,11 +193,11 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
               placeholder="Goal Patterns"
               chips={fprops.values.patterns}
               onSubmit={(value: string) => {
-                console.log(fprops.values.patterns);
                 fprops.setFieldValue('patterns', update(fprops.values.patterns, { $push: [value] }));
               }}
               onRemove={(index: number) => fprops.setFieldValue('patterns', fprops.values.patterns.filter((_, i) => i != index))}
             />
+            <br />
             <Button type="submit">Submit</Button>
             <br />
             <Form.Text className="text-danger">{fprops.status.failureResult}</Form.Text>
@@ -286,9 +319,10 @@ const ManageGoalTemplate = (props: {
       }
     </td>
     <td>
-    {
-        props.data.gtp.map((gtp, i) => <Badge key={i} variant="secondary" className="m-1">{gtp.pattern}</Badge>)
-    }
+      {
+        props.data.gtp
+          .map((gtp, i) => <Badge key={i} variant="secondary" className="m-1">{gtp.pattern}</Badge>)
+      }
     </td>
     <td>
       <Button variant="link" onClick={_ => setShowEditGoalTemplate(true)} hidden={!props.mutable}>

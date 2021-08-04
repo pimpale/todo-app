@@ -183,7 +183,6 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
             placeholder="Goal Patterns"
             chips={fprops.values.patterns}
             onSubmit={(value: string) => {
-              console.log(fprops.values.patterns);
               fprops.setFieldValue('patterns', update(fprops.values.patterns, { $push: [value] }));
             }}
             onRemove={(index: number) => fprops.setFieldValue('patterns', fprops.values.patterns.filter((_, i) => i != index))}
