@@ -1,9 +1,13 @@
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
-import { Form } from "react-bootstrap";
-import { goalTemplateNew, userGeneratedCodeNew } from "../utils/utils";
+import { Form, Button } from "react-bootstrap";
+import { goalTemplateNew, goalTemplatePatternNew, userGeneratedCodeNew } from "../utils/utils";
 import { TemplateData } from '../components/ManageGoalTemplate';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { isErr, unwrap } from '@innexgo/frontend-common';
+
+import update from 'immutability-helper';
+import ChipInput from '../components/ChipInput';
+import parseDuration from 'parse-duration';
 
 type CreateGoalTemplateProps = {
   apiKey: ApiKey;
@@ -15,6 +19,7 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
     name: string,
     abstract: boolean,
     durationEstimate: string,
+    patterns: string[]
   }
 
   const onSubmit = async (values: CreateGoalTemplateValue,
@@ -28,6 +33,20 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
     if (values.name === "") {
       errors.name = "Please enter an event name";
       hasError = true;
+    }
+
+    let durationEstimate: number | undefined;
+
+    if (values.abstract) {
+      durationEstimate = undefined;
+    } else {
+      const ret = parseDuration(values.durationEstimate);
+      if (ret === null) {
+        errors.durationEstimate = "Couldn't parse duration";
+        hasError = true;
+      } else {
+        durationEstimate = ret;
+      }
     }
 
     fprops.setErrors(errors);
@@ -45,7 +64,7 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
 
     let maybeGoalTemplateData = await goalTemplateNew({
       name: values.name,
-      durationEstimate: undefined,
+      durationEstimate,
       userGeneratedCodeId: userGeneratedCode.userGeneratedCodeId,
       apiKey: props.apiKey.key,
     })
@@ -70,10 +89,25 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
       return;
     }
 
+    let goalTemplateData = maybeGoalTemplateData.Ok;
+
+    let gtp = [];
+
+    for (const pattern of values.patterns) {
+      const goalTemplatePattern = await goalTemplatePatternNew({
+        goalTemplateId: goalTemplateData.goalTemplate.goalTemplateId,
+        pattern,
+        active: true,
+        apiKey: props.apiKey.key
+      }).then(unwrap);
+
+      gtp.push(goalTemplatePattern);
+    }
+
     // clear input
     fprops.setFieldValue('name', '');
     // execute callback
-    props.postSubmit({ gtd: maybeGoalTemplateData.Ok, gtp: [] });
+    props.postSubmit({ gtd: goalTemplateData, gtp });
   }
 
 
@@ -84,6 +118,7 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
         name: "",
         abstract: false,
         durationEstimate: "30 minutes",
+        patterns: [],
       }}
       initialStatus={{
         failureResult: "",
@@ -94,16 +129,67 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
         <Form
           noValidate
           onSubmit={fprops.handleSubmit} >
-          <Form.Control
-            name="name"
-            type="text"
-            placeholder="Goal Name"
-            as="input"
-            value={fprops.values.name}
-            onChange={e => fprops.setFieldValue('name', e.target.value)}
-            isInvalid={!!fprops.errors.name}
+          <Form.Group>
+            <Form.Control
+              name="name"
+              type="text"
+              placeholder="Goal Name"
+              value={fprops.values.name}
+              onChange={e => fprops.setFieldValue('name', e.target.value)}
+              isInvalid={!!fprops.errors.name}
+            />
+            <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
+          </Form.Group>
+          <Form.Group>
+            <Form.Check>
+              <Form.Check.Input
+                type="radio"
+                name="abstract"
+                checked={fprops.values.abstract}
+                isInvalid={!!fprops.errors.abstract}
+                onClick={() => {
+                  fprops.setFieldValue('abstract', true);
+                }}
+              />
+              <Form.Check.Label>Abstract Goal</Form.Check.Label>
+            </Form.Check>
+            <Form.Check>
+              <Form.Check.Input
+                type="radio"
+                name="abstract"
+                isInvalid={!!fprops.errors.abstract}
+                checked={!fprops.values.abstract}
+                onClick={() => {
+                  fprops.setFieldValue('abstract', false);
+                }}
+              />
+              <Form.Check.Label>Schedulable Goal</Form.Check.Label>
+              <Form.Control.Feedback type="invalid">{fprops.errors.abstract}</Form.Control.Feedback>
+            </Form.Check>
+          </Form.Group>
+          <Form.Group hidden={fprops.values.abstract}>
+            <Form.Label>Duration Estimate</Form.Label>
+            <Form.Control
+              name="durationEstimate"
+              type="text"
+              placeholder="Duration Estimate"
+              value={fprops.values.durationEstimate}
+              onChange={fprops.handleChange}
+              isInvalid={!!fprops.errors.durationEstimate}
+            />
+            <Form.Control.Feedback type="invalid">{fprops.errors.durationEstimate}</Form.Control.Feedback>
+          </Form.Group>
+          <ChipInput
+            placeholder="Goal Patterns"
+            chips={fprops.values.patterns}
+            onSubmit={(value: string) => {
+              console.log(fprops.values.patterns);
+              fprops.setFieldValue('patterns', update(fprops.values.patterns, { $push: [value] }));
+            }}
+            onRemove={(index: number) => fprops.setFieldValue('patterns', fprops.values.patterns.filter((_, i) => i != index))}
           />
-          <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
+          <br />
+          <Button type="submit">Submit Form</Button>
           <Form.Text className="text-danger">{fprops.status.failureResult}</Form.Text>
           <Form.Text className="text-success">{fprops.status.successResult}</Form.Text>
         </Form>

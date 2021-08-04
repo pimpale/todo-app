@@ -50,7 +50,7 @@ export interface GoalData {
   creatorUserId: number,
   goal: Goal
   name: string,
-  durationEstimate?: number,
+  durationEstimate: number | null,
   timeUtilityFunction: TimeUtilityFunction,
   status: GoalDataStatusKind
 }
@@ -103,7 +103,7 @@ export interface GoalTemplateData {
   creatorUserId: number,
   goalTemplate: GoalTemplate,
   name: string,
-  durationEstimate?: number,
+  durationEstimate: number | null,
   userGeneratedCode: UserGeneratedCode,
   active: boolean,
 }

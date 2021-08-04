@@ -75,7 +75,7 @@ function Settings(props: AuthenticatedComponentProps) {
   return <DashboardLayout {...props}>
     <Container fluid className="py-4 px-4">
       <Row className="justify-content-md-center">
-        <Col md={6}>
+        <Col md={8}>
           <Section id="goalIntents" name="My Goals">
             <Async promiseFn={loadSettingsData} apiKey={props.apiKey}>
               {({ setData }) => <>

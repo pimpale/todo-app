@@ -138,7 +138,7 @@ function EditGoal(props: EditGoalProps) {
       onSubmit={onSubmit}
       initialValues={{
         name: props.goalData.name,
-        durationEstimate: props.goalData.durationEstimate === undefined
+        durationEstimate: props.goalData.durationEstimate === null
           ? ""
           : formatDuration(
             intervalToDuration({
@@ -230,7 +230,7 @@ function CancelGoal(props: CancelGoalProps) {
       goalId: props.goalData.goal.goalId,
       apiKey: props.apiKey.key,
       name: props.goalData.name,
-      durationEstimate: props.goalData.durationEstimate,
+      durationEstimate: props.goalData.durationEstimate === null ? undefined : props.goalData.durationEstimate,
       timeUtilityFunctionId: props.goalData.timeUtilityFunction.timeUtilityFunctionId,
       status: "CANCEL",
     });
@@ -321,7 +321,7 @@ const ManageGoal = (props: {
         : "NOT SCHEDULED"
       }
       <br />
-      {props.data.gd.durationEstimate === undefined
+      {props.data.gd.durationEstimate === null
         ? false
         : <small>Estimate: {
           formatDuration(intervalToDuration({

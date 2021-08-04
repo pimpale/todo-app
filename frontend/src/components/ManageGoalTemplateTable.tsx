@@ -1,9 +1,11 @@
-
+import React from 'react';
+import { Add } from '@material-ui/icons'
 import { Table } from 'react-bootstrap';
 import update from 'immutability-helper';
 import CreateGoalTemplate from '../components/CreateGoalTemplate';
 import ManageGoalTemplate, { TemplateData } from '../components/ManageGoalTemplate';
 import { ApiKey } from '@innexgo/frontend-auth-api';
+import DisplayModal from '../components/DisplayModal';
 
 
 type ManageGoalTemplateTableProps = {
@@ -24,25 +26,31 @@ function ManageGoalTemplateTable(props: ManageGoalTemplateTableProps) {
     // filter inactive
     .filter(({ t }) => props.showInactive || t.gtd.active);
 
+
+  const [showCreateTemplate, setShowCreateTemplate] = React.useState(false);
+
   return <>
-    {!props.addable ? false :
-      <CreateGoalTemplate
-        apiKey={props.apiKey}
-        postSubmit={(gtd) => {
-          props.setTemplates(update(props.templates, { $push: [gtd] }));
-        }}
-      />
-    }
     <Table hover bordered>
       <thead>
         <tr>
           <th>Name</th>
-          <th>Time</th>
-          <th>Utility</th>
+          <th>Estimated Duration</th>
+          <th>Patterns</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
+        <tr hidden={!props.addable}>
+          <td colSpan={5} className="px-0 py-0">
+            <button
+              className="h-100 w-100 mx-0 my-0"
+              style={{ borderStyle: 'dashed', borderWidth: "medium" }}
+              onClick={() => setShowCreateTemplate(true)}
+            >
+              <Add className="mx-auto my-auto text-muted" fontSize="large" />
+            </button>
+          </td>
+        </tr>
         {activeTemplates.length === 0
           ? <tr><td className="text-center" colSpan={4}>No Templates</td></tr>
           : <> </>
@@ -61,6 +69,20 @@ function ManageGoalTemplateTable(props: ManageGoalTemplateTableProps) {
           )}
       </tbody>
     </Table>
+    <DisplayModal
+      title="New Goal"
+      show={showCreateTemplate}
+      onClose={() => setShowCreateTemplate(false)}
+    >
+      <CreateGoalTemplate
+        apiKey={props.apiKey}
+        postSubmit={(gtd) => {
+          props.setTemplates(update(props.templates, { $push: [gtd] }));
+          setShowCreateTemplate(false);
+        }}
+      />
+    </DisplayModal>
+
   </>
 }
 

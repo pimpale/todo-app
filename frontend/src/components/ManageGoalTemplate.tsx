@@ -1,9 +1,8 @@
 import React from 'react';
 import update from 'immutability-helper';
-import { Col, Row, Card, Form, Button } from 'react-bootstrap';
+import { Col, Row, Badge, Form, Button } from 'react-bootstrap';
 import DisplayModal from '../components/DisplayModal';
-import UtilityPicker from '../components/UtilityPicker';
-import { GoalTemplateData, GoalTemplatePattern,  goalTemplateDataNew } from '../utils/utils';
+import { GoalTemplateData, GoalTemplatePattern, goalTemplateDataNew } from '../utils/utils';
 import { isErr } from '@innexgo/frontend-common';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { Edit, Cancel, } from '@material-ui/icons';
@@ -11,7 +10,7 @@ import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import parseDuration from 'parse-duration';
 import formatDuration from 'date-fns/formatDuration';
 import intervalToDuration from 'date-fns/intervalToDuration';
-import format from 'date-fns/format';
+import ChipInput from '../components/ChipInput';
 
 export type TemplateData = {
   gtd: GoalTemplateData,
@@ -29,7 +28,8 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
   type EditGoalTemplateValue = {
     name: string,
     durationEstimate: string,
-    abstract:boolean,
+    abstract: boolean,
+    patterns: string[],
   }
 
   const onSubmit = async (values: EditGoalTemplateValue,
@@ -108,7 +108,7 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
       initialValues={{
         name: props.data.gtd.name,
         abstract: props.data.gtd.durationEstimate === undefined,
-        durationEstimate: props.data.gtd.durationEstimate === undefined
+        durationEstimate: props.data.gtd.durationEstimate === null
           ? ""
           : formatDuration(
             intervalToDuration({
@@ -116,6 +116,7 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
               end: props.data.gtd.durationEstimate
             })
           ),
+        patterns: [],
       }}
       initialStatus={{
         failureResult: "",
@@ -155,6 +156,15 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
                 <Form.Control.Feedback type="invalid">{fprops.errors.durationEstimate}</Form.Control.Feedback>
               </Form.Group>
             </Row>
+            <ChipInput
+              placeholder="Goal Patterns"
+              chips={fprops.values.patterns}
+              onSubmit={(value: string) => {
+                console.log(fprops.values.patterns);
+                fprops.setFieldValue('patterns', update(fprops.values.patterns, { $push: [value] }));
+              }}
+              onRemove={(index: number) => fprops.setFieldValue('patterns', fprops.values.patterns.filter((_, i) => i != index))}
+            />
             <Button type="submit">Submit</Button>
             <br />
             <Form.Text className="text-danger">{fprops.status.failureResult}</Form.Text>
@@ -184,7 +194,7 @@ function CancelGoalTemplate(props: CancelGoalTemplateProps) {
       apiKey: props.apiKey.key,
       name: props.goalTemplateData.name,
       userGeneratedCodeId: props.goalTemplateData.userGeneratedCode.userGeneratedCodeId,
-      durationEstimate: props.goalTemplateData.durationEstimate,
+      durationEstimate: props.goalTemplateData.durationEstimate === null ? undefined : props.goalTemplateData.durationEstimate,
       active: false,
     });
 
@@ -267,15 +277,18 @@ const ManageGoalTemplate = (props: {
       {props.data.gtd.name}
     </td>
     <td>
-      {props.data.gtd.durationEstimate === undefined
+      {props.data.gtd.durationEstimate === null
         ? false
-        : <small>Estimate: {
-          formatDuration(intervalToDuration({
-            start: 0,
-            end: props.data.gtd.durationEstimate
-          }))
-        }</small>
+        : formatDuration(intervalToDuration({
+          start: 0,
+          end: props.data.gtd.durationEstimate
+        }))
       }
+    </td>
+    <td>
+    {
+        props.data.gtp.map((gtp, i) => <Badge key={i} variant="secondary" className="m-1">{gtp.pattern}</Badge>)
+    }
     </td>
     <td>
       <Button variant="link" onClick={_ => setShowEditGoalTemplate(true)} hidden={!props.mutable}>
