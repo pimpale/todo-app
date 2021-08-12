@@ -3,7 +3,7 @@ import update from 'immutability-helper';
 import { Col, Row, Badge, Form, Button } from 'react-bootstrap';
 import DisplayModal from '../components/DisplayModal';
 import { GoalTemplateData, GoalTemplatePattern, goalTemplateDataNew, goalTemplatePatternNew } from '../utils/utils';
-import { isErr, unwrap } from '@innexgo/frontend-common';
+import { isErr, unwrap} from '@innexgo/frontend-common';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { Edit, Cancel, } from '@material-ui/icons';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
@@ -27,9 +27,9 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
 
   type EditGoalTemplateValue = {
     name: string,
-    durationEstimate: string,
     abstract: boolean,
-    patterns: string[],
+    durationEstimate: string,
+    patterns: string[]
   }
 
   const onSubmit = async (values: EditGoalTemplateValue,
@@ -43,11 +43,18 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
       hasError = true;
     }
 
-    const durationEstimate = parseDuration(values.durationEstimate);
+    let durationEstimate: number | undefined;
 
-    if (durationEstimate === null || durationEstimate < 1) {
-      errors.durationEstimate = "Invalid duration estimate";
-      hasError = true;
+    if (values.abstract) {
+      durationEstimate = undefined;
+    } else {
+      const ret = parseDuration(values.durationEstimate);
+      if (ret === null) {
+        errors.durationEstimate = "Couldn't parse duration";
+        hasError = true;
+      } else {
+        durationEstimate = ret;
+      }
     }
 
     fprops.setErrors(errors);
@@ -58,7 +65,7 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
     const maybeGoalTemplateData = await goalTemplateDataNew({
       goalTemplateId: props.data.gtd.goalTemplate.goalTemplateId,
       name: values.name,
-      durationEstimate: durationEstimate === null ? undefined : durationEstimate,
+      durationEstimate,
       userGeneratedCodeId: props.data.gtd.userGeneratedCode.userGeneratedCodeId,
       active: props.data.gtd.active,
       apiKey: props.apiKey.key,
@@ -140,7 +147,7 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
       onSubmit={onSubmit}
       initialValues={{
         name: props.data.gtd.name,
-        abstract: props.data.gtd.durationEstimate === undefined,
+        abstract: props.data.gtd.durationEstimate === null,
         durationEstimate: props.data.gtd.durationEstimate === null
           ? ""
           : formatDuration(
@@ -160,48 +167,67 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
         <Form
           noValidate
           onSubmit={fprops.handleSubmit} >
-          <div hidden={fprops.status.successResult !== ""}>
-            <Row>
-              <Form.Group as={Col}>
-                <Form.Label>Name</Form.Label>
-                <Form.Control
-                  name="name"
-                  type="text"
-                  placeholder="GoalTemplate Name"
-                  as="input"
-                  value={fprops.values.name}
-                  onChange={e => fprops.setFieldValue("name", e.target.value)}
-                  isInvalid={!!fprops.errors.name}
-                />
-                <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
-              </Form.Group>
-              <Form.Group as={Col}>
-                <Form.Label>Estimated Duration</Form.Label>
-                <Form.Control
-                  name="durationEstimate"
-                  type="text"
-                  placeholder="Estimated Duration"
-                  as="input"
-                  value={fprops.values.durationEstimate}
-                  onChange={e => fprops.setFieldValue("durationEstimate", e.target.value)}
-                  isInvalid={!!fprops.errors.durationEstimate}
-                />
-                <Form.Control.Feedback type="invalid">{fprops.errors.durationEstimate}</Form.Control.Feedback>
-              </Form.Group>
-            </Row>
-            <ChipInput
-              placeholder="Goal Patterns"
-              chips={fprops.values.patterns}
-              onSubmit={(value: string) => {
-                fprops.setFieldValue('patterns', update(fprops.values.patterns, { $push: [value] }));
-              }}
-              onRemove={(index: number) => fprops.setFieldValue('patterns', fprops.values.patterns.filter((_, i) => i != index))}
+          <Form.Group>
+            <Form.Control
+              name="name"
+              type="text"
+              placeholder="Goal Name"
+              value={fprops.values.name}
+              onChange={e => fprops.setFieldValue('name', e.target.value)}
+              isInvalid={!!fprops.errors.name}
             />
-            <br />
-            <Button type="submit">Submit</Button>
-            <br />
-            <Form.Text className="text-danger">{fprops.status.failureResult}</Form.Text>
-          </div>
+            <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
+          </Form.Group>
+          <Form.Group>
+            <Form.Check>
+              <Form.Check.Input
+                type="radio"
+                name="abstract"
+                checked={fprops.values.abstract}
+                isInvalid={!!fprops.errors.abstract}
+                onClick={() => {
+                  fprops.setFieldValue('abstract', true);
+                }}
+              />
+              <Form.Check.Label>Abstract Goal</Form.Check.Label>
+            </Form.Check>
+            <Form.Check>
+              <Form.Check.Input
+                type="radio"
+                name="abstract"
+                isInvalid={!!fprops.errors.abstract}
+                checked={!fprops.values.abstract}
+                onClick={() => {
+                  fprops.setFieldValue('abstract', false);
+                }}
+              />
+              <Form.Check.Label>Schedulable Goal</Form.Check.Label>
+              <Form.Control.Feedback type="invalid">{fprops.errors.abstract}</Form.Control.Feedback>
+            </Form.Check>
+          </Form.Group>
+          <Form.Group hidden={fprops.values.abstract}>
+            <Form.Label>Duration Estimate</Form.Label>
+            <Form.Control
+              name="durationEstimate"
+              type="text"
+              placeholder="Duration Estimate"
+              value={fprops.values.durationEstimate}
+              onChange={fprops.handleChange}
+              isInvalid={!!fprops.errors.durationEstimate}
+            />
+            <Form.Control.Feedback type="invalid">{fprops.errors.durationEstimate}</Form.Control.Feedback>
+          </Form.Group>
+          <ChipInput
+            placeholder="Goal Patterns"
+            chips={fprops.values.patterns}
+            onSubmit={(value: string) => {
+              fprops.setFieldValue('patterns', update(fprops.values.patterns, { $push: [value] }));
+            }}
+            onRemove={(index: number) => fprops.setFieldValue('patterns', fprops.values.patterns.filter((_, i) => i != index))}
+          />
+          <br />
+          <Button type="submit">Submit</Button>
+          <Form.Text className="text-danger">{fprops.status.failureResult}</Form.Text>
           <Form.Text className="text-success">{fprops.status.successResult}</Form.Text>
         </Form>
       </>}

@@ -188,7 +188,7 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
             onRemove={(index: number) => fprops.setFieldValue('patterns', fprops.values.patterns.filter((_, i) => i != index))}
           />
           <br />
-          <Button type="submit">Submit Form</Button>
+          <Button type="submit">Submit</Button>
           <Form.Text className="text-danger">{fprops.status.failureResult}</Form.Text>
           <Form.Text className="text-success">{fprops.status.successResult}</Form.Text>
         </Form>
