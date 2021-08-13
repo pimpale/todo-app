@@ -3,7 +3,7 @@ import update from 'immutability-helper';
 import { Col, Row, Badge, Form, Button } from 'react-bootstrap';
 import DisplayModal from '../components/DisplayModal';
 import { GoalTemplateData, GoalTemplatePattern, goalTemplateDataNew, goalTemplatePatternNew } from '../utils/utils';
-import { isErr, unwrap} from '@innexgo/frontend-common';
+import { isErr, unwrap } from '@innexgo/frontend-common';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { Edit, Cancel, } from '@material-ui/icons';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
@@ -27,6 +27,7 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
 
   type EditGoalTemplateValue = {
     name: string,
+    utility: number,
     abstract: boolean,
     durationEstimate: string,
     patterns: string[]
@@ -65,6 +66,7 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
     const maybeGoalTemplateData = await goalTemplateDataNew({
       goalTemplateId: props.data.gtd.goalTemplate.goalTemplateId,
       name: values.name,
+      utility: values.utility,
       durationEstimate,
       userGeneratedCodeId: props.data.gtd.userGeneratedCode.userGeneratedCodeId,
       active: props.data.gtd.active,
@@ -147,6 +149,7 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
       onSubmit={onSubmit}
       initialValues={{
         name: props.data.gtd.name,
+        utility: props.data.gtd.utility,
         abstract: props.data.gtd.durationEstimate === null,
         durationEstimate: props.data.gtd.durationEstimate === null
           ? ""
@@ -177,6 +180,17 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
               isInvalid={!!fprops.errors.name}
             />
             <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
+          </Form.Group>
+          <Form.Group>
+            <Form.Control
+              name="utility"
+              type="number"
+              placeholder="Goal Utility"
+              value={fprops.values.utility}
+              onChange={e => fprops.setFieldValue('utility', parseInt(e.target.value, 10))}
+              isInvalid={!!fprops.errors.utility}
+            />
+            <Form.Control.Feedback type="invalid">{fprops.errors.utility}</Form.Control.Feedback>
           </Form.Group>
           <Form.Group>
             <Form.Check>
@@ -252,6 +266,7 @@ function CancelGoalTemplate(props: CancelGoalTemplateProps) {
       goalTemplateId: props.goalTemplateData.goalTemplate.goalTemplateId,
       apiKey: props.apiKey.key,
       name: props.goalTemplateData.name,
+      utility: props.goalTemplateData.utility,
       userGeneratedCodeId: props.goalTemplateData.userGeneratedCode.userGeneratedCodeId,
       durationEstimate: props.goalTemplateData.durationEstimate === null ? undefined : props.goalTemplateData.durationEstimate,
       active: false,

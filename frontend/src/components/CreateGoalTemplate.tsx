@@ -17,6 +17,7 @@ type CreateGoalTemplateProps = {
 function CreateGoalTemplate(props: CreateGoalTemplateProps) {
   type CreateGoalTemplateValue = {
     name: string,
+    utility: number,
     abstract: boolean,
     durationEstimate: string,
     patterns: string[]
@@ -64,6 +65,7 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
 
     let maybeGoalTemplateData = await goalTemplateNew({
       name: values.name,
+      utility: values.utility,
       durationEstimate,
       userGeneratedCodeId: userGeneratedCode.userGeneratedCodeId,
       apiKey: props.apiKey.key,
@@ -116,6 +118,7 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
       onSubmit={onSubmit}
       initialValues={{
         name: "",
+        utility: 50,
         abstract: false,
         durationEstimate: "30 minutes",
         patterns: [],
@@ -139,6 +142,17 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
               isInvalid={!!fprops.errors.name}
             />
             <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
+          </Form.Group>
+          <Form.Group>
+            <Form.Control
+              name="utility"
+              type="number"
+              placeholder="Goal Utility"
+              value={fprops.values.utility}
+              onChange={e => fprops.setFieldValue('utility', e.target.value)}
+              isInvalid={!!fprops.errors.utility}
+            />
+            <Form.Control.Feedback type="invalid">{fprops.errors.utility}</Form.Control.Feedback>
           </Form.Group>
           <Form.Group>
             <Form.Check>

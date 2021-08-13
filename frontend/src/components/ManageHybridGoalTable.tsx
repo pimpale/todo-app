@@ -2,8 +2,8 @@ import { Table } from 'react-bootstrap';
 import update from 'immutability-helper';
 import ManageGoalIntent from '../components/ManageGoalIntent';
 import CreateHybridGoal from '../components/CreateHybridGoal';
-import {TemplateData} from '../components/ManageGoalTemplate';
-import {TagData} from '../components/ManageNamedEntity';
+import { TemplateData } from '../components/ManageGoalTemplate';
+import { TagData } from '../components/ManageNamedEntity';
 import ManageGoal, { ManageGoalData } from '../components/ManageGoal';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { GoalIntentData } from '../utils/utils';
@@ -43,8 +43,8 @@ function ManageHybridGoalTable(props: ManageHybridGoalTableProps) {
         apiKey={props.apiKey}
         tags={props.tags}
         templates={props.templates}
-        postSubmit={(gid) => {
-          props.setGoalIntentData(update(props.goalIntentData, { $push: [gid] }));
+        postSubmit={(gd) => {
+          props.setData(update(props.data, { $push: [{ gd, ge: undefined }] }));
         }}
       />
     }

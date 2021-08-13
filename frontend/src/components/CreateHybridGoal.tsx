@@ -1,10 +1,10 @@
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Form } from "react-bootstrap";
-import { goalIntentNew, GoalIntentData, } from "../utils/utils";
+import { timeUtilityFunctionNew, goalNew, GoalData , } from "../utils/utils";
 import { TemplateData } from '../components/ManageGoalTemplate';
 import { TagData } from '../components/ManageNamedEntity';
 import { ApiKey } from '@innexgo/frontend-auth-api';
-import { isErr, throwException } from '@innexgo/frontend-common';
+import { isErr, unwrap, throwException, nullToUndefined } from '@innexgo/frontend-common';
 import parseDuration from 'parse-duration';
 import { myItemOut, myColOut } from '../utils/nlphelpers';
 import winkNlp from 'wink-nlp';
@@ -13,19 +13,23 @@ import { casual } from 'chrono-node';
 
 const builtinPatterns = [
   {
-    name: "BEFORE_GOAL",
-    patterns: ["before [HASHTAG]",]
-  },
-  {
-    name: "AFTER_GOAL",
-    patterns: ["after [HASHTAG]",]
-  },
-  {
     name: "PARENT_GOAL",
     patterns: ["for [HASHTAG]",]
   },
   {
-    name: "BEFORE_TIME",
+    name: "DURATION_ESTIMATE",
+    patterns: ["for [DURATION]",]
+  },
+  {
+    name: "GOAL_VALID_BEFORE_GOAL",
+    patterns: ["before [HASHTAG]",]
+  },
+  {
+    name: "GOAL_VALID_AFTER_GOAL",
+    patterns: ["after [HASHTAG]",]
+  },
+  {
+    name: "GOAL_VALID_BEFORE_TIME",
     patterns: [
       "[to|by|before] [DATE|TIME]",
       "[to|by|before] [TIME] [DATE]",
@@ -33,17 +37,13 @@ const builtinPatterns = [
     ]
   },
   {
-    name: "AFTER_TIME",
+    name: "GOAL_VALID_AFTER_TIME",
     patterns: [
       "[from|after] [DATE|TIME]",
       "[from|after] [TIME] [DATE]",
       "[from|after] [DATE] [TIME]",
     ]
   },
-  {
-    name: "DURATION_ESTIMATE",
-    patterns: ["for [DURATION]",]
-  }
 ];
 
 const builtinNlp = winkNlp(model);
@@ -54,7 +54,7 @@ type CreateHybridGoalProps = {
   apiKey: ApiKey;
   tags: TagData[];
   templates: TemplateData[];
-  postSubmit: (gid: GoalIntentData) => void;
+  postSubmit: (gd: GoalData) => void;
 }
 
 function CreateHybridGoal(props: CreateHybridGoalProps) {
@@ -92,11 +92,11 @@ function CreateHybridGoal(props: CreateHybridGoalProps) {
       let ds = myColOut(builtinNlp.readDoc(values.name).customEntities(), builtinNlp.its.detail, builtinNlp.as.array)
 
       let rawAfterGoal = ds
-        .filter(d => d.type === "AFTER_GOAL")
+        .filter(d => d.type === "GOAL_VALID_AFTER_GOAL")
         .map(d => d.value.split("#")[1])[0] // extract everything right of hashtag
 
       let rawBeforeGoal = ds
-        .filter(d => d.type === "BEFORE_GOAL")
+        .filter(d => d.type === "GOAL_VALID_BEFORE_GOAL")
         .map(d => d.value.split("#")[1])[0] // extract everything right of hashtag
 
       let rawParentGoal = ds
@@ -107,14 +107,14 @@ function CreateHybridGoal(props: CreateHybridGoalProps) {
         )[0]
 
       let rawAfterTime = ds
-        .filter(d => d.type === "AFTER_TIME")
+        .filter(d => d.type === "GOAL_VALID_AFTER_TIME")
         .map((d, i) => i === 0
           ? d.value.slice(d.value.indexOf(" ") + 1) //  extract everything right of the first space
           : throwException(Error("Duplicate goal beginline."))
         )[0]
 
       let rawBeforeTime = ds
-        .filter(d => d.type === "BEFORE_TIME")
+        .filter(d => d.type === "GOAL_VALID_BEFORE_TIME")
         .map((d, i) => i === 0
           ? d.value.slice(d.value.indexOf(" ") + 1) //  extract everything right of the first space
           : throwException(Error("Duplicate goal deadline."))
@@ -127,16 +127,18 @@ function CreateHybridGoal(props: CreateHybridGoalProps) {
           : throwException(Error("Duplicate duration estimate."))
         )[0]
 
-
       // duration estimate:
       // null means abstract
-      // undefined means no data
-      let durationEstimate: number | null | undefined = template?.durationEstimate;
+      let durationEstimate =
+        template?.durationEstimate === undefined
+          ? 1000 * 60 * 60
+          : template.durationEstimate
+        ;
 
       if (rawDurationEstimate !== undefined) {
         // prevent null template
-        if (durationEstimate === null) {
-          throw Error(`The goal template "${template?.name}" is abstract and can't be assigned a duration.`);
+        if (template?.durationEstimate === null) {
+          throw Error(`The goal template "${template.name}" is abstract and can't be assigned a duration.`);
         }
 
         const d = parseDuration(rawDurationEstimate);
@@ -153,37 +155,70 @@ function CreateHybridGoal(props: CreateHybridGoalProps) {
       let minTime: number | null = null;
       let maxTime: number | null = null;
 
-      if (rawBeforeTime !== undefined) {
-        const d = casual.parseDate(rawBeforeTime, new Date(), { forwardDate: true });
-
-        if (d === null) {
-          throw Error(`Couldn't parse date string "${rawBeforeTime}"`);
-        }
-
-        minTime = d.valueOf();
-      }
-
       if (rawAfterTime !== undefined) {
         const d = casual.parseDate(rawAfterTime, new Date(), { forwardDate: true });
 
         if (d === null) {
           throw Error(`Couldn't parse date string "${rawAfterTime}"`);
         }
+        // this is the min time the goal may be scheduled
+        minTime = d.valueOf();
+      }
 
+
+      if (rawBeforeTime !== undefined) {
+        const d = casual.parseDate(rawBeforeTime, new Date(), { forwardDate: true });
+
+        if (d === null) {
+          throw Error(`Couldn't parse date string "${rawBeforeTime}"`);
+        }
+        // this is the max time the goal may be scheduled
         maxTime = d.valueOf();
       }
 
-      console.log(minTime);
-      console.log(maxTime);
-      console.log(durationEstimate);
 
-      let maybeGoalIntentData = await goalIntentNew({
+      // now construct time utility function
+      const startTimes: number[] = [];
+      const utils: number[] = [];
+
+      if (minTime === null && maxTime === null) {
+        // start one time
+        startTimes.push(Date.now());
+        utils.push(100);
+      } else {
+        if (minTime !== null) {
+          // push zero for starttime
+          startTimes.push(minTime - 1);
+          utils.push(0);
+          // push 100 for endtime
+          startTimes.push(minTime);
+          utils.push(100);
+        }
+        if (maxTime !== null) {
+          // push 100 for before deadline
+          startTimes.push(maxTime);
+          utils.push(100);
+          // push zero for deadline
+          startTimes.push(maxTime + 1);
+          utils.push(0);
+        }
+      }
+
+      const tuf = await timeUtilityFunctionNew({
+        startTimes,
+        utils,
+        apiKey: props.apiKey.key
+      }).then(unwrap);
+
+      let maybeGoalData = await goalNew({
         name: values.name,
-        apiKey: props.apiKey.key,
+        durationEstimate: nullToUndefined(durationEstimate),
+        timeUtilityFunctionId: tuf.timeUtilityFunctionId,
+        apiKey: props.apiKey.key
       });
 
-      if (isErr(maybeGoalIntentData)) {
-        switch (maybeGoalIntentData.Err) {
+      if (isErr(maybeGoalData)) {
+        switch (maybeGoalData.Err) {
           case "UNAUTHORIZED": {
             fprops.setStatus({
               failureResult: "You have been automatically logged out. Please relogin.",
@@ -193,7 +228,7 @@ function CreateHybridGoal(props: CreateHybridGoalProps) {
           }
           default: {
             fprops.setStatus({
-              failureResult: "An unknown or network error has occured while trying to create goal intent.",
+              failureResult: "An unknown or network error has occured while trying to create goal.",
               successResult: ""
             });
             break;
@@ -205,7 +240,7 @@ function CreateHybridGoal(props: CreateHybridGoalProps) {
       // clear input
       fprops.setFieldValue("name", "");
       // execute callback
-      props.postSubmit(maybeGoalIntentData.Ok);
+      props.postSubmit(maybeGoalData.Ok);
     } catch (e: any) {
       let errors: FormikErrors<CreateHybridGoalValue> = {};
       errors.name = (e as Error).message;

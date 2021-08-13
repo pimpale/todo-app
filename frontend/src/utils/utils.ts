@@ -103,6 +103,7 @@ export interface GoalTemplateData {
   creatorUserId: number,
   goalTemplate: GoalTemplate,
   name: string,
+  utility: number,
   durationEstimate: number | null,
   userGeneratedCode: UserGeneratedCode,
   active: boolean,
@@ -329,6 +330,7 @@ export function userGeneratedCodeNew(props: UserGeneratedCodeNewProps): Promise<
 
 export interface GoalTemplateNewProps {
   name: string,
+  utility: number,
   durationEstimate?: number,
   userGeneratedCodeId: number,
   apiKey: string,
@@ -342,6 +344,7 @@ export function goalTemplateNew(props: GoalTemplateNewProps): Promise<Result<Goa
 export interface GoalTemplateDataNewProps {
   goalTemplateId: number,
   name: string,
+  utility: number,
   durationEstimate?: number,
   userGeneratedCodeId: number,
   active: boolean,
@@ -517,6 +520,8 @@ export interface GoalTemplateDataViewProps {
   creatorUserId?: number[],
   goalTemplateId?: number[],
   name?: string[],
+  minUtility?: number,
+  maxUtility?: number,
   minDurationEstimate?: number,
   maxDurationEstimate?: number,
   concrete?: boolean,
