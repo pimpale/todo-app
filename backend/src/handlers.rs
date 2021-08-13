@@ -265,6 +265,7 @@ async fn fill_goal_template_data(
     creator_user_id: goal_template_data.creator_user_id,
     goal_template: fill_goal_template(con, goal_template).await?,
     name: goal_template_data.name,
+    utility: goal_template_data.utility,
     duration_estimate: goal_template_data.duration_estimate,
     user_generated_code: fill_user_generated_code(con, user_generated_code).await?,
     active: goal_template_data.active,
@@ -868,6 +869,8 @@ pub async fn goal_template_new(
     user.user_id,
     goal_template.goal_template_id,
     props.name,
+    // TODO prevent negative utility somehow
+    props.utility,
     props.duration_estimate,
     props.user_generated_code_id,
     true,
@@ -931,6 +934,8 @@ pub async fn goal_template_data_new(
     user.user_id,
     props.goal_template_id,
     props.name,
+    // TODO prevent negative utility somehow
+    props.utility,
     props.duration_estimate,
     props.user_generated_code_id,
     props.active,

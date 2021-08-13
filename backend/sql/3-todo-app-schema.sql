@@ -142,6 +142,7 @@ create table goal_template_data(
   creator_user_id bigint not null,
   goal_template_id bigint not null references goal_template(goal_template_id),
   name text not null,
+  utility bigint not null,
   duration_estimate bigint, -- NULLABLE if null, then is abstract
   user_generated_code_id bigint not null references user_generated_code(user_generated_code_id), -- this function is run when a goal is templated
   active bool not null

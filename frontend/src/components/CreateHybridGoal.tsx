@@ -9,7 +9,7 @@ import parseDuration from 'parse-duration';
 import { myItemOut, myColOut } from '../utils/nlphelpers';
 import winkNlp from 'wink-nlp';
 import model from 'wink-eng-lite-web-model';
-import { strict } from 'chrono-node';
+import { casual } from 'chrono-node';
 
 const builtinPatterns = [
   {
@@ -74,12 +74,13 @@ function CreateHybridGoal(props: CreateHybridGoalProps) {
       const templateNlp = winkNlp(model);
       templateNlp.learnCustomEntities(
         props.templates.map((x, i) => ({
-          name: (i+1).toString(), // we add 1 to work around a bug in winkjs, `0` is not a valid name
+          name: (i + 1).toString(), // we add 1 to work around a bug in winkjs, `0` is not a valid name
           patterns: x.gtp.map(x => x.pattern)
         }))
       );
 
       templateNlp.readDoc(values.name).customEntities().each(x => console.log(x.out()));
+      builtinNlp.readDoc(values.name).customEntities().each(x => console.log(x.out()));
 
       // get the first template
       const maybeTemplateItem = templateNlp.readDoc(values.name).customEntities().itemAt(0);
@@ -153,27 +154,21 @@ function CreateHybridGoal(props: CreateHybridGoalProps) {
       let maxTime: number | null = null;
 
       if (rawBeforeTime !== undefined) {
-        const d = strict.parseDate(rawBeforeTime, new Date(), {forwardDate: true});
+        const d = casual.parseDate(rawBeforeTime, new Date(), { forwardDate: true });
 
         if (d === null) {
           throw Error(`Couldn't parse date string "${rawBeforeTime}"`);
         }
 
-         console.log(d);
-
         minTime = d.valueOf();
       }
 
       if (rawAfterTime !== undefined) {
-         console.log("got here");
-        const d = strict.parseDate(rawAfterTime, new Date(), {forwardDate: true});
-         console.log("got here2");
+        const d = casual.parseDate(rawAfterTime, new Date(), { forwardDate: true });
 
         if (d === null) {
           throw Error(`Couldn't parse date string "${rawAfterTime}"`);
         }
-
-         console.log(d);
 
         maxTime = d.valueOf();
       }
@@ -211,7 +206,7 @@ function CreateHybridGoal(props: CreateHybridGoalProps) {
       fprops.setFieldValue("name", "");
       // execute callback
       props.postSubmit(maybeGoalIntentData.Ok);
-    } catch (e:any) {
+    } catch (e: any) {
       let errors: FormikErrors<CreateHybridGoalValue> = {};
       errors.name = (e as Error).message;
       fprops.setErrors(errors);
