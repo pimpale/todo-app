@@ -10,7 +10,6 @@ import {APP_NAME} from '../utils/utils';
 import TransparentLogoIcon from "../img/innexgo_transparent_icon.png"
 
 
-
 class SimpleLayout extends React.Component {
   render() {
 

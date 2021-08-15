@@ -1,4 +1,4 @@
-import { Jumbotron, Container, Button} from 'react-bootstrap';
+import { Container, Button} from 'react-bootstrap';
 
 import ExternalLayout from '../components/ExternalLayout';
 import Section from '../components/Section';
@@ -70,7 +70,7 @@ function Home() {
 
   return (
     <ExternalLayout fixed={true} transparentTop={true}>
-      <Jumbotron fluid style={jumboStyle}>
+      <Container fluid style={jumboStyle}>
 
         <img src={lady} width = "450" height = "450" />
 
@@ -82,7 +82,7 @@ function Home() {
             </h5>
             <Button style={buttonStyle} href="/register"> Get Started → </Button>
         </div>
-      </Jumbotron>
+      </Container>
 
       
       <div className="custom-shape-divider-bottom-1624938662">

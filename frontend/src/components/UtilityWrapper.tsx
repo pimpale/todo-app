@@ -19,10 +19,10 @@ function UtilityWrapper(props: UtilityWrapperProps) {
           placement="auto"
           overlay={
             <Popover id="information-tooltip">
-              <Popover.Title as="h3">Help</Popover.Title>
-              <Popover.Content>
+              <Popover.Header as="h3">Help</Popover.Header>
+              <Popover.Body>
                 {props.children[0]}
-              </Popover.Content>
+              </Popover.Body>
             </Popover>
           }
         >

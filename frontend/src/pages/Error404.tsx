@@ -1,11 +1,4 @@
-
-import React from 'react';
 import { Link } from 'react-router-dom';
-
-// Bootstrap CSS & JS
-import '../style/dashboard.scss';
-import 'bootstrap/dist/js/bootstrap';
-import 'popper.js/dist/popper';
 
 function Error404() {
   return (

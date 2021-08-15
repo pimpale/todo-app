@@ -5,8 +5,6 @@ import { unwrap } from '@innexgo/frontend-common';
 import { Async, AsyncProps } from 'react-async';
 import { SvgIconComponent, ExitToApp, Menu } from '@material-ui/icons';
 
-// Bootstrap CSS & Js
-import '../style/dashboard.scss';
 
 const iconStyle = {
   width: "2rem",
@@ -105,10 +103,10 @@ const InnerLayout: React.FunctionComponent<React.PropsWithChildren<InnerLayoutPr
       <InnerLayoutContext.Provider value={collapsed}>
         <div>
           <nav className="bg-dark text-light" style={sidebarStyle}>
-            <div className="nav-item nav-link">
+            <div className="nav-item nav-link link-light">
               <Menu style={iconStyle} onClick={_ => setCollapsed(!collapsed)} />
             </div>
-            <div className="nav-item nav-link mx-auto my-3">
+            <span className="nav-item nav-link link-light mx-auto my-3">
               <Async promiseFn={loadUserData} apiKey={props.apiKey}>
                 <Async.Pending>
                   {collapsed ? false : <Loader /> }
@@ -123,13 +121,12 @@ const InnerLayout: React.FunctionComponent<React.PropsWithChildren<InnerLayoutPr
                 }
                 </Async.Fulfilled>
               </Async>
-            </div>
+            </span>
             {sidebarChildren}
             <div style={sidebarBottom}>
               <button
-                style={{ color: "#fff" }}
                 type="button"
-                className="btn nav-item nav-link"
+                className="btn nav-item nav-link link-light"
                 onClick={() => props.logoutCallback()}
               >
                 <ExitToApp style={iconStyle} /> {collapsed ? "" : "Log Out"}

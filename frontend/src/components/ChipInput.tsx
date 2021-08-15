@@ -49,7 +49,7 @@ export default class ReactChipInput extends React.Component<ChipInputProps> {
       >
         {/* Each chip is bootstrap's col */}
         {this.props.chips.map((chip, index) => (
-          <Badge key={index} variant="secondary" className="mx-1 mb-1">
+          <Badge key={index} bg="secondary" className="mx-1 mb-1">
             {chip}
             {/* The icon which helps user, if user wants to remove the chip */}
             <Close

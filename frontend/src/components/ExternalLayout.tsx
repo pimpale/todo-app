@@ -1,12 +1,7 @@
 import React from 'react';
 import { Menu } from '@material-ui/icons';
-import { Navbar, Nav } from 'react-bootstrap';
+import { Navbar, Nav, Container } from 'react-bootstrap';
 import { APP_NAME } from '../utils/utils';
-
-// Bootstrap CSS & JS
-import '../style/dashboard.scss';
-import 'bootstrap/dist/js/bootstrap.js';
-import 'popper.js/dist/popper.js';
 
 import innexgo_logo from '../img/innexgo_transparent_icon.png';
 
@@ -84,7 +79,7 @@ class ExternalHeader extends React.Component<ExternalHeaderProps, ExternalHeader
         <nav style={navStyle} className={"navbar navbar-expand-lg py-3" + (this.props.fixed ? " fixed-top" : "")}>
           <div className="container">
             <a style={gradText} className="navbar-brand font-weight-bold" href="/">{this.props.title}</a>
-            <button className="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+            <button className="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
               <Menu style={linkStyle} />
             </button>
             <div className="collapse navbar-collapse"
@@ -109,29 +104,27 @@ interface ExternalLayoutProps {
 
 class ExternalLayout extends React.Component<ExternalLayoutProps> {
   render() {
-
-    // TODO lets make this look better
-
     return (
       <>
         <ExternalHeader fixed={this.props.fixed} transparentTop={this.props.transparentTop} title={APP_NAME} />
         {this.props.children}
         <Navbar bg="dark" variant="dark">
-          <Navbar.Brand href="#home">
-            <img
-              alt={`${APP_NAME} Logo`}
-              src={innexgo_logo}
-              width="30"
-              height="30"
-              className="d-inline-block align-top"
-            />{' '}
-            {APP_NAME}
-          </Navbar.Brand>
-          <Nav className="mr-auto">
-            <Nav.Link>&copy; {APP_NAME}, 2021</Nav.Link>
-          </Nav>
+          <Container>
+            <Navbar.Brand href="#home">
+              <img
+                alt={`${APP_NAME} Logo`}
+                src={innexgo_logo}
+                width="30"
+                height="30"
+                className="d-inline-block align-top"
+              />{' '}
+              {APP_NAME}
+            </Navbar.Brand>
+            <Nav className="mr-auto">
+              <Nav.Link>&copy; {APP_NAME}, 2021</Nav.Link>
+            </Nav>
+          </Container>
         </Navbar>
-
       </>
 
     )

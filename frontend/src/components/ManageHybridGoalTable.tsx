@@ -48,7 +48,7 @@ function ManageHybridGoalTable(props: ManageHybridGoalTableProps) {
         }}
       />
     }
-    <Table hover bordered>
+    <Table hover bordered className="mt-2">
       <thead>
         <tr>
           <th>Name</th>

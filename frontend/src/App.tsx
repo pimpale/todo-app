@@ -34,6 +34,12 @@ import Account from './pages/Account';
 // search
 import Search from './pages/Search';
 
+// Bootstrap CSS & JS
+import './style/style.scss';
+import 'bootstrap/dist/js/bootstrap';
+
+
+
 function getPreexistingApiKey() {
   const preexistingApiKeyString = localStorage.getItem("apiKey");
   if (preexistingApiKeyString == null) {

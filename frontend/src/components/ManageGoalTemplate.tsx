@@ -362,7 +362,7 @@ const ManageGoalTemplate = (props: {
     <td>
       {
         props.data.gtp
-          .map((gtp, i) => <Badge key={i} variant="secondary" className="m-1">{gtp.pattern}</Badge>)
+          .map((gtp, i) => <Badge key={i} bg="secondary" className="m-1">{gtp.pattern}</Badge>)
       }
     </td>
     <td>
