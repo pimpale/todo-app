@@ -3,10 +3,10 @@ import { Card} from 'react-bootstrap'
 
 import RegisterForm from '../components/RegisterForm';
 import SimpleLayout from '../components/SimpleLayout';
-import ComponentProps from '../components/ComponentProps';
+import BrandedComponentProps from '../components/BrandedComponentProps';
 
 
-function Register(props: ComponentProps) {
+function Register(props: BrandedComponentProps) {
   const [successful, setSuccess] = React.useState(false);
   return (
     <SimpleLayout branding={props.branding}>

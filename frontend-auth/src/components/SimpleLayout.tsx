@@ -5,9 +5,9 @@ import AccountBoxIcon from '@material-ui/icons/AccountBox';
 import FeaturedPlayListIcon from '@material-ui/icons/FeaturedPlayList';
 import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications';
 import { Container, Row, Col } from 'react-bootstrap';
-import ComponentProps from '../components/ComponentProps';
+import BrandedComponentProps from '../components/BrandedComponentProps';
 
-class SimpleLayout extends React.Component<ComponentProps> {
+class SimpleLayout extends React.Component<BrandedComponentProps> {
   render() {
     const gradText = {
       background: "linear-gradient(#B7C9D6, #E6D5B8)",

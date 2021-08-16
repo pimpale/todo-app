@@ -1,5 +1,5 @@
 import Branding from '../components/Branding';
 
-export default interface ComponentProps {
+export default interface BrandedComponentProps {
   branding: Branding;
 }

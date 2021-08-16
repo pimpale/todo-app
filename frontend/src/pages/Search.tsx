@@ -6,7 +6,8 @@ import ManageGoalTable from '../components/ManageGoalTable';
 import { GoalData, goalDataView, GoalEvent, goalEventView } from '../utils/utils';
 import { isErr, unwrap } from '@innexgo/frontend-common';
 
-import { ApiKey, AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
+import { ApiKey} from '@innexgo/frontend-auth-api';
+import {AuthenticatedComponentProps} from '@innexgo/frontend-auth';
 
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 

@@ -12,7 +12,7 @@ import Loader from '../components/Loader';
 import { GoalIntentData, goalIntentDataView, goalDataView, goalEventView, namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, } from '../utils/utils';
 import { unwrap } from '@innexgo/frontend-common';
 
-import { AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
+import {AuthenticatedComponentProps} from '@innexgo/frontend-auth';
 
 type DashboardData = {
   goalIntentData: GoalIntentData[],

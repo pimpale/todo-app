@@ -11,7 +11,7 @@ import Loader from '../components/Loader';
 import { namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, } from '../utils/utils';
 import { unwrap } from '@innexgo/frontend-common';
 
-import { AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
+import {AuthenticatedComponentProps} from '@innexgo/frontend-auth';
 
 type SettingsData = {
   tags: TagData[],

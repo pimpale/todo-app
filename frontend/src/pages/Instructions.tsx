@@ -1,9 +1,9 @@
 import React from 'react';
-import SimpleLayout from '../components/SimpleLayout';
 import Section from '../components/Section';
+import {SimpleLayout, BrandedComponentProps} from '@innexgo/frontend-auth';
 
-function Instructions() {
-  return <SimpleLayout>
+function Instructions(props: BrandedComponentProps) {
+  return <SimpleLayout branding={props.branding}>
     <section>
       <h2>Registering & Logging In</h2>
       <p>

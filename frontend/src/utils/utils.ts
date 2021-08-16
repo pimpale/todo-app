@@ -671,8 +671,4 @@ export function goalEntityTagView(props: GoalEntityTagViewProps): Promise<Result
 
 export const INT_MAX: number = 999999999999999;
 
-export const APP_NAME: string = "LifeSketch";
-export const APP_SLOGAN: string = "Optimize your day.";
-
-
 export const setHrMin = (d: Date, hr: number, min: number) => setMinutes(setHours(d, hr), min)

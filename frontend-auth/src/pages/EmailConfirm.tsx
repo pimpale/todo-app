@@ -4,7 +4,7 @@ import SimpleLayout from '../components/SimpleLayout';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Email, emailNew } from '@innexgo/frontend-auth-api';
 import { isErr } from '@innexgo/frontend-common';
-import ComponentProps from '../components/ComponentProps';
+import BrandedComponentProps from '../components/BrandedComponentProps';
 
 type CreateEmailProps = {
   verificationChallengeKey: string;
@@ -115,7 +115,7 @@ function CreateEmail(props: CreateEmailProps) {
 }
 
 
-function EmailConfirm(props: ComponentProps) {
+function EmailConfirm(props: BrandedComponentProps) {
 
   const [email, setEmail] = React.useState<Email | null>(null);
 

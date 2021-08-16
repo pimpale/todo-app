@@ -11,7 +11,8 @@ import ErrorMessage from '../components/ErrorMessage';
 import { Async, AsyncProps } from 'react-async';
 import { Row, Col, Tab, Tabs, Container, } from 'react-bootstrap';
 import { goalEventNew, goalEventView, GoalData, ExternalEventData, externalEventDataNew, goalDataNew, externalEventView, externalEventDataView, goalDataView } from '../utils/utils';
-import { ApiKey, AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
+import { ApiKey, } from '@innexgo/frontend-auth-api';
+import {AuthenticatedComponentProps} from '@innexgo/frontend-auth';
 
 import { unwrap, isErr } from '@innexgo/frontend-common';
 

@@ -42,7 +42,7 @@ function ManagePassword(props: ManagePasswordProps) {
           });
           break;
         }
-        case "PASSWORD_CANNOT_MANAGE_FOR_OTHERS": {
+        case "PASSWORD_CANNOT_CREATE_FOR_OTHERS": {
           setStatus({
             failureMessage: "You may only change your own password",
             successMessage: ""

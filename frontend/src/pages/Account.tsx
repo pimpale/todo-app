@@ -4,8 +4,8 @@ import { Form, Container } from 'react-bootstrap'
 import UtilityWrapper from '../components/UtilityWrapper';
 
 import DashboardLayout from '../components/DashboardLayout';
-import {ManagePassword, ManageUserData } from 'frontend-auth';
-import { AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
+import {ManagePassword, ManageUserData } from '@innexgo/frontend-auth';
+import { AuthenticatedComponentProps } from '@innexgo/frontend-auth';
 
 function Account(props: AuthenticatedComponentProps) {
   // TODO actually add backend components to handle changing the name properly

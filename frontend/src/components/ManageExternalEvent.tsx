@@ -1,5 +1,6 @@
 import React from 'react';
-import { Form, Button, Table } from 'react-bootstrap'; import Loader from '../components/Loader';
+import { Form, Button, Table } from 'react-bootstrap';
+import Loader from '../components/Loader';
 import { Async, AsyncProps } from 'react-async';
 import ErrorMessage from '../components/ErrorMessage';
 import DisplayModal from '../components/DisplayModal';

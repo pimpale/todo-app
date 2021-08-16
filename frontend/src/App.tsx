@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 import {ApiKey} from '@innexgo/frontend-auth-api';
-import AuthenticatedRoute from './components/AuthenticatedRoute';
+import {AuthenticatedRoute, BrandedRoute} from '@innexgo/frontend-auth';
 
 // public pages
 import Home from './pages/Home';
@@ -11,13 +11,13 @@ import About from './pages/About';
 import Error404 from './pages/Error404';
 
 // register
-import Register from './pages/Register';
-import EmailConfirm from './pages/EmailConfirm';
-import ParentPermissionConfirm from './pages/ParentPermissionConfirm';
+import {Register } from '@innexgo/frontend-auth';
+import {EmailConfirm } from '@innexgo/frontend-auth';
+import {ParentPermissionConfirm } from '@innexgo/frontend-auth';
 
 // When you forget password
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
+import {ForgotPassword} from '@innexgo/frontend-auth';
+import {ResetPassword} from '@innexgo/frontend-auth';
 
 // calendar
 import Calendar from './pages/Calendar';
@@ -33,6 +33,9 @@ import Account from './pages/Account';
 
 // search
 import Search from './pages/Search';
+
+import LightIcon from "./img/innexgo_transparent_icon.png";
+import DarkIcon from "./img/innexgo_onyx_transparent.png";
 
 // Bootstrap CSS & JS
 import './style/style.scss';
@@ -66,22 +69,30 @@ function App() {
     }
   };
 
+  const branding = {
+      name: "LifeSketch",
+      tagline:  "Optimize your day.",
+      homeUrl: "/",
+      tosUrl: "/terms_of_service",
+      iconSrc: LightIcon,
+  }
+
   return (
     <BrowserRouter>
       <Switch>
         <Route path="/" exact component={Home} />
-        <Route path="/instructions" component={Instructions} />
-        <Route path="/about" component={About} />
-        <Route path="/forgot_password" component={ForgotPassword} />
-        <Route path="/reset_password" component={ResetPassword} />
-        <Route path="/register" component={Register} />
-        <Route path="/email_confirm" component={EmailConfirm} />
-        <Route path="/parent_confirm" component={ParentPermissionConfirm} />
-        <AuthenticatedRoute path="/calendar" {...apiKeyGetSetter} component={Calendar} />
-        <AuthenticatedRoute path="/dashboard" {...apiKeyGetSetter} component={Dashboard} />
-        <AuthenticatedRoute path="/settings" {...apiKeyGetSetter} component={Settings} />
-        <AuthenticatedRoute path="/account" {...apiKeyGetSetter} component={Account} />
-        <AuthenticatedRoute path="/search" {...apiKeyGetSetter} component={Search} />
+        <BrandedRoute       branding={branding} path="/instructions" component={Instructions} />
+        <BrandedRoute       branding={branding} path="/about" component={About} />
+        <BrandedRoute       branding={branding} path="/forgot_password" component={ForgotPassword} />
+        <BrandedRoute       branding={branding} path="/reset_password" component={ResetPassword} />
+        <BrandedRoute       branding={branding} path="/register" component={Register} />
+        <BrandedRoute       branding={branding} path="/email_confirm" component={EmailConfirm} />
+        <BrandedRoute       branding={branding} path="/parent_confirm" component={ParentPermissionConfirm} />
+        <AuthenticatedRoute branding={branding} path="/calendar" {...apiKeyGetSetter} component={Calendar} />
+        <AuthenticatedRoute branding={branding} path="/dashboard" {...apiKeyGetSetter} component={Dashboard} />
+        <AuthenticatedRoute branding={branding} path="/settings" {...apiKeyGetSetter} component={Settings} />
+        <AuthenticatedRoute branding={branding} path="/account" {...apiKeyGetSetter} component={Account} />
+        <AuthenticatedRoute branding={branding} path="/search" {...apiKeyGetSetter} component={Search} />
         <Route path="/" component={Error404} />
       </Switch>
     </BrowserRouter>
