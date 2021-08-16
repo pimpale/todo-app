@@ -3,6 +3,7 @@ import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Card, Button, Form, } from 'react-bootstrap'
 import { passwordNewReset, } from '@innexgo/frontend-auth-api';
 import {isErr} from '@innexgo/frontend-common';
+import ComponentProps from '../components/ComponentProps';
 
 import SimpleLayout from '../components/SimpleLayout';
 
@@ -130,11 +131,11 @@ function ResetPasswordForm(props: ResetPasswordProps) {
   </>
 }
 
-function ResetPassword() {
+function ResetPassword(props: ComponentProps) {
   // get password reset key from url
   const resetKey = new URLSearchParams(window.location.search).get("resetKey") ?? "";
   const [successful, setSuccess] = React.useState(false);
-  return <SimpleLayout>
+  return <SimpleLayout branding={props.branding}>
     <div className="h-100 w-100 d-flex">
       <Card className="mx-auto my-auto">
         <Card.Body>

@@ -3,11 +3,13 @@ import { Card} from 'react-bootstrap'
 
 import RegisterForm from '../components/RegisterForm';
 import SimpleLayout from '../components/SimpleLayout';
+import ComponentProps from '../components/ComponentProps';
 
-function Register() {
+
+function Register(props: ComponentProps) {
   const [successful, setSuccess] = React.useState(false);
   return (
-    <SimpleLayout>
+    <SimpleLayout branding={props.branding}>
       <div className="h-100 w-100 d-flex">
         <Card className="mx-auto my-auto">
           <Card.Body>

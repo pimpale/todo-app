@@ -1,89 +1,74 @@
 import React from 'react';
-import Branding from '../components/Branding';
-import { Menu } from '@material-ui/icons';
+import { ArrowForward } from '@material-ui/icons';
+import HomeIcon from '@material-ui/icons/Home';
+import AccountBoxIcon from '@material-ui/icons/AccountBox';
+import FeaturedPlayListIcon from '@material-ui/icons/FeaturedPlayList';
+import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications';
+import { Container, Row, Col } from 'react-bootstrap';
+import ComponentProps from '../components/ComponentProps';
 
-interface HeaderProps {
-  branding: Branding,
-  links: { title: string, url: string }[]
-  children: React.ReactNode[],
-}
-
-interface HeaderState {
-  scroll: number;
-}
-
-class Header extends React.Component<HeaderProps, HeaderState> {
-  constructor(props: HeaderProps) {
-    super(props);
-    this.state = {
-      scroll: 0,
-    };
-  }
-
-  listenToScroll = () => {
-    const winScroll =
-      document.body.scrollTop || document.documentElement.scrollTop
-
-    const height =
-      document.documentElement.scrollHeight -
-      document.documentElement.clientHeight
-
-    const scrolled = winScroll / height
-
-    this.setState({
-      scroll: scrolled,
-    })
-  }
-  componentDidMount() {
-    window.addEventListener('scroll', this.listenToScroll)
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('scroll', this.listenToScroll)
-  }
-
+class SimpleLayout extends React.Component<ComponentProps> {
   render() {
-    const navStyle = {
-      transitionDuration: "0.4s"
-    };
-    return <>
-      <header>
-        <nav style={navStyle} className={"navbar navbar-expand-lg py-3 fixed-top" + (this.state.scroll === 0 ? "" : " bg-secondary")}>
-          <div className="container">
-            <a className="navbar-brand" href={this.props.branding.homeUrl}>
-              <img src={this.props.branding.iconSrc} alt="" width="30" height="24" className="d-inline-block align-text-top" />
-              {this.props.branding.name}
+    const gradText = {
+      background: "linear-gradient(#B7C9D6, #E6D5B8)",
+      color: "transparent",
+      backgroundClip: "text",
+      webkitBackgroundClip: "text",
+      fontWeight: "bold" as "bold",
+      marginBottom: "50px"
+    }
+
+    const iconStyle = {
+      color: "#E6D5B8",
+      fontSize: "32px",
+      marginRight: "10px",
+      marginLeft: "-20px"
+    }
+
+    const linkStyle = {
+      color: "white",
+      fontWeight: 550,
+      display: "flex",
+      marginTop: "15px",
+      alignItems: "center"
+    }
+
+
+    return (
+      <Container fluid>
+        <Row style={{ minHeight: "100vh" }}>
+          <Col md="2" className="px-5 py-5" style={{ backgroundColor: '#1C2B2D' }}>
+            <a href="/"><img src={this.props.branding.iconSrc} alt="Application Icon" /></a>
+            <h4 style={gradText} >{this.props.branding.name}</h4>
+
+            <a href="/" style={linkStyle}>
+              <HomeIcon style={iconStyle} /> Home
             </a>
-            <button className="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
-              <ThreeDotsVertical className="text-light" />
-            </button>
-            <div className="collapse navbar-collapse"
-              id="navbarSupportedContent">
-              <div className="navbar-nav ml-auto">
-                {this.props.links.map(l =>
-                  <a href={l.url} className="nav-item nav-link">
-                    <strong>{l.title}</strong>
-                  </a>
-                )}
-              </div>
-            </div>
-          </div>
-        </nav>
-      </header>
-      {this.props.children}
-      <footer>
-        <a href={this.props.branding.homeUrl}>
-          <img src={this.props.branding.iconSrc} alt="" width="30" height="24" className="d-inline-block align-text-top" />
-          {this.props.branding.name}
-        </a>
-        {this.props.branding.copyrightOrg ? `&copy; ${this.props.branding}` : ""}
-        {this.props.branding.tosUrl ? <a href={this.props.branding.tosUrl}>Terms of Service</a> : <div />}
-      </footer>
-    </>;
+            <br />
+            <a href="/dashboard" style={linkStyle}>
+              <ArrowForward style={iconStyle} /> Log In
+            </a>
+            <br />
+            <a href="/register" style={linkStyle}>
+              <AccountBoxIcon style={iconStyle} /> Register
+            </a>
+            <br />
+            <a href="/instructions" style={linkStyle}>
+              <FeaturedPlayListIcon style={iconStyle} /> Instructions
+            </a>
+            <br />
+            <a href="/terms_of_service" style={linkStyle}>
+              <SettingsApplicationsIcon style={iconStyle} /> Terms of Service
+            </a>
+            <br />
+          </Col>
+          <Col className="px-5 py-5">
+            {this.props.children}
+          </Col>
+        </Row>
+      </Container>
+    )
   }
 }
 
-
-
-
-export default ExternalLayout;
+export default SimpleLayout;

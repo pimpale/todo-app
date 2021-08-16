@@ -3,6 +3,7 @@ import { Formik, FormikHelpers } from 'formik'
 import { Button, Card, Form, } from 'react-bootstrap'
 import { passwordResetNew} from '@innexgo/frontend-auth-api';
 import {isErr} from '@innexgo/frontend-common';
+import ComponentProps from '../components/ComponentProps';
 
 import SimpleLayout from '../components/SimpleLayout';
 
@@ -98,9 +99,9 @@ function ForgotPasswordForm(props:ForgotPasswordFormProps) {
   )
 }
 
-function ForgotPassword() {
+function ForgotPassword(props: ComponentProps) {
   const [successful, setSuccess] = React.useState(false);
-  return <SimpleLayout>
+  return <SimpleLayout branding={props.branding}>
     <div className="h-100 w-100 d-flex">
       <Card className="mx-auto my-auto">
         <Card.Body>

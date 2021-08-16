@@ -4,11 +4,10 @@ import { Form, Container } from 'react-bootstrap'
 import UtilityWrapper from '../components/UtilityWrapper';
 
 import DashboardLayout from '../components/DashboardLayout';
-import CreatePassword from '../components/CreatePassword';
-import ManageUserData from '../components/ManageUserData';
+import {ManagePassword, ManageUserData } from 'frontend-auth';
 import { AuthenticatedComponentProps } from '@innexgo/frontend-auth-api';
 
-function Settings(props: AuthenticatedComponentProps) {
+function Account(props: AuthenticatedComponentProps) {
   // TODO actually add backend components to handle changing the name properly
   // Also, make the name and email and password changes into one box initially
   // Then, when you click on them to change, a modal should pop up
@@ -25,7 +24,7 @@ function Settings(props: AuthenticatedComponentProps) {
           </span>
           {passwdSuccess
             ? <Form.Text className="text-success">Password changed successfully</Form.Text>
-            : <CreatePassword apiKey={props.apiKey} onSuccess={() => setPasswdSuccess(true)} />
+            : <ManagePassword apiKey={props.apiKey} onSuccess={() => setPasswdSuccess(true)} />
           }
         </UtilityWrapper>
       </div>
@@ -44,4 +43,4 @@ function Settings(props: AuthenticatedComponentProps) {
   </DashboardLayout>
 }
 
-export default Settings;
+export default Account;

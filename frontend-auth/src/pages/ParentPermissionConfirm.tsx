@@ -4,6 +4,7 @@ import { Card, Button, Form } from "react-bootstrap";
 import SimpleLayout from '../components/SimpleLayout';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { ParentPermission , parentPermissionNew } from '@innexgo/frontend-auth-api';
+import ComponentProps from '../components/ComponentProps';
 import { isErr } from '@innexgo/frontend-common';
 
 type CreateParentPermissionProps = {
@@ -108,12 +109,12 @@ function CreateParentPermission(props: CreateParentPermissionProps) {
 }
 
 
-function ParentPermissionConfirm() {
+function ParentPermissionConfirm(props: ComponentProps) {
 
   const [parentPermission, setParentPermission] = React.useState<ParentPermission | null>(null);
 
   return (
-    <SimpleLayout>
+    <SimpleLayout branding={props.branding}>
       <div className="h-100 w-100 d-flex">
         <Card className="mx-auto my-auto">
           <Card.Body>

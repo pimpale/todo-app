@@ -2,8 +2,9 @@ import React from 'react';
 import { Card, Button, Form } from "react-bootstrap";
 import SimpleLayout from '../components/SimpleLayout';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
-import { Email , emailNew } from '@innexgo/frontend-auth-api';
+import { Email, emailNew } from '@innexgo/frontend-auth-api';
 import { isErr } from '@innexgo/frontend-common';
+import ComponentProps from '../components/ComponentProps';
 
 type CreateEmailProps = {
   verificationChallengeKey: string;
@@ -33,9 +34,9 @@ function CreateEmail(props: CreateEmailProps) {
     if (isErr(maybeEmail)) {
       switch (maybeEmail.Err) {
         case "VERIFICATION_CHALLENGE_NONEXISTENT": {
-         fprops.setStatus({
-           failureResult: "This link is invalid.",
-           successResult: ""
+          fprops.setStatus({
+            failureResult: "This link is invalid.",
+            successResult: ""
           });
           break;
         }
@@ -114,12 +115,12 @@ function CreateEmail(props: CreateEmailProps) {
 }
 
 
-function EmailConfirm() {
+function EmailConfirm(props: ComponentProps) {
 
   const [email, setEmail] = React.useState<Email | null>(null);
 
   return (
-    <SimpleLayout>
+    <SimpleLayout branding={props.branding}>
       <div className="h-100 w-100 d-flex">
         <Card className="mx-auto my-auto">
           <Card.Body>

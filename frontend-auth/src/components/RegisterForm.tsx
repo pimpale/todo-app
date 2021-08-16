@@ -1,7 +1,7 @@
-import React from 'react';
 import { Button, Form } from 'react-bootstrap'
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
-import { newVerificationChallenge, isApiErrorCode, isPasswordValid } from '../utils/utils';
+import { userNew } from '@innexgo/frontend-auth-api';
+import { isErr } from '@innexgo/frontend-common';
 
 type RegisterFormProps = {
   onSuccess: () => void
@@ -10,11 +10,14 @@ type RegisterFormProps = {
 function RegisterForm(props: RegisterFormProps) {
 
   type RegistrationValue = {
-    firstName: string,
-    lastName: string,
+    name: string,
     email: string,
     password1: string,
     password2: string,
+    // whether the olderThan13 is altered
+    touchedAge: boolean,
+    olderThan13: boolean,
+    parentEmail: string,
     terms: boolean,
   }
 
@@ -22,26 +25,28 @@ function RegisterForm(props: RegisterFormProps) {
     // Validate input
     let errors: FormikErrors<RegistrationValue> = {};
     let hasError = false;
-    if (values.firstName === "") {
-      errors.firstName= "Please enter your first name.";
-      hasError = true;
-    }
-    if (values.lastName === "") {
-      errors.lastName= "Please enter your last name.";
+    if (values.name === "") {
+      errors.name = "Please enter what you'd like us to call you.";
       hasError = true;
     }
     if (!values.email.includes("@")) {
       errors.email = "Please enter your email";
       hasError = true;
     }
-    if (!isPasswordValid(values.password1)) {
-      errors.password1 = "Password must have at least 8 chars and 1 number";
-      hasError = true;
-    }
     if (values.password2 !== values.password1) {
       errors.password2 = "Password does not match";
       hasError = true;
     }
+    if (!values.touchedAge) {
+      errors.olderThan13 = "Please pick an option";
+      hasError = true;
+    }
+
+    if (!values.olderThan13 && !values.parentEmail.includes("@")) {
+      errors.parentEmail = "Please enter a parent email";
+      hasError = true;
+    }
+
     if (!values.terms) {
       errors.terms = "You must agree to the terms and conditions";
       hasError = true;
@@ -52,25 +57,25 @@ function RegisterForm(props: RegisterFormProps) {
       return;
     }
 
-    const maybeVerificationChallenge = newVerificationChallenge({
-      userName: values.firstName+ " " + values.lastName,
-      userEmail: values.email,
+    const maybeUserData = await userNew({
+      userName: values.name,
       userPassword: values.password1,
+      userEmail: values.email,
+      parentEmail: values.olderThan13 ? undefined : values.parentEmail
     });
 
-    if (isApiErrorCode(maybeVerificationChallenge)) {
+    if (isErr(maybeUserData)) {
       // otherwise display errors
-      switch (maybeVerificationChallenge) {
+      switch (maybeUserData.Err) {
         case "USER_EMAIL_EMPTY": {
           fprops.setErrors({
-            email: "No such user exists"
+            name: "Please enter your email."
           });
           break;
         }
         case "USER_NAME_EMPTY": {
           fprops.setErrors({
-            firstName: "Please enter your first name.",
-            lastName: "Please enter your last name."
+            name: "Please enter what you'd like us to call you."
           });
           break;
         }
@@ -82,19 +87,7 @@ function RegisterForm(props: RegisterFormProps) {
         }
         case "PASSWORD_INSECURE": {
           fprops.setErrors({
-            password1: "Password is of insufficient complexity"
-          });
-          break;
-        }
-        case "EMAIL_RATELIMIT": {
-          fprops.setErrors({
-            email: "Please wait 5 minutes before sending another email."
-          });
-          break;
-        }
-        case "EMAIL_BLACKLISTED": {
-          fprops.setErrors({
-            email: "This email address is not permitted to make an account."
+            password1: "Password must have at least 8 chars and 1 number"
           });
           break;
         }
@@ -116,7 +109,7 @@ function RegisterForm(props: RegisterFormProps) {
     // execute callback
     props.onSuccess();
   }
-  const normalizeInput = (e: string) => e.toUpperCase().replace(/[^A-Z]+/g, "");
+  const normalizeInput = (e: string) => e.replace(/[^A-Za-z0-9]+/g, "");
 
   return (
     <Formik
@@ -126,12 +119,14 @@ function RegisterForm(props: RegisterFormProps) {
         successMessage: "",
       }}
       initialValues={{
-        firstName: "",
-        lastName: "",
+        name: "",
         email: "",
         password1: "",
         password2: "",
         terms: false,
+        touchedAge: false,
+        olderThan13: true,
+        parentEmail: ""
       }}
     >
       {(fprops) => <>
@@ -140,28 +135,16 @@ function RegisterForm(props: RegisterFormProps) {
           onSubmit={fprops.handleSubmit} >
           <div hidden={fprops.status.successMessage !== ""}>
             <Form.Group >
-              <Form.Label >First Name</Form.Label>
+              <Form.Label >Name</Form.Label>
               <Form.Control
-                name="firstName"
+                name="name"
                 type="text"
-                placeholder="First Name"
-                value={fprops.values.firstName}
-                onChange={e => fprops.setFieldValue("firstName", normalizeInput(e.target.value))}
-                isInvalid={!!fprops.errors.firstName}
+                placeholder="Name"
+                value={fprops.values.name}
+                onChange={e => fprops.setFieldValue("name", normalizeInput(e.target.value))}
+                isInvalid={!!fprops.errors.name}
               />
-              <Form.Control.Feedback type="invalid">{fprops.errors.firstName}</Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group >
-              <Form.Label >Last Name</Form.Label>
-              <Form.Control
-                name="lastName"
-                type="text"
-                placeholder="Last Name"
-                value={fprops.values.lastName}
-                onChange={e => fprops.setFieldValue("lastName", normalizeInput(e.target.value))}
-                isInvalid={!!fprops.errors.lastName}
-              />
-              <Form.Control.Feedback type="invalid">{fprops.errors.lastName}</Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
             </Form.Group>
             <Form.Group >
               <Form.Label >Email</Form.Label>
@@ -173,7 +156,7 @@ function RegisterForm(props: RegisterFormProps) {
                 onChange={fprops.handleChange}
                 isInvalid={!!fprops.errors.email}
               />
-              <Form.Control.Feedback type="invalid"> {fprops.errors.email} </Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">{fprops.errors.email}</Form.Control.Feedback>
             </Form.Group>
             <Form.Group >
               <Form.Label >Password</Form.Label>
@@ -199,6 +182,45 @@ function RegisterForm(props: RegisterFormProps) {
               />
               <Form.Control.Feedback type="invalid">{fprops.errors.password2}</Form.Control.Feedback>
             </Form.Group>
+            <Form.Group>
+              <Form.Check>
+                <Form.Check.Input
+                  type="radio"
+                  name="olderThan13"
+                  isInvalid={!!fprops.errors.olderThan13}
+                  onChange={() => {
+                    fprops.setFieldValue('olderThan13', false);
+                    fprops.setFieldValue('touchedAge', true)
+                  }}
+                />
+                <Form.Check.Label>I am younger than 13</Form.Check.Label>
+              </Form.Check>
+              <Form.Check>
+                <Form.Check.Input
+                  type="radio"
+                  name="olderThan13"
+                  isInvalid={!!fprops.errors.olderThan13}
+                  onChange={() => {
+                    fprops.setFieldValue('olderThan13', true);
+                    fprops.setFieldValue('touchedAge', true)
+                  }}
+                />
+                <Form.Check.Label>I am older than 13</Form.Check.Label>
+                <Form.Control.Feedback type="invalid">{fprops.errors.olderThan13}</Form.Control.Feedback>
+              </Form.Check>
+            </Form.Group>
+            <Form.Group hidden={fprops.values.olderThan13}>
+              <Form.Label>Parent Email</Form.Label>
+              <Form.Control
+                name="parentEmail"
+                type="email"
+                placeholder="Parent Email"
+                value={fprops.values.parentEmail}
+                onChange={fprops.handleChange}
+                isInvalid={!!fprops.errors.parentEmail}
+              />
+              <Form.Control.Feedback type="invalid">{fprops.errors.parentEmail}</Form.Control.Feedback>
+            </Form.Group>
             <Form.Check>
               <Form.Check.Input
                 name="terms"
@@ -206,7 +228,7 @@ function RegisterForm(props: RegisterFormProps) {
                 onChange={fprops.handleChange}
                 isInvalid={!!fprops.errors.terms}
               />
-              <Form.Check.Label> Agree to <a target="_blank" rel="noopener noreferrer"  href="/terms_of_service">terms of service</a></Form.Check.Label>
+              <Form.Check.Label> Agree to <a target="_blank" rel="noopener noreferrer" href="/terms_of_service">terms of service</a></Form.Check.Label>
               <Form.Control.Feedback type="invalid">{fprops.errors.terms}</Form.Control.Feedback>
             </Form.Check>
             <br />

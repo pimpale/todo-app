@@ -3,21 +3,21 @@ import { Button, Form, } from 'react-bootstrap'
 import { ApiKey, Password, passwordNewChange} from '@innexgo/frontend-auth-api';
 import {isErr} from '@innexgo/frontend-common';
 
-interface CreatePasswordProps {
+interface ManagePasswordProps {
   apiKey: ApiKey,
   onSuccess: (p:Password) => void
 }
 
-function CreatePassword(props: CreatePasswordProps) {
-  type CreatePasswordValue = {
+function ManagePassword(props: ManagePasswordProps) {
+  type ManagePasswordValue = {
     oldpassword: string,
     password1: string,
     password2: string,
   }
 
-  const onSubmit = async (values: CreatePasswordValue, { setStatus, setErrors }: FormikHelpers<CreatePasswordValue>) => {
+  const onSubmit = async (values: ManagePasswordValue, { setStatus, setErrors }: FormikHelpers<ManagePasswordValue>) => {
     // Validate input
-    let errors: FormikErrors<CreatePasswordValue> = {};
+    let errors: FormikErrors<ManagePasswordValue> = {};
     let hasError = false;
     if (values.password2 !== values.password1) {
       errors.password2 = "Password does not match.";
@@ -42,7 +42,7 @@ function CreatePassword(props: CreatePasswordProps) {
           });
           break;
         }
-        case "PASSWORD_CANNOT_CREATE_FOR_OTHERS": {
+        case "PASSWORD_CANNOT_MANAGE_FOR_OTHERS": {
           setStatus({
             failureMessage: "You may only change your own password",
             successMessage: ""
@@ -73,7 +73,7 @@ function CreatePassword(props: CreatePasswordProps) {
     }
   }
   return <>
-    <Formik<CreatePasswordValue>
+    <Formik<ManagePasswordValue>
       onSubmit={onSubmit}
       initialStatus={{
         successMessage: "",
@@ -136,4 +136,4 @@ function CreatePassword(props: CreatePasswordProps) {
   </>
 }
 
-export default CreatePassword;
+export default ManagePassword;
