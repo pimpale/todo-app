@@ -1,0 +1,9 @@
+{
+  "version": "v1",
+  "packages": {
+    "@innexgo/frontend-auth": {
+      "signature": "3be282ed9b013741bcacfcf8673e2d37",
+      "link": true
+    }
+  }
+}

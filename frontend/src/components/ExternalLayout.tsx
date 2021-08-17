@@ -1,10 +1,7 @@
 import React from 'react';
 import { Menu } from '@material-ui/icons';
 import { Navbar, Nav, Container } from 'react-bootstrap';
-import { APP_NAME } from '../utils/utils';
-
-import innexgo_logo from '../img/innexgo_transparent_icon.png';
-
+import { Branding } from '@innexgo/frontend-auth';
 
 interface ExternalHeaderProps {
   title: string;
@@ -100,35 +97,33 @@ class ExternalHeader extends React.Component<ExternalHeaderProps, ExternalHeader
 interface ExternalLayoutProps {
   fixed: boolean;
   transparentTop: boolean;
+  branding: Branding;
 }
 
-class ExternalLayout extends React.Component<ExternalLayoutProps> {
-  render() {
-    return (
-      <>
-        <ExternalHeader fixed={this.props.fixed} transparentTop={this.props.transparentTop} title={APP_NAME} />
-        {this.props.children}
-        <Navbar bg="dark" variant="dark">
-          <Container>
-            <Navbar.Brand href="#home">
-              <img
-                alt={`${APP_NAME} Logo`}
-                src={innexgo_logo}
-                width="30"
-                height="30"
-                className="d-inline-block align-top"
-              />{' '}
-              {APP_NAME}
-            </Navbar.Brand>
-            <Nav className="mr-auto">
-              <Nav.Link>&copy; {APP_NAME}, 2021</Nav.Link>
-            </Nav>
-          </Container>
-        </Navbar>
-      </>
-
-    )
-  }
-}
+const ExternalLayout: React.FC<ExternalLayoutProps> = (props) =>
+  <>
+    <ExternalHeader fixed={props.fixed} transparentTop={props.transparentTop} title={props.branding.name} />
+    {props.children}
+    <Navbar bg="dark" variant="dark">
+      <Container>
+        <Navbar.Brand href="#home">
+          <img
+            alt={`${props.branding.name} Logo`}
+            src={props.branding.darkAdaptedIcon}
+            width="30"
+            height="30"
+            className="d-inline-block align-top"
+          />{' '}
+          {props.branding.name}
+        </Navbar.Brand>
+        {props.branding.copyrightOrg ?
+          <Nav className="mr-auto">
+            <Nav.Link>&copy; {props.branding.copyrightOrg}, 2021</Nav.Link>
+          </Nav>
+          : false
+        }
+      </Container>
+    </Navbar>
+  </>
 
 export default ExternalLayout;

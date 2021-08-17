@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 
 type SectionProps = {
   id: string
@@ -19,8 +18,8 @@ const Section: React.FunctionComponent<SectionProps> = props => {
         visibility: "hidden",
       }}></span>
     <div className="clearfix">
-      <h2 style={{display: "inline"}} className="float-left">{props.name}</h2>
-      <a href={`#${props.id}`} className="float-right text-muted"><h3>#</h3></a>
+      <h2 style={{display: "inline"}} className="float-start">{props.name}</h2>
+      <a href={`#${props.id}`} className="float-end text-muted"><h3>#</h3></a>
     </div>
     {props.children}
   </section>

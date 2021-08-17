@@ -3,11 +3,11 @@ import { Container, Button} from 'react-bootstrap';
 import ExternalLayout from '../components/ExternalLayout';
 import Section from '../components/Section';
 
-import {APP_NAME, APP_SLOGAN} from '../utils/utils';
 import lady from '../img/lady_sit.png';
 import { borderRadius } from 'react-select/src/theme';
+import {BrandedComponentProps} from '@innexgo/frontend-auth';
 
-function Home() {
+function Home(props: BrandedComponentProps) {
 
   const jumboStyle = {
     height: "80vh",
@@ -65,17 +65,14 @@ function Home() {
     marginTop: "110px"
   };
 
-
-
-
   return (
-    <ExternalLayout fixed={true} transparentTop={true}>
+    <ExternalLayout branding={props.branding} fixed={true} transparentTop={true}>
       <Container fluid style={jumboStyle}>
 
         <img src={lady} width = "450" height = "450" />
 
         <div style = {homeTextStyle}>
-          <h1 style ={gradText}> {APP_SLOGAN} </h1>
+          <h1 style ={gradText}>{props.branding.tagline}</h1>
           <h5 style = {bodyText}>
             Easily organize and manage your <br/>
             calendar to accomplish long-term goals.
@@ -95,9 +92,9 @@ function Home() {
       <div style = {goldBack}> 
     
       <Container>
-        <Section id="welcome" name={`Welcome to ${APP_NAME}`}>
+        <Section id="welcome" name={`Welcome to ${props.branding.name}`}>
           <div>
-            Welcome to {APP_NAME}, an application built for a class project, but an application designed for the
+            Welcome to {props.branding.name}, an application built for a class project, but an application designed for the
             busiest of people. As students at UCLA, we know how frustrating it is to schedule classes,
             clubs, and homework so we made this application to help all kinds of people efficiently plan their schedule. We invite you to join us
             and be prepared for what the day has in store.

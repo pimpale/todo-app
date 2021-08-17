@@ -18,7 +18,7 @@ const Section: React.FunctionComponent<SectionProps> = props => {
       }}></span>
     <div className="clearfix">
       <h2 style={{display: "inline", float: "left"}}>{props.name}</h2>
-      <a href={`#${props.id}`} className="float-right text-muted"><h3>#</h3></a>
+      <a href={`#${props.id}`} className="float-end text-muted"><h3>#</h3></a>
     </div>
     {props.children}
   </section>

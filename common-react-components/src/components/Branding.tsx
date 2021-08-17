@@ -9,6 +9,8 @@ export default interface Branding {
   tosUrl?: string,
   // Copyright
   copyrightOrg?: string,
-  // Image element adapted for light theme
-  iconSrc: string,
+  // Image element adapted for light background
+  lightAdaptedIcon: string,
+  // Image element adapted for dark theme
+  darkAdaptedIcon: string,
 }

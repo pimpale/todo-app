@@ -38,7 +38,7 @@ class SimpleLayout extends React.Component<BrandedComponentProps> {
       <Container fluid>
         <Row style={{ minHeight: "100vh" }}>
           <Col md="2" className="px-5 py-5" style={{ backgroundColor: '#1C2B2D' }}>
-            <a href="/"><img src={this.props.branding.iconSrc} alt="Application Icon" /></a>
+            <a href="/"><img src={this.props.branding.darkAdaptedIcon} alt="Application Icon" /></a>
             <h4 style={gradText} >{this.props.branding.name}</h4>
 
             <a href="/" style={linkStyle}>

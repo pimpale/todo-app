@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
-import {ApiKey} from '@innexgo/frontend-auth-api';
-import {AuthenticatedRoute, BrandedRoute} from '@innexgo/frontend-auth';
+import { ApiKey } from '@innexgo/frontend-auth-api';
+import { AuthenticatedRoute, BrandedRoute } from '@innexgo/frontend-auth';
 
 // public pages
 import Home from './pages/Home';
@@ -11,13 +11,13 @@ import About from './pages/About';
 import Error404 from './pages/Error404';
 
 // register
-import {Register } from '@innexgo/frontend-auth';
-import {EmailConfirm } from '@innexgo/frontend-auth';
-import {ParentPermissionConfirm } from '@innexgo/frontend-auth';
+import { Register } from '@innexgo/frontend-auth';
+import { EmailConfirm } from '@innexgo/frontend-auth';
+import { ParentPermissionConfirm } from '@innexgo/frontend-auth';
 
 // When you forget password
-import {ForgotPassword} from '@innexgo/frontend-auth';
-import {ResetPassword} from '@innexgo/frontend-auth';
+import { ForgotPassword } from '@innexgo/frontend-auth';
+import { ResetPassword } from '@innexgo/frontend-auth';
 
 // calendar
 import Calendar from './pages/Calendar';
@@ -34,8 +34,8 @@ import Account from './pages/Account';
 // search
 import Search from './pages/Search';
 
-import LightIcon from "./img/innexgo_transparent_icon.png";
-import DarkIcon from "./img/innexgo_onyx_transparent.png";
+import DarkAdaptedIcon from "./img/innexgo_transparent_icon.png";
+import LightAdaptedIcon from "./img/innexgo_onyx_transparent.png";
 
 // Bootstrap CSS & JS
 import './style/style.scss';
@@ -70,33 +70,58 @@ function App() {
   };
 
   const branding = {
-      name: "LifeSketch",
-      tagline:  "Optimize your day.",
-      homeUrl: "/",
-      tosUrl: "/terms_of_service",
-      iconSrc: LightIcon,
+    name: "LifeSketch",
+    tagline: "Optimize your day.",
+    homeUrl: "/",
+    tosUrl: "/terms_of_service",
+    darkAdaptedIcon: DarkAdaptedIcon,
+    lightAdaptedIcon: LightAdaptedIcon,
   }
 
-  return (
-    <BrowserRouter>
-      <Switch>
-        <Route path="/" exact component={Home} />
-        <BrandedRoute       branding={branding} path="/instructions" component={Instructions} />
-        <BrandedRoute       branding={branding} path="/about" component={About} />
-        <BrandedRoute       branding={branding} path="/forgot_password" component={ForgotPassword} />
-        <BrandedRoute       branding={branding} path="/reset_password" component={ResetPassword} />
-        <BrandedRoute       branding={branding} path="/register" component={Register} />
-        <BrandedRoute       branding={branding} path="/email_confirm" component={EmailConfirm} />
-        <BrandedRoute       branding={branding} path="/parent_confirm" component={ParentPermissionConfirm} />
-        <AuthenticatedRoute branding={branding} path="/calendar" {...apiKeyGetSetter} component={Calendar} />
-        <AuthenticatedRoute branding={branding} path="/dashboard" {...apiKeyGetSetter} component={Dashboard} />
-        <AuthenticatedRoute branding={branding} path="/settings" {...apiKeyGetSetter} component={Settings} />
-        <AuthenticatedRoute branding={branding} path="/account" {...apiKeyGetSetter} component={Account} />
-        <AuthenticatedRoute branding={branding} path="/search" {...apiKeyGetSetter} component={Search} />
-        <Route path="/" component={Error404} />
-      </Switch>
-    </BrowserRouter>
-  );
+  return <BrowserRouter>
+    <Switch>
+      <Route path="/" exact >
+        <BrandedRoute branding={branding} component={Home} />
+      </Route>
+      <Route path="/instructions" >
+        <BrandedRoute branding={branding} component={Instructions} />
+      </Route>
+      <Route path="/about" >
+        <BrandedRoute branding={branding} component={About} />
+      </Route>
+      <Route path="/forgot_password" >
+        <BrandedRoute branding={branding} component={ForgotPassword} />
+      </Route>
+      <Route path="/reset_password" >
+        <BrandedRoute branding={branding} component={ResetPassword} />
+      </Route>
+      <Route path="/register" >
+        <BrandedRoute branding={branding} component={Register} />
+      </Route>
+      <Route path="/email_confirm" >
+        <BrandedRoute branding={branding} component={EmailConfirm} />
+      </Route>
+      <Route path="/parent_confirm" >
+        <BrandedRoute branding={branding} component={ParentPermissionConfirm} />
+      </Route>
+      <Route path="/calendar" >
+        <AuthenticatedRoute branding={branding} {...apiKeyGetSetter} component={Calendar} />
+      </Route>
+      <Route path="/dashboard" >
+        <AuthenticatedRoute branding={branding} {...apiKeyGetSetter} component={Dashboard} />
+      </Route>
+      <Route path="/settings" >
+        <AuthenticatedRoute branding={branding} {...apiKeyGetSetter} component={Settings} />
+      </Route >
+      <Route path="/account" >
+        <AuthenticatedRoute branding={branding} {...apiKeyGetSetter} component={Account} />
+      </Route >
+      <Route path="/search" >
+        <AuthenticatedRoute branding={branding} {...apiKeyGetSetter} component={Search} />
+      </Route >
+      <Route path="/" component={Error404} />
+    </Switch >
+  </BrowserRouter >
 }
 
 export default App;
