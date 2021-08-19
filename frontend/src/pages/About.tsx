@@ -1,4 +1,4 @@
-import {SimpleLayout, BrandedComponentProps} from '@innexgo/frontend-auth';
+import {SimpleLayout, BrandedComponentProps} from '@innexgo/common-react-components';
 
 function About(props: BrandedComponentProps) {
   return <SimpleLayout branding={props.branding}>

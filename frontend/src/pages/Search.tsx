@@ -7,7 +7,7 @@ import { GoalData, goalDataView, GoalEvent, goalEventView } from '../utils/utils
 import { isErr, unwrap } from '@innexgo/frontend-common';
 
 import { ApiKey} from '@innexgo/frontend-auth-api';
-import {AuthenticatedComponentProps} from '@innexgo/frontend-auth';
+import {AuthenticatedComponentProps} from '@innexgo/auth-react-components';
 
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 

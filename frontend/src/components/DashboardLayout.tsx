@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dashboard, Event, Settings, Search, Person} from '@material-ui/icons';
-import { AuthenticatedComponentProps } from '@innexgo/frontend-auth';
+import { AuthenticatedComponentProps } from '@innexgo/auth-react-components';
 
 import InnerLayout from '../components/InnerLayout';
 

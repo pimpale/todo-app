@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 import { ApiKey } from '@innexgo/frontend-auth-api';
-import { AuthenticatedRoute, BrandedRoute } from '@innexgo/frontend-auth';
+import { AuthenticatedRoute} from '@innexgo/auth-react-components';
 
 // public pages
 import Home from './pages/Home';
@@ -11,13 +11,13 @@ import About from './pages/About';
 import Error404 from './pages/Error404';
 
 // register
-import { Register } from '@innexgo/frontend-auth';
-import { EmailConfirm } from '@innexgo/frontend-auth';
-import { ParentPermissionConfirm } from '@innexgo/frontend-auth';
+import { Register } from '@innexgo/auth-react-components';
+import { EmailConfirm } from '@innexgo/auth-react-components';
+import { ParentPermissionConfirm } from '@innexgo/auth-react-components';
 
 // When you forget password
-import { ForgotPassword } from '@innexgo/frontend-auth';
-import { ResetPassword } from '@innexgo/frontend-auth';
+import { ForgotPassword } from '@innexgo/auth-react-components';
+import { ResetPassword } from '@innexgo/auth-react-components';
 
 // calendar
 import Calendar from './pages/Calendar';
@@ -81,28 +81,28 @@ function App() {
   return <BrowserRouter>
     <Switch>
       <Route path="/" exact >
-        <BrandedRoute branding={branding} component={Home} />
+        <Home branding={branding} />
       </Route>
       <Route path="/instructions" >
-        <BrandedRoute branding={branding} component={Instructions} />
+        <Instructions branding={branding} />
       </Route>
       <Route path="/about" >
-        <BrandedRoute branding={branding} component={About} />
+        <About branding={branding} />
       </Route>
       <Route path="/forgot_password" >
-        <BrandedRoute branding={branding} component={ForgotPassword} />
+        <ForgotPassword branding={branding} />
       </Route>
       <Route path="/reset_password" >
-        <BrandedRoute branding={branding} component={ResetPassword} />
+        <ResetPassword branding={branding} />
       </Route>
       <Route path="/register" >
-        <BrandedRoute branding={branding} component={Register} />
+        <Register branding={branding} />
       </Route>
       <Route path="/email_confirm" >
-        <BrandedRoute branding={branding} component={EmailConfirm} />
+        <EmailConfirm branding={branding} />
       </Route>
       <Route path="/parent_confirm" >
-        <BrandedRoute branding={branding} component={ParentPermissionConfirm} />
+        <ParentPermissionConfirm branding={branding} />
       </Route>
       <Route path="/calendar" >
         <AuthenticatedRoute branding={branding} {...apiKeyGetSetter} component={Calendar} />

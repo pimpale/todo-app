@@ -1,10 +1,9 @@
 import React from 'react';
 import { Card, Button, Form } from "react-bootstrap";
-import SimpleLayout from '../components/SimpleLayout';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Email, emailNew } from '@innexgo/frontend-auth-api';
 import { isErr } from '@innexgo/frontend-common';
-import BrandedComponentProps from '../components/BrandedComponentProps';
+import { SimpleLayout, BrandedComponentProps } from '@innexgo/common-react-components';
 
 type CreateEmailProps = {
   verificationChallengeKey: string;

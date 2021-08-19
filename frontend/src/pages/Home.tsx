@@ -1,11 +1,10 @@
 import { Container, Button} from 'react-bootstrap';
 
 import ExternalLayout from '../components/ExternalLayout';
-import Section from '../components/Section';
+import { Section, BrandedComponentProps} from '@innexgo/common-react-components';
 
 import lady from '../img/lady_sit.png';
 import { borderRadius } from 'react-select/src/theme';
-import {BrandedComponentProps} from '@innexgo/frontend-auth';
 
 function Home(props: BrandedComponentProps) {
 

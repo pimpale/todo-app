@@ -1,18 +1,17 @@
 import { Row, Container, Col } from 'react-bootstrap';
 import { Async, AsyncProps } from 'react-async';
 import update from 'immutability-helper';
-import Section from '../components/Section';
+import { Loader, Section } from '@innexgo/common-react-components';
 import ErrorMessage from '../components/ErrorMessage';
 import DashboardLayout from '../components/DashboardLayout';
 import { TemplateData } from '../components/ManageGoalTemplate';
 import { TagData } from '../components/ManageNamedEntity';
 import ManageHybridGoalTable from '../components/ManageHybridGoalTable';
 import { ManageGoalData } from '../components/ManageGoal';
-import Loader from '../components/Loader';
 import { GoalIntentData, goalIntentDataView, goalDataView, goalEventView, namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, } from '../utils/utils';
 import { unwrap } from '@innexgo/frontend-common';
 
-import {AuthenticatedComponentProps} from '@innexgo/frontend-auth';
+import {AuthenticatedComponentProps} from '@innexgo/auth-react-components';
 
 type DashboardData = {
   goalIntentData: GoalIntentData[],

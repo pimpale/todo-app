@@ -2,9 +2,7 @@ import React from 'react';
 import { Card} from 'react-bootstrap'
 
 import RegisterForm from '../components/RegisterForm';
-import SimpleLayout from '../components/SimpleLayout';
-import BrandedComponentProps from '../components/BrandedComponentProps';
-
+import { SimpleLayout, BrandedComponentProps } from '@innexgo/common-react-components';
 
 function Register(props: BrandedComponentProps) {
   const [successful, setSuccess] = React.useState(false);

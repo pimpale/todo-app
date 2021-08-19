@@ -1,5 +1,5 @@
 import React from 'react';
-import Loader from '../components/Loader';
+import { Loader } from '@innexgo/common-react-components';
 import { ApiKey, UserData, userDataView } from '@innexgo/frontend-auth-api';
 import { unwrap } from '@innexgo/frontend-common';
 import { Async, AsyncProps } from 'react-async';

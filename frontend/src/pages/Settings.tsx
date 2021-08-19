@@ -1,17 +1,16 @@
 import { Row, Container, Col } from 'react-bootstrap';
 import { Async, AsyncProps } from 'react-async';
 import update from 'immutability-helper';
-import Section from '../components/Section';
 import ErrorMessage from '../components/ErrorMessage';
 import DashboardLayout from '../components/DashboardLayout';
 import { TemplateData } from '../components/ManageGoalTemplate';
 import { TagData } from '../components/ManageNamedEntity';
 import ManageGoalTemplateTable from '../components/ManageGoalTemplateTable';
-import Loader from '../components/Loader';
+import { Loader , Section } from '@innexgo/common-react-components';
 import { namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, } from '../utils/utils';
 import { unwrap } from '@innexgo/frontend-common';
 
-import {AuthenticatedComponentProps} from '@innexgo/frontend-auth';
+import {AuthenticatedComponentProps} from '@innexgo/auth-react-components';
 
 type SettingsData = {
   tags: TagData[],

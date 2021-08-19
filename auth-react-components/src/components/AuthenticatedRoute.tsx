@@ -1,9 +1,8 @@
 import React from "react";
 import Login from "../components/Login";
-import SimpleLayout from "../components/SimpleLayout";
 import { ApiKey } from "@innexgo/frontend-auth-api";
 import AuthenticatedComponentProps from '../components/AuthenticatedComponentProps';
-import Branding from '../components/Branding';
+import { SimpleLayout , Branding } from '@innexgo/common-react-components';
 
 
 export interface AuthenticatedRouteProps {

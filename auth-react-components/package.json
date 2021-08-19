@@ -35,7 +35,9 @@
     "react-router-dom": "^5.1.8",
     "sass": "^1.37.5"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@innexgo/common-react-components": "link:.yalc/@innexgo/common-react-components"
+  },
   "devDependencies": {
     "@innexgo/frontend-auth-api": "^0.2.27",
     "@innexgo/frontend-common": "^0.0.9",

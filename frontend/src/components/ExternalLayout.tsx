@@ -1,7 +1,7 @@
 import React from 'react';
 import { Menu } from '@material-ui/icons';
 import { Navbar, Nav, Container } from 'react-bootstrap';
-import { Branding } from '@innexgo/frontend-auth';
+import { Branding } from '@innexgo/common-react-components';
 
 interface ExternalHeaderProps {
   title: string;

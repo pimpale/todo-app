@@ -1,5 +1,5 @@
 import React from 'react'
-import Loader from '../components/Loader';
+import { Loader } from '@innexgo/common-react-components';
 import FullCalendar, { EventApi, DateSelectArg, EventClickArg } from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
@@ -12,7 +12,7 @@ import { Async, AsyncProps } from 'react-async';
 import { Row, Col, Tab, Tabs, Container, } from 'react-bootstrap';
 import { goalEventNew, goalEventView, GoalData, ExternalEventData, externalEventDataNew, goalDataNew, externalEventView, externalEventDataView, goalDataView } from '../utils/utils';
 import { ApiKey, } from '@innexgo/frontend-auth-api';
-import {AuthenticatedComponentProps} from '@innexgo/frontend-auth';
+import {AuthenticatedComponentProps} from '@innexgo/auth-react-components';
 
 import { unwrap, isErr } from '@innexgo/frontend-common';
 

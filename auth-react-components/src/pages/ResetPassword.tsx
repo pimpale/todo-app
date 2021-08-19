@@ -2,10 +2,8 @@ import React from 'react';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Card, Button, Form, } from 'react-bootstrap'
 import { passwordNewReset, } from '@innexgo/frontend-auth-api';
-import {isErr} from '@innexgo/frontend-common';
-import BrandedComponentProps from '../components/BrandedComponentProps';
-
-import SimpleLayout from '../components/SimpleLayout';
+import { isErr } from '@innexgo/frontend-common';
+import { SimpleLayout, BrandedComponentProps } from '@innexgo/common-react-components';
 
 interface ResetPasswordProps {
   resetKey: string,

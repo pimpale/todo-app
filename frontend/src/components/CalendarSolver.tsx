@@ -1,5 +1,5 @@
 import React from 'react'
-import Loader from '../components/Loader';
+import { Loader } from '@innexgo/common-react-components';
 import { Async, AsyncProps } from 'react-async';
 import ErrorMessage from '../components/ErrorMessage';
 import FullCalendar from '@fullcalendar/react'

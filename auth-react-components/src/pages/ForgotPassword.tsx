@@ -3,9 +3,8 @@ import { Formik, FormikHelpers } from 'formik'
 import { Button, Card, Form, } from 'react-bootstrap'
 import { passwordResetNew} from '@innexgo/frontend-auth-api';
 import {isErr} from '@innexgo/frontend-common';
-import BrandedComponentProps from '../components/BrandedComponentProps';
+import { SimpleLayout, BrandedComponentProps } from '@innexgo/common-react-components';
 
-import SimpleLayout from '../components/SimpleLayout';
 
 type ForgotPasswordFormProps = {
   onSuccess: ()=>void;

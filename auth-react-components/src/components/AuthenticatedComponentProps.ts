@@ -1,5 +1,5 @@
 import {ApiKey} from '@innexgo/frontend-auth-api';
-import Branding from '../components/Branding';
+import { Branding } from '@innexgo/common-react-components';
 
 export default interface AuthenticatedComponentProps {
   branding: Branding,
