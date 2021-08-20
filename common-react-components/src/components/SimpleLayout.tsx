@@ -1,9 +1,5 @@
 import React from 'react';
-import { ArrowForward } from '@material-ui/icons';
-import HomeIcon from '@material-ui/icons/Home';
-import AccountBoxIcon from '@material-ui/icons/AccountBox';
-import FeaturedPlayListIcon from '@material-ui/icons/FeaturedPlayList';
-import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications';
+import { ArrowRight, House, PersonPlus, Gear, FileText } from 'react-bootstrap-icons';
 import { Container, Row, Col } from 'react-bootstrap';
 import BrandedComponentProps from '../components/BrandedComponentProps';
 
@@ -42,23 +38,23 @@ class SimpleLayout extends React.Component<BrandedComponentProps> {
             <h4 style={gradText} >{this.props.branding.name}</h4>
 
             <a href="/" style={linkStyle}>
-              <HomeIcon style={iconStyle} /> Home
+              <House style={iconStyle} /> Home
             </a>
             <br />
             <a href="/dashboard" style={linkStyle}>
-              <ArrowForward style={iconStyle} /> Log In
+              <ArrowRight style={iconStyle} /> Log In
             </a>
             <br />
             <a href="/register" style={linkStyle}>
-              <AccountBoxIcon style={iconStyle} /> Register
+              <PersonPlus style={iconStyle} /> Register
             </a>
             <br />
             <a href="/instructions" style={linkStyle}>
-              <FeaturedPlayListIcon style={iconStyle} /> Instructions
+              <FileText style={iconStyle} /> Instructions
             </a>
             <br />
             <a href="/terms_of_service" style={linkStyle}>
-              <SettingsApplicationsIcon style={iconStyle} /> Terms of Service
+              <Gear style={iconStyle} /> Terms of Service
             </a>
             <br />
           </Col>
