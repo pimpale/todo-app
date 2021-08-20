@@ -4,10 +4,10 @@ use super::Config;
 use super::Db;
 use super::SERVICE_NAME;
 use auth_service_api::client::AuthService;
-use std::collections::HashMap;
 use std::convert::Infallible;
 use std::future::Future;
 use todo_app_service_api::response::TodoAppError;
+use todo_app_service_api::response;
 use warp::http::StatusCode;
 use warp::Filter;
 
@@ -29,8 +29,8 @@ pub fn api(
   auth_service: AuthService,
 ) -> impl Filter<Extract = impl warp::Reply, Error = Infallible> + Clone {
   // public API
-  api_info()
-    .or(combine!(
+  combine!(
+      api_info(),
       adapter(
         config.clone(),
         db.clone(),
@@ -269,15 +269,19 @@ pub fn api(
         warp::path!("public" / "user_generated_code" / "view"),
         handlers::user_generated_code_view,
       )
-    ))
+    )
     .recover(handle_rejection)
 }
 
-fn api_info() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
-  let mut info = HashMap::new();
-  info.insert("version", "0.1");
-  info.insert("name", SERVICE_NAME);
-  warp::path!("info").map(move || warp::reply::json(&info))
+
+fn api_info() -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
+  let info = response::Info {
+      service: SERVICE_NAME.to_owned(),
+      version_major: 1,
+      version_minor: 0,
+      version_rev: 0,
+  };
+  warp::path!("public" / "info").map(move || warp::reply::json(&info))
 }
 
 // this function adapts a handler function to a warp filter
