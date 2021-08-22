@@ -1,16 +1,16 @@
 import React from 'react';
 import { Formik, FormikHelpers } from 'formik'
 import { Button, Card, Form, } from 'react-bootstrap'
-import { passwordResetNew} from '@innexgo/frontend-auth-api';
-import {isErr} from '@innexgo/frontend-common';
+import { passwordResetNew } from '@innexgo/frontend-auth-api';
+import { isErr } from '@innexgo/frontend-common';
 import { SimpleLayout, BrandedComponentProps } from '@innexgo/common-react-components';
 
 
 type ForgotPasswordFormProps = {
-  onSuccess: ()=>void;
+  onSuccess: () => void;
 }
 
-function ForgotPasswordForm(props:ForgotPasswordFormProps) {
+function ForgotPasswordForm(props: ForgotPasswordFormProps) {
 
   type ForgotPasswordValue = {
     email: string,
@@ -75,7 +75,7 @@ function ForgotPasswordForm(props:ForgotPasswordFormProps) {
         <Form
           noValidate
           onSubmit={props.handleSubmit} >
-          <Form.Group >
+          <Form.Group className="mb-3">
             <Form.Label>Email</Form.Label>
             <Form.Control
               name="email"
@@ -87,11 +87,13 @@ function ForgotPasswordForm(props:ForgotPasswordFormProps) {
             />
             <Form.Control.Feedback type="invalid"> {props.errors.email} </Form.Control.Feedback>
           </Form.Group>
-          <br />
-          <Button type="submit">Submit</Button>
-          <br />
-          <Form.Text className="text-danger">{props.status.failureMessage}</Form.Text>
-          <Form.Text className="text-success">{props.status.successMessage}</Form.Text>
+          <Form.Group className="mb-3">
+            <Button type="submit">Submit</Button>
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Text className="text-danger">{props.status.failureMessage}</Form.Text>
+            <Form.Text className="text-success">{props.status.successMessage}</Form.Text>
+          </Form.Group>
         </Form>
       )}
     </Formik>
@@ -105,10 +107,10 @@ function ForgotPassword(props: BrandedComponentProps) {
       <Card className="mx-auto my-auto">
         <Card.Body>
           <Card.Title>Send Reset Password Email</Card.Title>
-            {successful
-              ? <Form.Text className="text-success">We've sent an email to reset your password.</Form.Text>
-              : <ForgotPasswordForm onSuccess={() => setSuccess(true)} />
-            }
+          {successful
+            ? <Form.Text className="text-success">We've sent an email to reset your password.</Form.Text>
+            : <ForgotPasswordForm onSuccess={() => setSuccess(true)} />
+          }
         </Card.Body>
       </Card>
     </div>

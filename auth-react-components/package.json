@@ -21,21 +21,21 @@
   },
   "homepage": "https://github.com/innexgo/frontend-auth#readme",
   "peerDependencies": {
+    "@innexgo/common-react-components": "link:../common-react-components/",
     "@innexgo/frontend-auth-api": "^0.2.27",
     "@innexgo/frontend-common": "^0.0.9",
     "@popperjs/core": "^2.9.1",
     "bootstrap": "^5.0.1",
     "formik": "^2.2.9",
     "react": "^17.0.1",
-    "react-bootstrap": "^2.0.0-beta.4",
+    "react-bootstrap": "^2.0.0-beta.5",
     "react-bootstrap-icons": "^1.5.0",
     "react-dom": "^17.0.2",
     "sass": "^1.37.5"
   },
-  "dependencies": {
-    "@innexgo/common-react-components": "file:.yalc/@innexgo/common-react-components"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@innexgo/common-react-components": "link:../common-react-components/",
     "@innexgo/frontend-auth-api": "^0.2.27",
     "@innexgo/frontend-common": "^0.0.9",
     "@popperjs/core": "^2.9.3",
@@ -44,7 +44,8 @@
     "bootstrap": "^5.1.0",
     "formik": "^2.2.9",
     "react": "^17.0.1",
-    "react-bootstrap": "^2.0.0-beta.4",
+    "react-async": "^10.0.1",
+    "react-bootstrap": "^2.0.0-beta.5",
     "react-bootstrap-icons": "^1.5.0",
     "react-dom": "17.0.2",
     "sass": "^1.37.5",

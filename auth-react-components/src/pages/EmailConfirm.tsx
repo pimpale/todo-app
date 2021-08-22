@@ -128,7 +128,10 @@ function EmailConfirm(props: BrandedComponentProps) {
               email !== null
                 ? <Card.Text> Your email ({email.verificationChallenge.email}), has been confirmed. Click <a href="/">here</a> to login.</Card.Text>
                 : <CreateEmail
-                  verificationChallengeKey={new URLSearchParams(window.location.search).get("verificationChallengeKey") ?? ""}
+                  verificationChallengeKey={
+                    (new URLSearchParams(window.location.search).get("verificationChallengeKey") ?? "")
+                      .replace(' ', '+')
+                  }
                   postSubmit={e => setEmail(e)}
                 />
             }

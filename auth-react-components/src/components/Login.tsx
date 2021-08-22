@@ -90,7 +90,7 @@ function Login(props: LoginProps) {
   // Notice how Formik is a Generic component that does type checking
   // This helps ensure we make fewer mistakes
   return <>
-    <Formik<LoginValue> 
+    <Formik<LoginValue>
       onSubmit={onSubmit}
       initialStatus=""
       initialValues={{
@@ -98,15 +98,15 @@ function Login(props: LoginProps) {
         email: "",
         password: "",
       }}
-    > 
+    >
       {(fprops) => (
         /* we enable noValidate so that we can delegate validation to Formik */
         /* onSubmit={fprops.handleSubmit} means that Formik will handle form submission */
-        <Form 
+        <Form
           noValidate
           onSubmit={fprops.handleSubmit}>
           {/* Use Bootstrap's Form.Group in order to recieve a consistently styled texbox */}
-          <Form.Group>
+          <Form.Group className="mb-3">
             <Form.Label>Email</Form.Label>
             {/* When making a form, the `type` prop should usually be "text" */}
             {/* unless its an email address or a password */}
@@ -121,7 +121,7 @@ function Login(props: LoginProps) {
             {/* Feedback fields aren't usually displayed unless we called `setError` in `onSubmit` */}
             <Form.Control.Feedback type="invalid"> {fprops.errors.email} </Form.Control.Feedback>
           </Form.Group>
-          <Form.Group >
+          <Form.Group className="mb-3">
             <Form.Label>Password</Form.Label>
             <Form.Control
               name="password"
@@ -133,19 +133,18 @@ function Login(props: LoginProps) {
             />
             <Form.Control.Feedback type="invalid">{fprops.errors.password}</Form.Control.Feedback>
           </Form.Group>
-          <br />
           {/* Hitting this button will submit the form. */}
           {/* Submitting the form will submit the Formik form, which will call onSubmit. */}
           {/* If the operation was successful, props.onSuccess will be called */}
           {/* If it wasn't successful, errors will be set. */}
-          <Button type="submit">Login</Button>
-          <br />
+          <Button type="submit" className="mb-3">Login</Button>
           {/* This is where the status text will be displayed */}
-          <Form.Text className="text-danger">{fprops.status}</Form.Text>
-          <br />
-          <Form.Text>
-            <a href="/forgot_password">Forgot Password?</a>
-          </Form.Text>
+          <Form.Text className="text-danger mb-3">{fprops.status}</Form.Text>
+          <Form.Group className="mb-3">
+            <Form.Text>
+              <a href="/forgot_password">Forgot Password?</a>
+            </Form.Text>
+          </Form.Group>
         </Form>
       )}
     </Formik>

@@ -4,6 +4,7 @@ import ManagePassword from './components/ManagePassword';
 import ManageUserData from './components/ManageUserData';
 import Login from './components/Login';
 import RegisterForm from './components/RegisterForm';
+import InnerLayout from './components/InnerLayout';
 
 import EmailConfirm from './pages/EmailConfirm';
 import ParentPermissionConfirm from './pages/ParentPermissionConfirm';
@@ -18,6 +19,7 @@ export { ManagePassword };
 export { ManageUserData };
 export { Login };
 export { RegisterForm };
+export { InnerLayout };
 
 export { EmailConfirm };
 export { ParentPermissionConfirm };

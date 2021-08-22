@@ -1,8 +1,6 @@
 import React from 'react';
 import { ColumnsGap, CalendarEvent, Gear, Search, Person} from 'react-bootstrap-icons';
-import { AuthenticatedComponentProps } from '@innexgo/auth-react-components';
-
-import InnerLayout from '../components/InnerLayout';
+import { InnerLayout, AuthenticatedComponentProps } from '@innexgo/auth-react-components';
 
 export default function DashboardLayout(props: React.PropsWithChildren<AuthenticatedComponentProps>) {
   return <InnerLayout apiKey={props.apiKey} logoutCallback={() => props.setApiKey(null)} >

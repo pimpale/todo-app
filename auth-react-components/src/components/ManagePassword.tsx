@@ -1,11 +1,11 @@
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { Button, Form, } from 'react-bootstrap'
-import { ApiKey, Password, passwordNewChange} from '@innexgo/frontend-auth-api';
-import {isErr} from '@innexgo/frontend-common';
+import { ApiKey, Password, passwordNewChange } from '@innexgo/frontend-auth-api';
+import { isErr } from '@innexgo/frontend-common';
 
 interface ManagePasswordProps {
   apiKey: ApiKey,
-  onSuccess: (p:Password) => void
+  onSuccess: (p: Password) => void
 }
 
 function ManagePassword(props: ManagePasswordProps) {
@@ -89,7 +89,7 @@ function ManagePassword(props: ManagePasswordProps) {
         <Form
           noValidate
           onSubmit={props.handleSubmit} >
-          <Form.Group >
+          <Form.Group className="mb-3">
             <Form.Label >Old Password</Form.Label>
             <Form.Control
               name="oldpassword"
@@ -101,7 +101,7 @@ function ManagePassword(props: ManagePasswordProps) {
             />
             <Form.Control.Feedback type="invalid"> {props.errors.oldpassword} </Form.Control.Feedback>
           </Form.Group>
-          <Form.Group>
+          <Form.Group className="mb-3">
             <Form.Label >New Password</Form.Label>
             <Form.Control
               name="password1"
@@ -113,7 +113,7 @@ function ManagePassword(props: ManagePasswordProps) {
             />
             <Form.Control.Feedback type="invalid"> {props.errors.password1} </Form.Control.Feedback>
           </Form.Group>
-          <Form.Group>
+          <Form.Group className="mb-3">
             <Form.Label>Confirm Password</Form.Label>
             <Form.Control
               name="password2"
@@ -125,11 +125,13 @@ function ManagePassword(props: ManagePasswordProps) {
             />
             <Form.Control.Feedback type="invalid">{props.errors.password2}</Form.Control.Feedback>
           </Form.Group>
-          <br />
-          <Button type="submit">Change Password</Button>
-          <br />
-          <Form.Text className="text-danger">{props.status.failureMessage}</Form.Text>
-          <Form.Text className="text-success">{props.status.successMessage}</Form.Text>
+          <Form.Group className="mb-3">
+            <Button type="submit">Change Password</Button>
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Text className="text-danger">{props.status.failureMessage}</Form.Text>
+            <Form.Text className="text-success">{props.status.successMessage}</Form.Text>
+          </Form.Group>
         </Form>
       )}
     </Formik>

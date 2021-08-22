@@ -94,7 +94,7 @@ function ResetPasswordForm(props: ResetPasswordProps) {
         <Form
           noValidate
           onSubmit={props.handleSubmit} >
-          <Form.Group >
+          <Form.Group className="mb-3">
             <Form.Label >New Password</Form.Label>
             <Form.Control
               name="password1"
@@ -106,7 +106,7 @@ function ResetPasswordForm(props: ResetPasswordProps) {
             />
             <Form.Control.Feedback type="invalid"> {props.errors.password1} </Form.Control.Feedback>
           </Form.Group>
-          <Form.Group >
+          <Form.Group className="mb-3">
             <Form.Label>Confirm Password</Form.Label>
             <Form.Control
               name="password2"
@@ -118,11 +118,13 @@ function ResetPasswordForm(props: ResetPasswordProps) {
             />
             <Form.Control.Feedback type="invalid">{props.errors.password2}</Form.Control.Feedback>
           </Form.Group>
-          <br />
-          <Button type="submit">Reset Password</Button>
-          <br />
-          <Form.Text className="text-danger">{props.status.failureMessage}</Form.Text>
-          <Form.Text className="text-success">{props.status.successMessage}</Form.Text>
+          <Form.Group className="mb-3">
+            <Button type="submit">Reset Password</Button>
+          </Form.Group >
+          <Form.Group className="mb-3">
+            <Form.Text className="text-danger">{props.status.failureMessage}</Form.Text>
+            <Form.Text className="text-success">{props.status.successMessage}</Form.Text>
+          </Form.Group>
         </Form>
       )}
     </Formik>
@@ -131,7 +133,7 @@ function ResetPasswordForm(props: ResetPasswordProps) {
 
 function ResetPassword(props: BrandedComponentProps) {
   // get password reset key from url
-  const resetKey = new URLSearchParams(window.location.search).get("resetKey") ?? "";
+  const resetKey = (new URLSearchParams(window.location.search).get("resetKey") ?? "").replace(' ', '+');
   const [successful, setSuccess] = React.useState(false);
   return <SimpleLayout branding={props.branding}>
     <div className="h-100 w-100 d-flex">

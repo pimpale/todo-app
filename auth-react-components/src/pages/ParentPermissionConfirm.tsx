@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Button, Form } from "react-bootstrap";
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
-import { ParentPermission , parentPermissionNew } from '@innexgo/frontend-auth-api';
+import { ParentPermission, parentPermissionNew } from '@innexgo/frontend-auth-api';
 import { isErr } from '@innexgo/frontend-common';
 
 import { SimpleLayout, BrandedComponentProps } from '@innexgo/common-react-components';
@@ -122,7 +122,10 @@ function ParentPermissionConfirm(props: BrandedComponentProps) {
               parentPermission !== null
                 ? <Card.Text>Thank you, your response has been noted.</Card.Text>
                 : <CreateParentPermission
-                  verificationChallengeKey={new URLSearchParams(window.location.search).get("verificationChallengeKey") ?? ""}
+                  verificationChallengeKey={
+                    (new URLSearchParams(window.location.search).get("verificationChallengeKey") ?? "")
+                      .replace(' ', '+')
+                  }
                   postSubmit={e => setParentPermission(e)}
                 />
             }

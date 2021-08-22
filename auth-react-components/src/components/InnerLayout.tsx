@@ -112,7 +112,7 @@ const InnerLayout: React.FunctionComponent<React.PropsWithChildren<InnerLayoutPr
                   {collapsed ? false : <Loader /> }
                 </Async.Pending>
                 <Async.Rejected>
-                  OOF
+                  <span className="text-danger">Couldn't load User</span>
                 </Async.Rejected>
                 <Async.Fulfilled<UserData>>{ud =>
                   collapsed

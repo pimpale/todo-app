@@ -26,7 +26,7 @@ function RegisterForm(props: RegisterFormProps) {
     let errors: FormikErrors<RegistrationValue> = {};
     let hasError = false;
     if (values.name === "") {
-      errors.name = "Please enter what you'd like us to call you.";
+      errors.name = "Please enter what you'd like us to call you";
       hasError = true;
     }
     if (!values.email.includes("@")) {
@@ -44,6 +44,11 @@ function RegisterForm(props: RegisterFormProps) {
 
     if (!values.olderThan13 && !values.parentEmail.includes("@")) {
       errors.parentEmail = "Please enter a parent email";
+      hasError = true;
+    }
+
+    if(values.parentEmail === values.email) {
+      errors.parentEmail = "Parent email must be different from your email";
       hasError = true;
     }
 
@@ -134,7 +139,7 @@ function RegisterForm(props: RegisterFormProps) {
           noValidate
           onSubmit={fprops.handleSubmit} >
           <div hidden={fprops.status.successMessage !== ""}>
-            <Form.Group >
+            <Form.Group className="mb-3">
               <Form.Label >Name</Form.Label>
               <Form.Control
                 name="name"
@@ -146,7 +151,7 @@ function RegisterForm(props: RegisterFormProps) {
               />
               <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
             </Form.Group>
-            <Form.Group >
+            <Form.Group className="mb-3">
               <Form.Label >Email</Form.Label>
               <Form.Control
                 name="email"
@@ -158,7 +163,7 @@ function RegisterForm(props: RegisterFormProps) {
               />
               <Form.Control.Feedback type="invalid">{fprops.errors.email}</Form.Control.Feedback>
             </Form.Group>
-            <Form.Group >
+            <Form.Group className="mb-3">
               <Form.Label >Password</Form.Label>
               <Form.Control
                 name="password1"
@@ -170,7 +175,7 @@ function RegisterForm(props: RegisterFormProps) {
               />
               <Form.Control.Feedback type="invalid">{fprops.errors.password1}</Form.Control.Feedback>
             </Form.Group>
-            <Form.Group >
+            <Form.Group className="mb-3">
               <Form.Label >Confirm Password</Form.Label>
               <Form.Control
                 name="password2"
@@ -182,8 +187,8 @@ function RegisterForm(props: RegisterFormProps) {
               />
               <Form.Control.Feedback type="invalid">{fprops.errors.password2}</Form.Control.Feedback>
             </Form.Group>
-            <Form.Group>
-              <Form.Check>
+            <Form.Group className="mb-3">
+              <Form.Check className="form-check">
                 <Form.Check.Input
                   type="radio"
                   name="olderThan13"
@@ -195,7 +200,7 @@ function RegisterForm(props: RegisterFormProps) {
                 />
                 <Form.Check.Label>I am younger than 13</Form.Check.Label>
               </Form.Check>
-              <Form.Check>
+              <Form.Check className="form-check">
                 <Form.Check.Input
                   type="radio"
                   name="olderThan13"
@@ -209,7 +214,7 @@ function RegisterForm(props: RegisterFormProps) {
                 <Form.Control.Feedback type="invalid">{fprops.errors.olderThan13}</Form.Control.Feedback>
               </Form.Check>
             </Form.Group>
-            <Form.Group hidden={fprops.values.olderThan13}>
+            <Form.Group hidden={fprops.values.olderThan13} className="mb-3">
               <Form.Label>Parent Email</Form.Label>
               <Form.Control
                 name="parentEmail"
@@ -221,20 +226,21 @@ function RegisterForm(props: RegisterFormProps) {
               />
               <Form.Control.Feedback type="invalid">{fprops.errors.parentEmail}</Form.Control.Feedback>
             </Form.Group>
-            <Form.Check>
+            <Form.Check className="mb-3 form-check">
               <Form.Check.Input
                 name="terms"
                 checked={fprops.values.terms}
                 onChange={fprops.handleChange}
                 isInvalid={!!fprops.errors.terms}
               />
-              <Form.Check.Label> Agree to <a target="_blank" rel="noopener noreferrer" href="/terms_of_service">terms of service</a></Form.Check.Label>
+              <Form.Check.Label>Agree to <a target="_blank" rel="noopener noreferrer" href="/terms_of_service">terms of service</a></Form.Check.Label>
               <Form.Control.Feedback type="invalid">{fprops.errors.terms}</Form.Control.Feedback>
             </Form.Check>
             <br />
             <Button type="submit">Submit Form</Button>
-            <br />
-            <Form.Text className="text-danger">{fprops.status.failureMessage}</Form.Text>
+            <Form.Group>
+              <Form.Text className="text-danger">{fprops.status.failureMessage}</Form.Text>
+            </Form.Group>
           </div>
           <Form.Text className="text-success">{fprops.status.successMessage}</Form.Text>
         </Form>
