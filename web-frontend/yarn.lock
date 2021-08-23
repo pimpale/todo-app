@@ -1410,10 +1410,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.0.tgz#87de7af9c231826fdd68ac7258f77c429e0e5fcf"
   integrity sha512-wdppn25U8z/2yiaT6YGquE6X8sSv7hNMWSXYSSU1jGv/yd6XqjXgTDJ8KP4NgjTXfJ3GbRjeeb8RTV7a/VpM+w==
 
-"@innexgo/auth-react-components@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@innexgo/auth-react-components/-/auth-react-components-0.1.1.tgz#c6ab6ee836e1255836e9a8eaf26ad6ebb00cd1d8"
-  integrity sha512-ufsCFzNxxubXmQAp8C2zooYsNR7bX1T8xSwddIsuHw+0TSUBMb77TbF8a4yOSJfPQYICXTxNW4fxyapks0CWLA==
+"@innexgo/auth-react-components@^0.1.4":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@innexgo/auth-react-components/-/auth-react-components-0.1.4.tgz#676fa4931cf2720804dda1b508cf65c0120efb27"
+  integrity sha512-zW7Nt1U6OkwznxD2sRwwfG65ryeR95x/EOSBKe9qN8yHNs+H65Mik42NdCMSrEQTMEpGPaPGPFqhKlocisIeMQ==
 
 "@innexgo/common-react-components@^0.1.0":
   version "0.1.0"
