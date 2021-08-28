@@ -1,16 +1,17 @@
-import React from 'react'
 import { Table } from 'react-bootstrap';
 import update from 'immutability-helper';
-import DisplayModal from '../components/DisplayModal';
-import { Plus as Add } from 'react-bootstrap-icons'
+import CreateGoalTextbox from '../components/CreateGoalTextbox';
+import { TemplateData } from '../components/ManageGoalTemplate';
+import { TagData } from '../components/ManageNamedEntity';
 import ManageGoal, { ManageGoalData } from '../components/ManageGoal';
-import CreateGoal from '../components/CreateGoal';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 
 
 type ManageGoalTableProps = {
   data: ManageGoalData[],
   setData: (d: ManageGoalData[]) => void,
+  tags: TagData[],
+  templates: TemplateData[],
   apiKey: ApiKey,
   mutable: boolean,
   addable: boolean,
@@ -18,40 +19,38 @@ type ManageGoalTableProps = {
 }
 
 function ManageGoalTable(props: ManageGoalTableProps) {
-  const [showCreateGoal, setShowCreateGoal] = React.useState(false);
 
-  const actives = props.data
+  const activeGoalDataEvents = props.data
     // enumerate data + index
     .map((d, i) => ({ d, i }))
     // filter inactive
     .filter(({ d }) => props.showInactive || d.gd.status !== "CANCEL")
 
   return <>
-    <Table hover bordered>
+    {!props.addable ? false :
+      <CreateGoalTextbox
+        apiKey={props.apiKey}
+        tags={props.tags}
+        templates={props.templates}
+        postSubmit={(gd) => {
+          props.setData(update(props.data, { $push: [{ gd, ge: undefined }] }));
+        }}
+      />
+    }
+    <Table hover bordered className="mt-2">
       <thead>
         <tr>
           <th>Name</th>
           <th>Time</th>
-          <th>Utility</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr hidden={!props.addable}>
-          <td colSpan={5} className="px-0 py-0">
-            <button
-              className="h-100 w-100 mx-0 my-0"
-              style={{ borderStyle: 'dashed', borderWidth: "medium" }}
-              onClick={() => setShowCreateGoal(true)}
-            >
-              <Add className="mx-auto my-auto text-muted" fontSize="large" />
-            </button>
-          </td>
-        </tr>
-        {actives.length !== 0 ? <> </> :
-          <tr><td colSpan={5} className="text-center">No Goals</td></tr>
+        {activeGoalDataEvents.length === 0
+          ? <tr><td className="text-center" colSpan={4}>No Goals Yet</td></tr>
+          : <> </>
         }
-        {actives
+        {activeGoalDataEvents
           // reverse in order to see newest first
           .reverse()
           .map(({ d, i }) =>
@@ -59,26 +58,15 @@ function ManageGoalTable(props: ManageGoalTableProps) {
               key={i}
               mutable={props.mutable}
               data={d}
-              setData={(d) => props.setData(update(props.data, { [i]: { $set: d } }))}
+              setData={
+                // https://stackoverflow.com/questions/29537299/react-how-to-update-state-item1-in-state-using-setstate
+                (d) => props.setData(update(props.data, { [i]: { $set: d } }))
+              }
               apiKey={props.apiKey}
             />
           )}
       </tbody>
     </Table>
-    <DisplayModal
-      title="New Goal"
-      show={showCreateGoal}
-      onClose={() => setShowCreateGoal(false)}
-    >
-      <CreateGoal
-        apiKey={props.apiKey}
-        postSubmit={(gd) => {
-          setShowCreateGoal(false);
-          // add d to the goal data
-          props.setData(update(props.data, { $push: [{ gd: gd, ge: undefined }] }));
-        }}
-      />
-    </DisplayModal>
   </>
 }
 

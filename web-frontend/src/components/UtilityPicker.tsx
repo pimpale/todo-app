@@ -75,13 +75,13 @@ function UtilityPicker(props: UtilityPickerProps) {
           }
           return true;
         },
-        onDrag: (e: React.MouseEvent, datasetIndex: number, index: number, value: Point) => {
+        onDrag: (_: React.MouseEvent, datasetIndex: number, index: number, value: Point) => {
           if (value.y > 100) {
             return false
           }
           return true;
         },
-        onDragEnd: (e: React.MouseEvent, datasetIndex: number, index: number, value: Point) => {
+        onDragEnd: (_: React.MouseEvent, datasetIndex: number, index: number, value: Point) => {
           if(value.y > 100) {
               value.y = 100;
           }
@@ -134,7 +134,7 @@ function UtilityPicker(props: UtilityPickerProps) {
   return <>
     <Row>
       <Col>
-        <div> Date: </div>
+        <div>Date:</div>
         <DayPickerInput value={new Date(start)} onDayChange={day => {
           setStart(setHrMin(day, getHours(start), getMinutes(start)).valueOf());
           setEnd(setHrMin(day, getHours(end), getMinutes(end)).valueOf());

@@ -6,29 +6,20 @@ import ErrorMessage from '../components/ErrorMessage';
 import DashboardLayout from '../components/DashboardLayout';
 import { TemplateData } from '../components/ManageGoalTemplate';
 import { TagData } from '../components/ManageNamedEntity';
-import ManageHybridGoalTable from '../components/ManageHybridGoalTable';
+import ManageGoalTable from '../components/ManageGoalTable';
 import { ManageGoalData } from '../components/ManageGoal';
-import { GoalIntentData, goalIntentDataView, goalDataView, goalEventView, namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, } from '@innexgo/frontend-todo-app-api';
+import { goalDataView, goalEventView, namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, } from '@innexgo/frontend-todo-app-api';
 import { unwrap } from '@innexgo/frontend-common';
 
 import {AuthenticatedComponentProps} from '@innexgo/auth-react-components';
 
 type DashboardData = {
-  goalIntentData: GoalIntentData[],
   data: ManageGoalData[],
   tags: TagData[],
   templates: TemplateData[],
 }
 
 const loadDashboardData = async (props: AsyncProps<DashboardData>) => {
-  const goalIntentData = await goalIntentDataView({
-    creatorUserId: [props.apiKey.creatorUserId],
-    onlyRecent: true,
-    active: true,
-    responded: false,
-    apiKey: props.apiKey.key,
-  })
-    .then(unwrap);
 
   const goalData =
     await goalDataView({
@@ -98,7 +89,6 @@ const loadDashboardData = async (props: AsyncProps<DashboardData>) => {
   }));
 
   return {
-    goalIntentData,
     data,
     tags,
     templates,
@@ -118,9 +108,7 @@ function Dashboard(props: AuthenticatedComponentProps) {
                   {e => <ErrorMessage error={e} />}
                 </Async.Rejected>
                 <Async.Fulfilled<DashboardData>>{dd =>
-                  <ManageHybridGoalTable
-                    goalIntentData={dd.goalIntentData}
-                    setGoalIntentData={(gids) => setData(update(dd, { goalIntentData: { $set: gids } }))}
+                  <ManageGoalTable
                     data={dd.data}
                     setData={(d) => setData(update(dd, { data: { $set: d } }))}
                     tags={dd.tags}

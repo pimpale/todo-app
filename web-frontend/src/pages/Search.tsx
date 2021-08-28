@@ -1,15 +1,21 @@
 import React from 'react'
+import { TemplateData } from '../components/ManageGoalTemplate';
+import { TagData } from '../components/ManageNamedEntity';
+import { Loader } from '@innexgo/common-react-components';
 import { Button, Container, Form, Row, Col } from 'react-bootstrap';
 import DashboardLayout from '../components/DashboardLayout';
 import { ManageGoalData } from '../components/ManageGoal';
 import ManageGoalTable from '../components/ManageGoalTable';
+import { Async, AsyncProps } from 'react-async';
 import { GoalData, goalDataView, GoalEvent, goalEventView } from '@innexgo/frontend-todo-app-api';
 import { isErr, unwrap } from '@innexgo/frontend-common';
+import ErrorMessage from '../components/ErrorMessage';
 
-import { ApiKey} from '@innexgo/frontend-auth-api';
-import {AuthenticatedComponentProps} from '@innexgo/auth-react-components';
+import { ApiKey } from '@innexgo/frontend-auth-api';
+import { AuthenticatedComponentProps } from '@innexgo/auth-react-components';
 
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
+import { namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, } from '@innexgo/frontend-todo-app-api';
 
 type SearchProps = {
   apiKey: ApiKey;
@@ -119,6 +125,66 @@ function SearchForm(props: SearchProps) {
   </>
 }
 
+type SearchData = {
+  tags: TagData[],
+  templates: TemplateData[],
+}
+
+const loadSearchData = async (props: AsyncProps<SearchData>) => {
+  const goalTemplateData = await goalTemplateDataView({
+    creatorUserId: [props.apiKey.creatorUserId],
+    active: true,
+    onlyRecent: true,
+    apiKey: props.apiKey.key,
+  })
+    .then(unwrap)
+
+  const namedEntityData = await namedEntityDataView({
+    creatorUserId: [props.apiKey.creatorUserId],
+    active: true,
+    onlyRecent: true,
+    apiKey: props.apiKey.key,
+  })
+    .then(unwrap)
+
+  const namedEntityPatterns = await namedEntityPatternView({
+    namedEntityId: namedEntityData.map(gtd => gtd.namedEntity.namedEntityId),
+    active: true,
+    onlyRecent: true,
+    apiKey: props.apiKey.key
+  })
+    .then(unwrap);
+
+  // group patterns by tag
+  const tags = namedEntityData.map(ned => ({
+    ned,
+    nep: namedEntityPatterns.filter(nep => nep.namedEntity.namedEntityId === ned.namedEntity.namedEntityId)
+  }));
+
+  const goalTemplatePatterns = await goalTemplatePatternView({
+    goalTemplateId: goalTemplateData.map(gtd => gtd.goalTemplate.goalTemplateId),
+    active: true,
+    onlyRecent: true,
+    apiKey: props.apiKey.key
+  })
+    .then(unwrap);
+
+  // group patterns by template
+  const templates = goalTemplateData.map(gtd => ({
+    gtd,
+    gtp: goalTemplatePatterns.filter(gtp => gtp.goalTemplate.goalTemplateId === gtd.goalTemplate.goalTemplateId)
+  }));
+
+  return {
+    tags,
+    templates,
+  }
+}
+
+
+
+
+
 function Search(props: AuthenticatedComponentProps) {
   const [searchResults, setSearchResults] = React.useState<ManageGoalData[]>([]);
   return <DashboardLayout {...props}>
@@ -129,14 +195,24 @@ function Search(props: AuthenticatedComponentProps) {
       />
       <Row className="justify-content-md-center">
         <Col md={8}>
-          <ManageGoalTable
-            data={searchResults}
-            setData={setSearchResults}
-            apiKey={props.apiKey}
-            addable={false}
-            mutable
-            showInactive={false}
-          />
+          <Async promiseFn={loadSearchData} apiKey={props.apiKey}>
+            <Async.Pending><Loader /></Async.Pending>
+            <Async.Rejected>
+              {e => <ErrorMessage error={e} />}
+            </Async.Rejected>
+            <Async.Fulfilled<SearchData>>{sd =>
+              <ManageGoalTable
+                data={searchResults}
+                setData={setSearchResults}
+                tags={sd.tags}
+                templates={sd.templates}
+                apiKey={props.apiKey}
+                addable={false}
+                mutable
+                showInactive={false}
+              />
+            }</Async.Fulfilled>
+          </Async>
         </Col>
       </Row>
     </Container>

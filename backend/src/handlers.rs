@@ -15,8 +15,6 @@ use super::goal_data_service;
 use super::goal_dependency_service;
 use super::goal_entity_tag_service;
 use super::goal_event_service;
-use super::goal_intent_data_service;
-use super::goal_intent_service;
 use super::goal_service;
 use super::goal_template_data_service;
 use super::goal_template_pattern_service;
@@ -64,58 +62,14 @@ fn report_auth_err(e: AuthError) -> response::TodoAppError {
   }
 }
 
-async fn fill_goal_intent(
-  _con: &mut tokio_postgres::Client,
-  goal_intent: GoalIntent,
-) -> Result<response::GoalIntent, response::TodoAppError> {
-  Ok(response::GoalIntent {
-    goal_intent_id: goal_intent.goal_intent_id,
-    creation_time: goal_intent.creation_time,
-    creator_user_id: goal_intent.creator_user_id,
-  })
-}
-
-async fn fill_goal_intent_data(
-  con: &mut tokio_postgres::Client,
-  goal_intent_data: GoalIntentData,
-) -> Result<response::GoalIntentData, response::TodoAppError> {
-  let goal_intent =
-    goal_intent_service::get_by_goal_intent_id(con, goal_intent_data.goal_intent_id)
-      .await
-      .map_err(report_postgres_err)?
-      .ok_or(response::TodoAppError::GoalIntentNonexistent)?;
-
-  Ok(response::GoalIntentData {
-    goal_intent_data_id: goal_intent_data.goal_intent_data_id,
-    creation_time: goal_intent_data.creation_time,
-    creator_user_id: goal_intent_data.creator_user_id,
-    goal_intent: fill_goal_intent(con, goal_intent).await?,
-    name: goal_intent_data.name,
-    active: goal_intent_data.active,
-  })
-}
-
 async fn fill_goal(
-  con: &mut tokio_postgres::Client,
+  _con: &mut tokio_postgres::Client,
   goal: Goal,
 ) -> Result<response::Goal, response::TodoAppError> {
-  let goal_intent = match goal.goal_intent_id {
-    Some(goal_intent_id) => {
-      let goal_intent = goal_intent_service::get_by_goal_intent_id(con, goal_intent_id)
-        .await
-        .map_err(report_postgres_err)?
-        .ok_or(response::TodoAppError::GoalIntentNonexistent)?;
-
-      Some(fill_goal_intent(con, goal_intent).await?)
-    }
-    _ => None,
-  };
-
   Ok(response::Goal {
     goal_id: goal.goal_id,
     creation_time: goal.creation_time,
     creator_user_id: goal.creator_user_id,
-    intent: goal_intent,
   })
 }
 
@@ -497,81 +451,6 @@ pub async fn external_event_data_new(
   fill_external_event_data(con, external_event_data).await
 }
 
-pub async fn goal_intent_new(
-  _config: Config,
-  db: Db,
-  auth_service: AuthService,
-  props: request::GoalIntentNewProps,
-) -> Result<response::GoalIntentData, response::TodoAppError> {
-  // validate api key
-  let user = get_user_if_api_key_valid(&auth_service, props.api_key).await?;
-
-  let con = &mut *db.lock().await;
-
-  let mut sp = con.transaction().await.map_err(report_postgres_err)?;
-
-  // create intent
-  let goal_intent = goal_intent_service::add(&mut sp, user.user_id)
-    .await
-    .map_err(report_postgres_err)?;
-
-  // create data
-  let goal_intent_data = goal_intent_data_service::add(
-    &mut sp,
-    user.user_id,
-    goal_intent.goal_intent_id,
-    props.name,
-    true,
-  )
-  .await
-  .map_err(report_postgres_err)?;
-
-  sp.commit().await.map_err(report_postgres_err)?;
-
-  // return json
-  fill_goal_intent_data(con, goal_intent_data).await
-}
-
-pub async fn goal_intent_data_new(
-  _config: Config,
-  db: Db,
-  auth_service: AuthService,
-  props: request::GoalIntentDataNewProps,
-) -> Result<response::GoalIntentData, response::TodoAppError> {
-  // validate api key
-  let user = get_user_if_api_key_valid(&auth_service, props.api_key).await?;
-
-  let con = &mut *db.lock().await;
-
-  let mut sp = con.transaction().await.map_err(report_postgres_err)?;
-
-  let goal_intent = goal_intent_service::get_by_goal_intent_id(&mut sp, props.goal_intent_id)
-    .await
-    .map_err(report_postgres_err)?
-    .ok_or(response::TodoAppError::GoalIntentNonexistent)?;
-
-  // validate intent is owned by correct user
-  if goal_intent.creator_user_id != user.user_id {
-    return Err(response::TodoAppError::GoalIntentNonexistent);
-  }
-
-  // now we can update data
-  let goal_intent_data = goal_intent_data_service::add(
-    &mut sp,
-    user.user_id,
-    goal_intent.goal_intent_id,
-    props.name,
-    props.active,
-  )
-  .await
-  .map_err(report_postgres_err)?;
-
-  sp.commit().await.map_err(report_postgres_err)?;
-
-  // return json
-  fill_goal_intent_data(con, goal_intent_data).await
-}
-
 pub async fn goal_new(
   _config: Config,
   db: Db,
@@ -610,25 +489,13 @@ pub async fn goal_new(
   .await
   .map_err(report_postgres_err)?
   .ok_or(response::TodoAppError::TimeUtilityFunctionNonexistent)?;
-  // validate intent is owned by correct user
+  // validate tuf is owned by correct user
   if time_utility_function.creator_user_id != user.user_id {
     return Err(response::TodoAppError::TimeUtilityFunctionNonexistent);
   }
 
-  // validate that intent exists and belongs to you
-  if let Some(goal_intent_id) = props.goal_intent_id {
-    let goal_intent = goal_intent_service::get_by_goal_intent_id(&mut sp, goal_intent_id)
-      .await
-      .map_err(report_postgres_err)?
-      .ok_or(response::TodoAppError::GoalIntentNonexistent)?;
-    // validate intent is owned by correct user
-    if goal_intent.creator_user_id != user.user_id {
-      return Err(response::TodoAppError::GoalIntentNonexistent);
-    }
-  }
-
   // create goal
-  let goal = goal_service::add(&mut sp, user.user_id, props.goal_intent_id)
+  let goal = goal_service::add(&mut sp, user.user_id)
     .await
     .map_err(report_postgres_err)?;
 
@@ -693,7 +560,7 @@ pub async fn goal_data_new(
   .await
   .map_err(report_postgres_err)?
   .ok_or(response::TodoAppError::TimeUtilityFunctionNonexistent)?;
-  // validate intent is owned by correct user
+  // validate function is owned by correct user
   if time_utility_function.creator_user_id != user.user_id {
     return Err(response::TodoAppError::TimeUtilityFunctionNonexistent);
   }
@@ -703,7 +570,7 @@ pub async fn goal_data_new(
     .await
     .map_err(report_postgres_err)?
     .ok_or(response::TodoAppError::GoalNonexistent)?;
-  // validate intent is owned by correct user
+  // validate goal is owned by correct user
   if goal.creator_user_id != user.user_id {
     return Err(response::TodoAppError::GoalNonexistent);
   }
@@ -753,7 +620,7 @@ pub async fn goal_event_new(
     .await
     .map_err(report_postgres_err)?
     .ok_or(response::TodoAppError::GoalNonexistent)?;
-  // validate intent is owned by correct user
+  // validate goal is owned by correct user
   if goal.creator_user_id != user.user_id {
     return Err(response::TodoAppError::GoalNonexistent);
   }
@@ -794,7 +661,7 @@ pub async fn goal_dependency_new(
     .await
     .map_err(report_postgres_err)?
     .ok_or(response::TodoAppError::GoalNonexistent)?;
-  // validate intent is owned by correct user
+  // validate goal is owned by correct user
   if goal.creator_user_id != user.user_id {
     return Err(response::TodoAppError::GoalNonexistent);
   }
@@ -803,7 +670,7 @@ pub async fn goal_dependency_new(
     .await
     .map_err(report_postgres_err)?
     .ok_or(response::TodoAppError::GoalNonexistent)?;
-  // validate intent is owned by correct user
+  // validate goal is owned by correct user
   if dependent_goal.creator_user_id != user.user_id {
     return Err(response::TodoAppError::GoalNonexistent);
   }
@@ -853,7 +720,7 @@ pub async fn goal_template_new(
   .await
   .map_err(report_postgres_err)?
   .ok_or(response::TodoAppError::UserGeneratedCodeNonexistent)?;
-  // validate intent is owned by correct user
+  // validate goal is owned by correct user
   if user_generated_code.creator_user_id != user.user_id {
     return Err(response::TodoAppError::UserGeneratedCodeNonexistent);
   }
@@ -912,7 +779,7 @@ pub async fn goal_template_data_new(
   .await
   .map_err(report_postgres_err)?
   .ok_or(response::TodoAppError::UserGeneratedCodeNonexistent)?;
-  // validate intent is owned by correct user
+  // validate code is owned by correct user
   if user_generated_code.creator_user_id != user.user_id {
     return Err(response::TodoAppError::UserGeneratedCodeNonexistent);
   }
@@ -1260,60 +1127,6 @@ pub async fn external_event_data_view(
   }
 
   Ok(resp_external_event_datas)
-}
-
-pub async fn goal_intent_view(
-  _config: Config,
-  db: Db,
-  auth_service: AuthService,
-  props: request::GoalIntentViewProps,
-) -> Result<Vec<response::GoalIntent>, response::TodoAppError> {
-  // validate api key
-  let user = get_user_if_api_key_valid(&auth_service, props.api_key.clone()).await?;
-
-  let con = &mut *db.lock().await;
-  // get users
-  let goal_intents = goal_intent_service::query(con, props)
-    .await
-    .map_err(report_postgres_err)?;
-
-  // return goal_intents
-  let mut resp_goal_intents = vec![];
-  for u in goal_intents
-    .into_iter()
-    .filter(|u| u.creator_user_id == user.user_id)
-  {
-    resp_goal_intents.push(fill_goal_intent(con, u).await?);
-  }
-
-  Ok(resp_goal_intents)
-}
-
-pub async fn goal_intent_data_view(
-  _config: Config,
-  db: Db,
-  auth_service: AuthService,
-  props: request::GoalIntentDataViewProps,
-) -> Result<Vec<response::GoalIntentData>, response::TodoAppError> {
-  // validate api key
-  let user = get_user_if_api_key_valid(&auth_service, props.api_key.clone()).await?;
-
-  let con = &mut *db.lock().await;
-  // get users
-  let goal_intent_data = goal_intent_data_service::query(con, props)
-    .await
-    .map_err(report_postgres_err)?;
-  // return users
-  // return goal_intent_datas
-  let mut resp_goal_intent_datas = vec![];
-  for u in goal_intent_data
-    .into_iter()
-    .filter(|u| u.creator_user_id == user.user_id)
-  {
-    resp_goal_intent_datas.push(fill_goal_intent_data(con, u).await?);
-  }
-
-  Ok(resp_goal_intent_datas)
 }
 
 pub async fn goal_view(

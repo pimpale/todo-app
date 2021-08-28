@@ -6,6 +6,7 @@ import UtilityPicker from '../components/UtilityPicker';
 import { GoalData, GoalEvent, timeUtilityFunctionNew, goalDataNew } from '@innexgo/frontend-todo-app-api';
 import { isErr } from '@innexgo/frontend-common';
 import { ApiKey } from '@innexgo/frontend-auth-api';
+import Action from '../components/Action';
 import { Pencil as Edit, X as Cancel, } from 'react-bootstrap-icons';
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import parseDuration from 'parse-duration';
@@ -332,28 +333,21 @@ const ManageGoal = (props: {
       }
     </td>
     <td>
-      <UtilityPicker
-        span={[
-          Math.min(...props.data.gd.timeUtilityFunction.startTimes) - 100000,
-          Math.max(...props.data.gd.timeUtilityFunction.startTimes) + 100000
-        ]}
-        points={props.data.gd.timeUtilityFunction.startTimes.map((t, i) => ({ x: t, y: props.data.gd.timeUtilityFunction.utils[i] }))}
-        setPoints={() => null}
-        mutable={
-          // this one is for viewing only
-          false
-        }
-      />
-    </td>
-    <td>
-      <Button variant="link" onClick={_ => setShowEditGoal(true)} hidden={!props.mutable}>
-        <Edit />
-      </Button>
-      <Button variant="link" onClick={_ => setShowCancelGoal(true)}
-        hidden={props.data.gd.status == "CANCEL" || !props.mutable}
-      >
-        <Cancel />
-      </Button>
+      <div className="d-flex flex-wrap">
+        <Action
+          title="Edit"
+          onClick={() => setShowEditGoal(true)}
+          icon={Edit}
+          hidden={!props.mutable}
+        />
+        <Action
+          title="Cancel"
+          onClick={() => setShowCancelGoal(true)}
+          hidden={props.data.gd.status == "CANCEL" || !props.mutable}
+          icon={Cancel}
+          destructive
+        />
+      </div>
     </td>
     <DisplayModal
       title="Edit Goal"

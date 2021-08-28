@@ -94,7 +94,7 @@ function CreateExternalEvent(props: CreateExternalEventProps) {
           noValidate
           onSubmit={fprops.handleSubmit} >
           <div hidden={fprops.status.successResult !== ""}>
-            <Form.Group >
+            <Form.Group className="mb-3">
               <Form.Label>ExternalEvent Name</Form.Label>
               <Form.Control
                 name="name"
@@ -107,7 +107,7 @@ function CreateExternalEvent(props: CreateExternalEventProps) {
               />
               <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
             </Form.Group>
-            <Form.Group >
+            <Form.Group className="mb-3">
               <Form.Label>Description</Form.Label>
               <Form.Control
                 name="description"
@@ -120,7 +120,7 @@ function CreateExternalEvent(props: CreateExternalEventProps) {
               />
               <Form.Control.Feedback type="invalid">{fprops.errors.description}</Form.Control.Feedback>
             </Form.Group>
-            <Button type="submit">Submit Form</Button>
+            <Button type="submit" className="mb-3">Submit Form</Button>
             <br />
             <Form.Text className="text-danger">{fprops.status.failureResult}</Form.Text>
           </div>

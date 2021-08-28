@@ -170,18 +170,20 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
         <Form
           noValidate
           onSubmit={fprops.handleSubmit} >
-          <Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Template Name</Form.Label>
             <Form.Control
               name="name"
               type="text"
-              placeholder="Goal Name"
+              placeholder="Template Name"
               value={fprops.values.name}
               onChange={e => fprops.setFieldValue('name', e.target.value)}
               isInvalid={!!fprops.errors.name}
             />
             <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
           </Form.Group>
-          <Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Goal Utility</Form.Label>
             <Form.Control
               name="utility"
               type="number"
@@ -192,7 +194,7 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
             />
             <Form.Control.Feedback type="invalid">{fprops.errors.utility}</Form.Control.Feedback>
           </Form.Group>
-          <Form.Group>
+          <Form.Group className="mb-3">
             <Form.Check>
               <Form.Check.Input
                 type="radio"
@@ -219,7 +221,7 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
               <Form.Control.Feedback type="invalid">{fprops.errors.abstract}</Form.Control.Feedback>
             </Form.Check>
           </Form.Group>
-          <Form.Group hidden={fprops.values.abstract}>
+          <Form.Group hidden={fprops.values.abstract} className="mb-3">
             <Form.Label>Duration Estimate</Form.Label>
             <Form.Control
               name="durationEstimate"
@@ -231,16 +233,20 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
             />
             <Form.Control.Feedback type="invalid">{fprops.errors.durationEstimate}</Form.Control.Feedback>
           </Form.Group>
-          <ChipInput
-            placeholder="Goal Patterns"
-            chips={fprops.values.patterns}
-            onSubmit={(value: string) => {
-              fprops.setFieldValue('patterns', update(fprops.values.patterns, { $push: [value] }));
-            }}
-            onRemove={(index: number) => fprops.setFieldValue('patterns', fprops.values.patterns.filter((_, i) => i != index))}
-          />
+          <Form.Group className="mb-3">
+            <Form.Label>Patterns</Form.Label>
+            <ChipInput
+              placeholder="Goal Patterns"
+              chips={fprops.values.patterns}
+              onSubmit={(value: string) => {
+                fprops.setFieldValue('patterns', update(fprops.values.patterns, { $push: [value] }));
+              }}
+              onRemove={(index: number) => fprops.setFieldValue('patterns', fprops.values.patterns.filter((_, i) => i != index))}
+            />
+          </Form.Group>
           <br />
           <Button type="submit">Submit</Button>
+          <br/>
           <Form.Text className="text-danger">{fprops.status.failureResult}</Form.Text>
           <Form.Text className="text-success">{fprops.status.successResult}</Form.Text>
         </Form>

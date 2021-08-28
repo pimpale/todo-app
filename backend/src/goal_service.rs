@@ -10,7 +10,6 @@ impl From<tokio_postgres::row::Row> for Goal {
       goal_id: row.get("goal_id"),
       creation_time: row.get("creation_time"),
       creator_user_id: row.get("creator_user_id"),
-      goal_intent_id: row.get("goal_intent_id"),
     }
   }
 }
@@ -18,7 +17,6 @@ impl From<tokio_postgres::row::Row> for Goal {
 pub async fn add(
   con: &mut impl GenericClient,
   creator_user_id: i64,
-  goal_intent_id: Option<i64>,
 ) -> Result<Goal, tokio_postgres::Error> {
   let creation_time = current_time_millis();
 
@@ -27,13 +25,12 @@ pub async fn add(
       "INSERT INTO
        goal(
            creation_time,
-           creator_user_id,
-           goal_intent_id
+           creator_user_id
        )
-       VALUES($1, $2, $3)
+       VALUES($1, $2)
        RETURNING goal_id
       ",
-      &[&creation_time, &creator_user_id, &goal_intent_id],
+      &[&creation_time, &creator_user_id],
     )
     .await?
     .get(0);
@@ -43,7 +40,6 @@ pub async fn add(
     goal_id,
     creation_time,
     creator_user_id,
-    goal_intent_id,
   })
 }
 
@@ -68,7 +64,6 @@ pub async fn query(
      AND ($2::bigint IS NULL OR g.creation_time >= $2)
      AND ($3::bigint IS NULL OR g.creation_time <= $3)
      AND ($4::bigint IS NULL OR g.creator_user_id = $4)
-     AND ($5::bigint IS NULL OR g.goal_intent_id = $5 IS TRUE)
      ORDER BY g.goal_id
      ";
 
@@ -82,7 +77,6 @@ pub async fn query(
         &props.min_creation_time,
         &props.max_creation_time,
         &props.creator_user_id,
-        &props.goal_intent_id,
       ],
     )
     .await?

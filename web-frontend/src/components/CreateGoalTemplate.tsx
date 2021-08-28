@@ -17,7 +17,7 @@ type CreateGoalTemplateProps = {
 function CreateGoalTemplate(props: CreateGoalTemplateProps) {
   type CreateGoalTemplateValue = {
     name: string,
-    utility: number,
+    utility: string,
     abstract: boolean,
     durationEstimate: string,
     patterns: string[]
@@ -36,6 +36,10 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
       hasError = true;
     }
 
+    if (parseInt(values.utility) === NaN) {
+      errors.name = "Couldn't parse Utility";
+      hasError = true;
+    }
     let durationEstimate: number | undefined;
 
     if (values.abstract) {
@@ -65,7 +69,7 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
 
     let maybeGoalTemplateData = await goalTemplateNew({
       name: values.name,
-      utility: values.utility,
+      utility: parseInt(values.utility),
       durationEstimate,
       userGeneratedCodeId: userGeneratedCode.userGeneratedCodeId,
       apiKey: props.apiKey.key,
@@ -118,7 +122,7 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
       onSubmit={onSubmit}
       initialValues={{
         name: "",
-        utility: 50,
+        utility: "30",
         abstract: false,
         durationEstimate: "30 minutes",
         patterns: [],
@@ -132,18 +136,20 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
         <Form
           noValidate
           onSubmit={fprops.handleSubmit} >
-          <Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Template Name</Form.Label>
             <Form.Control
               name="name"
               type="text"
-              placeholder="Goal Name"
+              placeholder="Template Name"
               value={fprops.values.name}
               onChange={e => fprops.setFieldValue('name', e.target.value)}
               isInvalid={!!fprops.errors.name}
             />
             <Form.Control.Feedback type="invalid">{fprops.errors.name}</Form.Control.Feedback>
           </Form.Group>
-          <Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Goal Utility</Form.Label>
             <Form.Control
               name="utility"
               type="number"
@@ -154,7 +160,7 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
             />
             <Form.Control.Feedback type="invalid">{fprops.errors.utility}</Form.Control.Feedback>
           </Form.Group>
-          <Form.Group>
+          <Form.Group className="mb-3">
             <Form.Check>
               <Form.Check.Input
                 type="radio"
@@ -181,7 +187,7 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
               <Form.Control.Feedback type="invalid">{fprops.errors.abstract}</Form.Control.Feedback>
             </Form.Check>
           </Form.Group>
-          <Form.Group hidden={fprops.values.abstract}>
+          <Form.Group hidden={fprops.values.abstract} className="mb-3">
             <Form.Label>Duration Estimate</Form.Label>
             <Form.Control
               name="durationEstimate"
@@ -193,16 +199,18 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
             />
             <Form.Control.Feedback type="invalid">{fprops.errors.durationEstimate}</Form.Control.Feedback>
           </Form.Group>
-          <ChipInput
-            placeholder="Goal Patterns"
-            chips={fprops.values.patterns}
-            onSubmit={(value: string) => {
-              fprops.setFieldValue('patterns', update(fprops.values.patterns, { $push: [value] }));
-            }}
-            onRemove={(index: number) => fprops.setFieldValue('patterns', fprops.values.patterns.filter((_, i) => i != index))}
-          />
-          <br />
+          <Form.Group className="mb-3">
+            <ChipInput
+              placeholder="Goal Patterns"
+              chips={fprops.values.patterns}
+              onSubmit={(value: string) => {
+                fprops.setFieldValue('patterns', update(fprops.values.patterns, { $push: [value] }));
+              }}
+              onRemove={(index: number) => fprops.setFieldValue('patterns', fprops.values.patterns.filter((_, i) => i != index))}
+            />
+          </Form.Group>
           <Button type="submit">Submit</Button>
+          <br/>
           <Form.Text className="text-danger">{fprops.status.failureResult}</Form.Text>
           <Form.Text className="text-success">{fprops.status.successResult}</Form.Text>
         </Form>

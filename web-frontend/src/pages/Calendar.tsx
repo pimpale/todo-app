@@ -1,4 +1,5 @@
 import React from 'react'
+import update from 'immutability-helper';
 import { Loader } from '@innexgo/common-react-components';
 import FullCalendar, { EventApi, DateSelectArg, EventClickArg } from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -9,10 +10,12 @@ import CalendarCard, { goalDataToEvent, externalEventDataToEvent } from '../comp
 import ErrorMessage from '../components/ErrorMessage';
 
 import { Async, AsyncProps } from 'react-async';
-import { Row, Col, Tab, Tabs, Container, } from 'react-bootstrap';
-import { goalEventNew, goalEventView, GoalData, ExternalEventData, externalEventDataNew, goalDataNew, externalEventView, externalEventDataView, goalDataView } from '@innexgo/frontend-todo-app-api';
+import { Card, Row, Col, Tab, Tabs, Container, } from 'react-bootstrap';
+import { GoalEvent, ExternalEvent, goalEventNew, goalEventView, GoalData, ExternalEventData, externalEventDataNew, goalDataNew, externalEventView, externalEventDataView, goalDataView } from '@innexgo/frontend-todo-app-api';
 import { ApiKey, } from '@innexgo/frontend-auth-api';
-import {AuthenticatedComponentProps} from '@innexgo/auth-react-components';
+import { AuthenticatedComponentProps } from '@innexgo/auth-react-components';
+import { TemplateData } from '../components/ManageGoalTemplate';
+import { TagData } from '../components/ManageNamedEntity';
 
 import { unwrap, isErr } from '@innexgo/frontend-common';
 
@@ -21,13 +24,14 @@ import UtilityWrapper from '../components/UtilityWrapper';
 import CreateExternalEvent from '../components/CreateExternalEvent';
 import CreateGoal from '../components/CreateGoal';
 import ManageExternalEvent from '../components/ManageExternalEvent';
-import {ManageGoalData} from '../components/ManageGoal';
+import { ManageGoalData } from '../components/ManageGoal';
 import ManageGoalTable from '../components/ManageGoalTable';
 import DisplayModal from '../components/DisplayModal';
+import { namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, } from '@innexgo/frontend-todo-app-api';
 
 
 type UnscheduledGoalCardProps = {
-  onChange: () => void;
+  setGoalData: (gd: GoalData) => void;
   goalData: GoalData;
 }
 
@@ -35,7 +39,7 @@ function UnscheduledGoalCard(props: UnscheduledGoalCardProps) {
   let elRef = React.useRef<HTMLDivElement>(null);
 
   const event = {
-    id: `GoalData:${props.goalData.goalDataId}`,
+    id: `GoalData:${props.goalData.goal.goalId}`,
     duration: props.goalData.durationEstimate,
     color: "#00000000",
     borderColor: "#00000000",
@@ -52,9 +56,9 @@ function UnscheduledGoalCard(props: UnscheduledGoalCardProps) {
   });
 
   return (
-    <div
+    <Card
       ref={elRef}
-      className="fc-event fc-h-event mb-1 fc-daygrid-event fc-daygrid-block-event p-2"
+      className="px-1 py-1 mb-3 bg-primary text-light overflow-hidden"
       data-custom={JSON.stringify({ goalData: props.goalData })}
       title={props.goalData.name}
       style={{
@@ -66,7 +70,7 @@ function UnscheduledGoalCard(props: UnscheduledGoalCardProps) {
           {props.goalData.name}
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -87,11 +91,10 @@ const loadUnscheduledGoalData = async (props: AsyncProps<GoalData[]>) => {
 
 
 type EventCalendarProps = {
+  tags: TagData[],
+  templates: TemplateData[],
   apiKey: ApiKey,
 }
-
-// TODO make it so that selected data and selected modals are equivalent
-// Look at AdminManageAdminships for examples
 
 function EventCalendar(props: EventCalendarProps) {
 
@@ -108,7 +111,7 @@ function EventCalendar(props: EventCalendarProps) {
   }
 
   // the currently selected data
-  const [selectedManageGoalData, setSelectedManageGoalData] = React.useState<ManageGoalData| null>(null);
+  const [selectedManageGoalData, setSelectedManageGoalData] = React.useState<ManageGoalData | null>(null);
   const [selectedManageExternalEventData, setSelectedManageExternalEventData] = React.useState<ExternalEventData | null>(null);
 
   const calendarRef = React.useRef<FullCalendar | null>(null);
@@ -171,7 +174,7 @@ function EventCalendar(props: EventCalendarProps) {
         break;
       }
       case "GoalData": {
-        setSelectedManageGoalData({gd:props.goalData, ge: props.goalEvent});
+        setSelectedManageGoalData({ gd: props.goalData, ge: props.goalEvent });
         break;
       }
     }
@@ -180,7 +183,7 @@ function EventCalendar(props: EventCalendarProps) {
   const changeHandler = async (event: EventApi, oldEventProps: Record<string, any>, revert: () => void) => {
     switch (event.id.split(':')[0]) {
       case "ExternalEventData": {
-        const oped = oldEventProps.externalEventData;
+        const oped:ExternalEventData = oldEventProps.externalEventData;
         const maybeExternalEventData = await externalEventDataNew({
           externalEventId: oped.externalEvent.externalEventId,
           name: oped.name,
@@ -197,12 +200,12 @@ function EventCalendar(props: EventCalendarProps) {
         break;
       }
       case "GoalData": {
-        const oge = oldEventProps.goalEvent;
+        const ode:GoalData = oldEventProps.goalData;
         const maybeGoalEvent = await goalEventNew({
-          goalId: oge.goalId,
+          goalId: ode.goal.goalId,
           startTime: event.start!.valueOf(),
           endTime: event.end!.valueOf(),
-          active: oge.active,
+          active: true,
           apiKey: props.apiKey.key,
         });
         if (isErr(maybeGoalEvent)) {
@@ -231,17 +234,17 @@ function EventCalendar(props: EventCalendarProps) {
       <Async
         promiseFn={loadUnscheduledGoalData}
         apiKey={props.apiKey} >
-        {({ reload }) => <>
+        {({ setData }) => <>
           <Async.Pending><Loader /></Async.Pending>
           <Async.Rejected>
             {e => <ErrorMessage error={e} />}
           </Async.Rejected>
           <Async.Fulfilled<GoalData[]>>{gdus =>
-            gdus.map(gdu =>
+            gdus.map((gdu, i) =>
               <UnscheduledGoalCard
-                key={gdu.goalDataId}
+                key={i}
                 goalData={gdu}
-                onChange={reload}
+                setGoalData={d => setData(update(gdus, { [i]: { $set: d } }))}
               />
             )
           }
@@ -321,15 +324,15 @@ function EventCalendar(props: EventCalendarProps) {
         show={selectedSpan !== null}
         onClose={() => setSelectedSpan(null)}
       >
-        <Tabs className="py-3">
-          <Tab eventKey="external" title="Create External">
+        <Tabs>
+          <Tab eventKey="goal" title="Create Goal" className="mt-3">
             <CreateGoal
               apiKey={props.apiKey}
               span={selectedSpan}
               postSubmit={() => setSelectedSpan(null)}
             />
           </Tab>
-          <Tab eventKey="event" title="Create Event">
+          <Tab eventKey="event" title="Create Event" className="mt-3">
             <CreateExternalEvent
               apiKey={props.apiKey}
               startTime={selectedSpan[0]}
@@ -359,6 +362,8 @@ function EventCalendar(props: EventCalendarProps) {
           data={[selectedManageGoalData]}
           setData={() => setSelectedManageGoalData(null)}
           apiKey={props.apiKey}
+          tags={props.tags}
+          templates={props.templates}
           mutable
           addable={false}
           showInactive={false}
@@ -368,6 +373,63 @@ function EventCalendar(props: EventCalendarProps) {
   </Row>
 }
 
+
+type CalendarData = {
+  tags: TagData[],
+  templates: TemplateData[],
+}
+
+const loadCalendarData = async (props: AsyncProps<CalendarData>) => {
+  const goalTemplateData = await goalTemplateDataView({
+    creatorUserId: [props.apiKey.creatorUserId],
+    active: true,
+    onlyRecent: true,
+    apiKey: props.apiKey.key,
+  })
+    .then(unwrap)
+
+  const namedEntityData = await namedEntityDataView({
+    creatorUserId: [props.apiKey.creatorUserId],
+    active: true,
+    onlyRecent: true,
+    apiKey: props.apiKey.key,
+  })
+    .then(unwrap)
+
+  const namedEntityPatterns = await namedEntityPatternView({
+    namedEntityId: namedEntityData.map(gtd => gtd.namedEntity.namedEntityId),
+    active: true,
+    onlyRecent: true,
+    apiKey: props.apiKey.key
+  })
+    .then(unwrap);
+
+  // group patterns by tag
+  const tags = namedEntityData.map(ned => ({
+    ned,
+    nep: namedEntityPatterns.filter(nep => nep.namedEntity.namedEntityId === ned.namedEntity.namedEntityId)
+  }));
+
+  const goalTemplatePatterns = await goalTemplatePatternView({
+    goalTemplateId: goalTemplateData.map(gtd => gtd.goalTemplate.goalTemplateId),
+    active: true,
+    onlyRecent: true,
+    apiKey: props.apiKey.key
+  })
+    .then(unwrap);
+
+  // group patterns by template
+  const templates = goalTemplateData.map(gtd => ({
+    gtd,
+    gtp: goalTemplatePatterns.filter(gtp => gtp.goalTemplate.goalTemplateId === gtd.goalTemplate.goalTemplateId)
+  }));
+
+  return {
+    tags,
+    templates,
+  }
+}
+
 function CalendarWidget(props: AuthenticatedComponentProps) {
   return <UtilityWrapper title="Upcoming Appointments">
     <span>
@@ -375,7 +437,15 @@ function CalendarWidget(props: AuthenticatedComponentProps) {
       You can click any date to add an appointment on that date,
       or click an existing appointment to delete it.
     </span>
-    <EventCalendar apiKey={props.apiKey} />
+    <Async promiseFn={loadCalendarData} apiKey={props.apiKey}>
+      <Async.Pending><Loader /></Async.Pending>
+      <Async.Rejected>
+        {e => <ErrorMessage error={e} />}
+      </Async.Rejected>
+      <Async.Fulfilled<CalendarData>>{cd =>
+        <EventCalendar apiKey={props.apiKey} tags={cd.tags} templates={cd.templates} />
+      }</Async.Fulfilled>
+    </Async>
   </UtilityWrapper>
 };
 

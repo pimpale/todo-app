@@ -111,8 +111,7 @@ pub async fn query(
     " AND ($9::bool      IS NULL OR gd.duration_estimate IS NOT NULL)",
     " AND ($10::bigint[] IS NULL OR gd.time_utility_function_id = ANY($10))",
     " AND ($11::bigint[] IS NULL OR gd.status = ANY($11))",
-    " AND ($12::bigint[] IS NULL OR g.goal_intent_id = ANY($12) IS TRUE)",
-    " AND ($13::bool     IS NULL OR ge.active = $13 IS TRUE)",
+    " AND ($12::bool     IS NULL OR (ge.active IS TRUE) = $12)",
     " ORDER BY gd.goal_data_id",
   ]
   .join("\n");
@@ -136,7 +135,6 @@ pub async fn query(
         &props
           .status
           .map(|x| x.into_iter().map(|x| x as i64).collect::<Vec<i64>>()),
-        &props.goal_intent_id,
         &props.scheduled,
       ],
     )

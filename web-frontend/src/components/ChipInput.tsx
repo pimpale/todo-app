@@ -1,6 +1,5 @@
 import React from 'react';
-import { Badge } from 'react-bootstrap';
-import { X } from 'react-bootstrap-icons';
+import { Badge, CloseButton } from 'react-bootstrap';
 
 /**Type of Input-Props */
 export type ChipInputProps = {
@@ -42,7 +41,7 @@ export default class ReactChipInput extends React.Component<ChipInputProps> {
       <div
         ref={this.divRef}
         tabIndex={-1}
-        className="form-control"
+        className="form-control d-flex flex-wrap"
         style={{ height: "auto" }}
         onFocus={() => this.formControlRef.current.focus()}
         onBlur={() => this.formControlRef.current.blur()}
@@ -50,16 +49,13 @@ export default class ReactChipInput extends React.Component<ChipInputProps> {
         {/* Each chip is bootstrap's col */}
         {this.props.chips.map((chip, index) => (
           <Badge key={index} bg="secondary" className="mx-1 mb-1">
-            {chip}
-            {/* The icon which helps user, if user wants to remove the chip */}
-            <X
-              className={['ml-2'].join(' ')}
-              onClick={() => this.props.onRemove(index)}
-            />
+            <span className="align-middle">{chip}</span>
+            <CloseButton variant="white" className="ms-1 align-middle" onClick={() => this.props.onRemove(index)} />
           </Badge>
         ))}
         {/* The input, from which value is read and chip is added accordingly */}
         <input
+          className="flex-grow-1"
           ref={this.formControlRef}
           name="chipInput"
           placeholder={this.props.placeholder}

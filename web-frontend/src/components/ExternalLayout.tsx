@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu } from '@material-ui/icons';
+import { List as Menu } from 'react-bootstrap-icons';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import { Branding } from '@innexgo/common-react-components';
 

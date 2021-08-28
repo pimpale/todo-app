@@ -7,38 +7,11 @@ CREATE DATABASE todo_app;
 -- Creator User Id (if applicable)
 -- Everything else
 
-drop table if exists goal_intent cascade;
-create table goal_intent(
-  goal_intent_id bigserial primary key,
-  creation_time bigint not null,
-  creator_user_id bigint not null
-);
-
-drop table if exists goal_intent_data cascade;
-create table goal_intent_data(
-  goal_intent_data_id bigserial primary key,
-  creation_time bigint not null,
-  creator_user_id bigint not null,
-  goal_intent_id bigint not null references goal_intent(goal_intent_id),
-  name text not null,
-  active bool not null
-);
-
-create view recent_goal_intent_data as
-  select gid.* from goal_intent_data gid
-  inner join (
-   select max(goal_intent_data_id) id 
-   from goal_intent_data 
-   group by goal_intent_id
-  ) maxids
-  on maxids.id = gid.goal_intent_data_id;
-
 drop table if exists goal cascade;
 create table goal(
   goal_id bigserial primary key,
   creation_time bigint not null,
-  creator_user_id bigint not null,
-  goal_intent_id bigint references goal_intent(goal_intent_id)
+  creator_user_id bigint not null
 );
 
 drop table if exists time_utility_function cascade;
