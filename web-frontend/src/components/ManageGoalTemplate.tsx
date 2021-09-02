@@ -1,5 +1,6 @@
 import React from 'react';
 import update from 'immutability-helper';
+import { Action } from '@innexgo/common-react-components';
 import { Col, Row, Badge, Form, Button } from 'react-bootstrap';
 import DisplayModal from '../components/DisplayModal';
 import { GoalTemplateData, GoalTemplatePattern, goalTemplateDataNew, goalTemplatePatternNew } from '@innexgo/frontend-todo-app-api';
@@ -372,14 +373,22 @@ const ManageGoalTemplate = (props: {
       }
     </td>
     <td>
-      <Button variant="link" onClick={_ => setShowEditGoalTemplate(true)} hidden={!props.mutable}>
-        <Edit />
-      </Button>
-      <Button variant="link" onClick={_ => setShowCancelGoalTemplate(true)}
-        hidden={!(props.data.gtd.active && props.mutable)}
-      >
-        <Cancel />
-      </Button>
+
+     <div className="d-flex flex-wrap">
+        <Action
+          title="Edit"
+          onClick={() => setShowEditGoalTemplate(true)}
+          icon={Edit}
+          hidden={!props.mutable}
+        />
+        <Action
+          title="Cancel"
+          onClick={() => setShowCancelGoalTemplate(true)}
+          hidden={!(props.data.gtd.active && props.mutable)}
+          variant="danger"
+          icon={Cancel}
+        />
+      </div>
     </td>
     <DisplayModal
       title="Edit GoalTemplate"

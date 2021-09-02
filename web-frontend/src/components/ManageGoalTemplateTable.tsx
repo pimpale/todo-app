@@ -41,13 +41,13 @@ function ManageGoalTemplateTable(props: ManageGoalTemplateTableProps) {
       </thead>
       <tbody>
         <tr hidden={!props.addable}>
-          <td colSpan={5} className="px-0 py-0">
+          <td colSpan={5} className="p-0">
             <button
-              className="h-100 w-100 mx-0 my-0"
+              className="h-100 w-100 m-0 p-1"
               style={{ borderStyle: 'dashed', borderWidth: "medium" }}
               onClick={() => setShowCreateTemplate(true)}
             >
-              <Add className="mx-auto my-auto text-muted" fontSize="large" />
+              <Add className="mx-auto my-auto text-muted" style={{height: "2rem", width: "2rem"}}/>
             </button>
           </td>
         </tr>

@@ -1415,17 +1415,17 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.0.tgz#87de7af9c231826fdd68ac7258f77c429e0e5fcf"
   integrity sha512-wdppn25U8z/2yiaT6YGquE6X8sSv7hNMWSXYSSU1jGv/yd6XqjXgTDJ8KP4NgjTXfJ3GbRjeeb8RTV7a/VpM+w==
 
-"@innexgo/auth-react-components@^0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@innexgo/auth-react-components/-/auth-react-components-0.1.4.tgz#676fa4931cf2720804dda1b508cf65c0120efb27"
-  integrity sha512-zW7Nt1U6OkwznxD2sRwwfG65ryeR95x/EOSBKe9qN8yHNs+H65Mik42NdCMSrEQTMEpGPaPGPFqhKlocisIeMQ==
+"@innexgo/auth-react-components@^0.1.5":
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/@innexgo/auth-react-components/-/auth-react-components-0.1.5.tgz#14fca9ef4ab2f3b23815d0193a5dc5f320f460be"
+  integrity sha512-E/8lz97rPXRA5bDqy0rPT22aOIo4Fre/EiVYt7zOHl9QrVhWLwX4hEyQcjuekf06svHMupSnMbDSf9mR8MKJBg==
 
-"@innexgo/common-react-components@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@innexgo/common-react-components/-/common-react-components-0.1.0.tgz#3e75cb73ec2f3a16b00a3d2ce1bffe3d86dee7fd"
-  integrity sha512-CBq+1iB6xvKlu74ac6GlZiuP5vAXT147igolV93CDuwf5lk7lVq+8GUxQzN4s3gT26Zq60g+qDAOoX3SZKMTAQ==
+"@innexgo/common-react-components@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@innexgo/common-react-components/-/common-react-components-0.1.2.tgz#5cf322aa828ec68673becaac83fec3d026340f83"
+  integrity sha512-ML1ZBaOukRo1TsSUHLM4po4ZDoy2zNLlv8CVHgY9ZXZ0Uj/ujyWtFfYsnAMdkPjcQq32t7zbNZTlgoh44OaADw==
 
-"@innexgo/frontend-auth-api@^0.2.29":
+"@innexgo/frontend-auth-api@^0.2.28":
   version "0.2.28"
   resolved "https://registry.yarnpkg.com/@innexgo/frontend-auth-api/-/frontend-auth-api-0.2.28.tgz#e77637994d79221f113181832470445e2d3579a0"
   integrity sha512-RjOaygliTeIiJ5DS+IYnt618vGu7r2QPqtLrUB4IpeUnqLsQ6p8eduyqCW7HqsrGRlUZp9hRaUYGO10o8zd9ZA==
@@ -10583,10 +10583,10 @@ react-bootstrap-select@^0.14.0:
     vinyl-buffer "^1.0.0"
     vinyl-source-stream "^1.0.0"
 
-react-bootstrap@2.0.0-beta.5:
-  version "2.0.0-beta.5"
-  resolved "https://registry.yarnpkg.com/react-bootstrap/-/react-bootstrap-2.0.0-beta.5.tgz#3bdb532cd8c13b360dd277102607e4ff7ca58013"
-  integrity sha512-vMRsO3akQ4utRZkMuWtJ82g0vOqzQUoHK7pZs7af3P7c43zrBWzFYM161aKBAIY6Kfhc9Wn2Ms7tZcdpc3pszA==
+react-bootstrap@2.0.0-beta.6:
+  version "2.0.0-beta.6"
+  resolved "https://registry.yarnpkg.com/react-bootstrap/-/react-bootstrap-2.0.0-beta.6.tgz#983e0e2be718384aded800de10e9aceb581a0188"
+  integrity sha512-eHEkmESWYYgNLjqbz31G696Eytu+6GeF8CPHQ8t9Se12dUEej8OjBakyQP0OGms9yy1ZZeLG/Fvuo7VxiwMcuQ==
   dependencies:
     "@babel/runtime" "^7.14.0"
     "@restart/context" "^2.1.4"
@@ -11372,10 +11372,10 @@ sass-loader@^10.0.5:
     schema-utils "^3.0.0"
     semver "^7.3.2"
 
-sass@^1.38.1:
-  version "1.38.1"
-  resolved "https://registry.yarnpkg.com/sass/-/sass-1.38.1.tgz#54dfb17fb168846b5850324b82fc62dc68f51bad"
-  integrity sha512-Lj8nPaSYOuRhgqdyShV50fY5jKnvaRmikUNalMPmbH+tKMGgEKVkltI/lP30PEfO2T1t6R9yc2QIBLgOc3uaFw==
+sass@^1.39.0:
+  version "1.39.0"
+  resolved "https://registry.yarnpkg.com/sass/-/sass-1.39.0.tgz#6c64695d1c437767c8f1a4e471288e831f81d035"
+  integrity sha512-F4o+RhJkNOIG0b6QudYU8c78ZADKZjKDk5cyrf8XTKWfrgbtyVVXImFstJrc+1pkQDCggyidIOytq6gS4gCCZg==
   dependencies:
     chokidar ">=3.0.0 <4.0.0"
 
