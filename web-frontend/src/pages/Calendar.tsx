@@ -19,7 +19,7 @@ import { TagData } from '../components/ManageNamedEntity';
 
 import { unwrap, isErr } from '@innexgo/frontend-common';
 
-import UtilityWrapper from '../components/UtilityWrapper';
+import {WidgetWrapper} from '@innexgo/common-react-components';
 
 import CreateExternalEvent from '../components/CreateExternalEvent';
 import CreateGoal from '../components/CreateGoal';
@@ -431,7 +431,7 @@ const loadCalendarData = async (props: AsyncProps<CalendarData>) => {
 }
 
 function CalendarWidget(props: AuthenticatedComponentProps) {
-  return <UtilityWrapper title="Upcoming Appointments">
+  return <WidgetWrapper title="Upcoming Appointments">
     <span>
       This screen shows all future appointments.
       You can click any date to add an appointment on that date,
@@ -446,7 +446,7 @@ function CalendarWidget(props: AuthenticatedComponentProps) {
         <EventCalendar apiKey={props.apiKey} tags={cd.tags} templates={cd.templates} />
       }</Async.Fulfilled>
     </Async>
-  </UtilityWrapper>
+  </WidgetWrapper>
 };
 
 function Calendar(props: AuthenticatedComponentProps) {
