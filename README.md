@@ -1,5 +1,14 @@
 # todo-app
 
+# Marketing Blurb
+
+BRUINMINDER is open source productivity software that aims to manage long term goals by breaking them down into smaller subtasks.
+It can transform your abstract to-do lists into a practical schedule using statistical methods.
+We also support adding goals from various different other websites.
+In short, our goal is to empower your ability to organize your tasks and achieve your goals.
+
+# Dev Guide
+
 View these guides:
 
 (backend guide)[./backend/README.md]
