@@ -1,6 +1,6 @@
 #![feature(async_closure)]
 #![feature(never_type)]
-use clap::Clap;
+use clap::Parser;
 use std::error::Error;
 use std::sync::Arc;
 use tokio_postgres::{Client, NoTls};
@@ -35,7 +35,7 @@ mod handlers;
 
 static SERVICE_NAME: &str = "todo-app-service";
 
-#[derive(Clap, Clone)]
+#[derive(Parser, Clone)]
 struct Opts {
   #[clap(short, long)]
   site_external_url: String,
