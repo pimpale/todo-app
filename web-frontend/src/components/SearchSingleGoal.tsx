@@ -1,5 +1,5 @@
 import AsyncSelect from 'react-select/async';
-import { ValueType } from 'react-select';
+import { SingleValue } from 'react-select';
 import { GoalData } from '@innexgo/frontend-todo-app-api';
 
 interface SearchSingleGoalProps {
@@ -26,7 +26,7 @@ export default function SearchSingleGoal(props: SearchSingleGoalProps) {
   };
 
 
-  const onChange = (opt: ValueType<GoalDataOption, false>) => {
+  const onChange = (opt: SingleValue<GoalDataOption>) => {
     if (opt == null) {
       props.setFn(null);
     } else {

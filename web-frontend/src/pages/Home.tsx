@@ -4,7 +4,6 @@ import ExternalLayout from '../components/ExternalLayout';
 import { Section, BrandedComponentProps} from '@innexgo/common-react-components';
 
 import lady from '../img/lady_sit.png';
-import { borderRadius } from 'react-select/src/theme';
 
 function Home(props: BrandedComponentProps) {
 

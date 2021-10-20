@@ -1,10 +1,10 @@
 import React from 'react';
-import { Plus as Add } from 'react-bootstrap-icons'
 import { Table } from 'react-bootstrap';
 import update from 'immutability-helper';
 import CreateGoalTemplate from '../components/CreateGoalTemplate';
 import ManageGoalTemplate, { TemplateData } from '../components/ManageGoalTemplate';
 import { ApiKey } from '@innexgo/frontend-auth-api';
+import { AddButton } from '@innexgo/common-react-components';
 import DisplayModal from '../components/DisplayModal';
 
 
@@ -42,13 +42,7 @@ function ManageGoalTemplateTable(props: ManageGoalTemplateTableProps) {
       <tbody>
         <tr hidden={!props.addable}>
           <td colSpan={5} className="p-0">
-            <button
-              className="h-100 w-100 m-0 p-1"
-              style={{ borderStyle: 'dashed', borderWidth: "medium" }}
-              onClick={() => setShowCreateTemplate(true)}
-            >
-              <Add className="mx-auto my-auto text-muted" style={{height: "2rem", width: "2rem"}}/>
-            </button>
+            <AddButton onClick={() => setShowCreateTemplate(true)} />
           </td>
         </tr>
         {activeTemplates.length === 0
@@ -70,7 +64,7 @@ function ManageGoalTemplateTable(props: ManageGoalTemplateTableProps) {
       </tbody>
     </Table>
     <DisplayModal
-      title="New Goal"
+      title="New Template"
       show={showCreateTemplate}
       onClose={() => setShowCreateTemplate(false)}
     >
