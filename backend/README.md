@@ -137,14 +137,65 @@ If you are a backend developer, or someone who wants to make changes to the back
 
 ### With Docker Compose
 
-* Install git
-* Install docker
-* Install docker-compose
-* `git clone https://github.com/pimpale/todo-app`
-* `cd todo-app/backend`
-* `docker-compose build`
-* `docker-compose up`
+* **Warning**: Outdated
+  * Install git
+  * Install docker
+  * Install docker-compose
+  * `git clone https://github.com/pimpale/todo-app`
+  * `cd todo-app/backend`
+  * `docker-compose build`
+  * `docker-compose up`
 
 ### Uncontainerized
 
-**TODO**
+#### Build
+* Install git
+* Install rustup & cargo
+  * https://www.rust-lang.org/tools/install
+* Add nightly rust
+  * Run: `rustup toolchain install nightly`
+  * Run: `rustup default nightly`
+* Default to nightly rust
+* Git clone the todo-app repository
+  * Run: `git clone https://github.com/pimpale/todo-app`
+* Build
+  * `cd backend`
+  * `cargo build`
+
+* Install mail-service
+  * Run: `git clone https://github.com/innexgo/mail-service`
+  * Run: `cd mail-service`
+  * Run: `cargo build`
+* Install auth-service
+  * Run: `git clone https://github.com/innexgo/auth-service`
+  * Run: `cd auth-service`
+  * Run: `cargo build`
+
+* Install Postgres:
+  * https://www.postgresql.org/download/
+
+#### Initialization: Do this the first time, and every time database upgrades
+
+* Initialize Mail
+  * `cd mail-service/sql`
+  * `psql -f 1-mail-schema.sql`
+* Initialize Auth
+  * `cd auth-service/sql`
+  * `psql -f 1-auth-schema.sql`
+  * `psql -f 2-mock-data.sql`
+* Initialize TodoApp
+  * `cd todo-app/backend/sql`
+  * `psql -f 1-todo-app-schema.sql`
+
+#### Run
+
+* Start Mail
+  * `cd mail-service`
+  * `./run.sh`
+* Start Auth
+  * `cd auth-service`
+  * `./run.sh`
+* Start TodoApp
+  * `cd todo-app/backend`
+  * `./run.sh`
+
