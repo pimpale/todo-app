@@ -2,6 +2,8 @@
 
 ## Table of Contents
 
+* [Installation Instructions](#installation-instructions)
+* [Run Instructions](#run-instructions)
 * [Architecture](#architecture)
   * [Overview](#overview)
   * [Backend](#backend)
@@ -11,6 +13,21 @@
   * [Error Handling with Typescript](#error-handling-with-typescript)
   * [Rendering Asynchronous Data](#rendering-asynchronous-data)
   * [React forms with Formik and React Bootstrap](#react-forms-with-formik-and-react-bootstrap)
+
+## Installation Instructions
+
+* Install [yarn] ( https://classic.yarnpkg.com/en/ )
+* Git clone the repository: `git clone https://github.com/pimpale/todo-app`
+* Install dependencies:
+  * `cd todo-app/web-frontend`
+  * `yarn install`
+
+## Run Instructions
+
+* Development
+  * `yarn start`
+* Production
+  * `yarn build`
 
 ## Architecture
 
