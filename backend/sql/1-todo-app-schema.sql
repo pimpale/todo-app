@@ -34,7 +34,7 @@ create table goal_data(
   goal_id bigint not null references goal(goal_id),
   name text not null,
   duration_estimate bigint, -- if null, then is abstract
-  time_utility_function_id bigint not null,
+  time_utility_function_id bigint not null references time_utility_function(time_utility_function_id),
   status bigint not null -- enum
 );
 
