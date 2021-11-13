@@ -58,6 +58,44 @@ In order to interface with the auth-service, we use the rust client library for 
 You can read more documentation about the auth service here:
 * https://github.com/innexgo/auth-service-api
 
+## API Endpoints
+
+* `public/goal_data/new`
+  * Creates a new version of the mutible data related to a goal after validating proper inputs
+* `public/goal_entity_tag/new`
+  * Creates a new goal entity tag after validating proper inputs
+  * This goal entity tag links a goal to a named entity, allowing it to be configued according to the data from other goals related to the same named entity
+* `public/goal_template/new`
+  * Creates a new goal template after validating proper inputs
+  * This goal template provides a framework for how to complete certain long term goals such as losing weight
+  * These can be user or admin created
+* `public/goal_template_pattern/new`
+  * Creates a new pattern that can activate a template after validating proper inputs
+  * For example, the pattern "CS31 project" can activate the template for completing a CS31 project
+* `public/named_entity_data/new`
+  * Creates a new version of the mutible data related to a named entity after validating proper inputs
+* `public/user_generated_code/new`
+  * 
+* `public/external_event/new`
+  * Creates an external event after validating proper inputs
+  * External events tend to come from integrating with other services such as Google calender
+* `public/goal/view`
+  * Lets the user view a snapshot of their goals after validating proper inputs
+* `public/external_event/view`
+  * Lets the user view a snapshot of their external events after validating proper inputs
+* `public/goal_entity_tag/view`
+  * Lets the user view a snapshot of their goal entity tags after validating proper inputs
+* `public/named_entity/view`
+  * Lets the user view a snapshot of their named entities after validating proper inputs
+* `public/named_entity_pattern/view`
+  * Lets the user view a snapshot of their named entity patterns after validating proper inputs
+* `public/goal_template_data/view`
+  * Lets the user view a snapshot of the latest version of the data related to the user's goal templates after validating proper inputs
+* `public/external_event_data/view`
+  * Lets the user view a snapshot of the latest version of the data related to the user's external events after validating proper inputs
+* `public/user_generated_code/view`
+  * Lets the user view a snapshot of IDK after validating proper inputs
+
 ## Data Model
 
 In this section, we'll describe how the data is laid out in SQL and what the semantic purpose of each column is.
@@ -79,97 +117,55 @@ It also has the benefit that we can undo changes in a simple way, and that we ma
 
 Here's how GoalIntent is laid out in SQL:
 ```sql
-create table goal(
-  goal_id bigserial primary key,
+create table goal_intent(
+  goal_intent_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null
 );
 
-create table goal_data(
-  goal_data_id bigserial primary key,
+create table goal_intent_data(
+  goal_intent_data_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null,
-  goal_id bigint not null references goal(goal_id),
+  goal_intent_id bigint not null,
   name text not null,
-  duration_estimate bigint, -- if null, then is abstract
-  time_utility_function_id bigint not null references time_utility_function(time_utility_function_id),
-  status bigint not null -- enum
+  active bool not null
 );
-
 ```
 
 Let's inspect the columns one by one:
-* `goal`: The "core table" storing immutable properties.
-  * `goal_id`: The ID of the goal itself.
+* `goal_intent`: The "core table" storing immutable properties.
+  * `goal_intent_id`: The ID of the goal intent itself.
   * `creation_time`: When the goal was first created. 
     * Unix timestamp
       * What you get from `Date.now()` or `System.currentTimeMillis()`.
   * `creator_user_id`: owner of the object. 
     * In our current permission model, you can only access objects which you have created.
     * So far, we don't allow transfering ownership of an object or sharing objects.
-* `goal_data`: The "data table" storing mutable properties.
-  * `goal_data_id`: The ID of the goal data.
-    * Note that there may be more than one goal data for each goal.
-  * `creation_time`: When goal data was created.
+* `goal_intent_data`: The "data table" storing mutable properties.
+  * `goal_intent_data_id`: The ID of the goal intent data.
+    * Note that there may be more than one goal intent data for each goal intent.
+  * `creation_time`: When goal intent data was created.
     * Effectively represents the time it was edited.
-  * `creator_user_id`: Who created this goal data.
-    * Should be the same as who created the goal.
-  * `goal_id`: The id of the goal this is for. 
-  * `name`: The name of the goal.
-  * `active`: This field tells us whether the goal should be counted as deleted.
+  * `creator_user_id`: Who created this goal intent data.
+    * Should be the same as who created the goal intent.
+  * `goal_intent_id`: The id of the goal intent this is for. 
+  * `name`: The name of the goal intent.
+  * `active`: This field tells us whether the goal intent should be counted as deleted.
 
 To retrieve only recent data from this table, we would use:
 ```sql
-create view recent_goal_data as
-  select gd.* from goal_data gd
-  inner join (
-   select max(goal_data_id) id 
-   from goal_data 
-   group by goal_id
-  ) maxids
-  on maxids.id = gd.goal_data_id;
+SELECT gid.* FROM goal_intent_data gid
+INNER JOIN (
+  SELECT max(goal_intent_data_id) id 
+  FROM goal_intent_data 
+  GROUP BY goal_intent_id
+) maxids 
+ON maxids.id = gid.goal_intent_data_id
 ```
 
-This approach creates a subquery containing only the maximum goal_data_id for any given goal_id.
+This approach creates a subquery containing only the maximum goal_intent_data_id for any given goal_intent_id.
 We then inner join this table, thus selecting only the most recent rows.
-
-## Database Tables
-
-* goal
-  * Basically reprents something that the user has entered into their calendar
-  * It can be created either manually by the user, or automatically on a schedule.
-* goal_data
-  * This contains the mutable data for the `goal` table.
-* time_utility_function
-  * Represents how the utility associated with a goal changes over time.
-* goal_event
-  * A goal_event represents the chunk of time that's associated with a goal
-  * A goal can be scheduled by creating a new goal_event associated with it.
-    * This gives it a specific time in the future where it is supposed to be completed
-    * It will then also show up in the calendar view
-  * You can deschedule a goal by marking the goal_event as inactive
-  * goal_event is basically the time block we're giving to the goal
-* goal_dependency
-  * Represents the fact that one goal must be complete before the other can be scheduled
-  * Its used when we autogenerate schedules.
-* goal_template
-  * It allows the time and duration of a goal to be automatically inferred from the goal's name
-  * Immutable
-* goal_template_data
-  * This table contains the data for what should be autogenerated when the template is applied
-  * Contains mutable data
-* goal_template_pattern
-  * Only if the name of the goal matches a pattern, do we activate the template associated with it.
-* named_entity
-  * A place, thing, or person with information associated with it
-* named_entity_data
-  * Contains data associated with the named entity
-* named_entity_pattern
-  * Patterns by which the named_entity is applied to goal
-* goal_entity_tag
-  * Relates a named_entity to a goal.
-* external_event_data
-  * When I import something from google calendar or another external service
 
 ## Building and Deploying
 
