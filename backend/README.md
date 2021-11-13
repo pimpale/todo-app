@@ -62,6 +62,44 @@ You can read more documentation about the auth service here:
 
 -   https://github.com/innexgo/auth-service-api
 
+## API Endpoints
+
+* `public/goal_data/new`
+  * Creates a new version of the mutible data related to a goal after validating proper inputs
+* `public/goal_entity_tag/new`
+  * Creates a new goal entity tag after validating proper inputs
+  * This goal entity tag links a goal to a named entity, allowing it to be configued according to the data from other goals related to the same named entity
+* `public/goal_template/new`
+  * Creates a new goal template after validating proper inputs
+  * This goal template provides a framework for how to complete certain long term goals such as losing weight
+  * These can be user or admin created
+* `public/goal_template_pattern/new`
+  * Creates a new pattern that can activate a template after validating proper inputs
+  * For example, the pattern "CS31 project" can activate the template for completing a CS31 project
+* `public/named_entity_data/new`
+  * Creates a new version of the mutible data related to a named entity after validating proper inputs
+* `public/user_generated_code/new`
+  * 
+* `public/external_event/new`
+  * Creates an external event after validating proper inputs
+  * External events tend to come from integrating with other services such as Google calender
+* `public/goal/view`
+  * Lets the user view a snapshot of their goals after validating proper inputs
+* `public/external_event/view`
+  * Lets the user view a snapshot of their external events after validating proper inputs
+* `public/goal_entity_tag/view`
+  * Lets the user view a snapshot of their goal entity tags after validating proper inputs
+* `public/named_entity/view`
+  * Lets the user view a snapshot of their named entities after validating proper inputs
+* `public/named_entity_pattern/view`
+  * Lets the user view a snapshot of their named entity patterns after validating proper inputs
+* `public/goal_template_data/view`
+  * Lets the user view a snapshot of the latest version of the data related to the user's goal templates after validating proper inputs
+* `public/external_event_data/view`
+  * Lets the user view a snapshot of the latest version of the data related to the user's external events after validating proper inputs
+* `public/user_generated_code/view`
+  * Lets the user view a snapshot of IDK after validating proper inputs
+
 ## Data Model
 
 In this section, we'll describe how the data is laid out in SQL and what the semantic purpose of each column is.
@@ -84,27 +122,23 @@ It also has the benefit that we can undo changes in a simple way, and that we ma
 Here's how GoalIntent is laid out in SQL:
 
 ```sql
-create table goal(
-  goal_id bigserial primary key,
+create table goal_intent(
+  goal_intent_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null
 );
 
-create table goal_data(
-  goal_data_id bigserial primary key,
+create table goal_intent_data(
+  goal_intent_data_id bigserial primary key,
   creation_time bigint not null,
   creator_user_id bigint not null,
-  goal_id bigint not null references goal(goal_id),
+  goal_intent_id bigint not null,
   name text not null,
-  duration_estimate bigint, -- if null, then is abstract
-  time_utility_function_id bigint not null references time_utility_function(time_utility_function_id),
-  status bigint not null -- enum
+  active bool not null
 );
-
 ```
 
 Let's inspect the columns one by one:
-
 -   `goal`: The "core table" storing immutable properties.
     -   `goal_id`: The ID of the goal itself.
     -   `creation_time`: When the goal was first created.
@@ -137,7 +171,7 @@ create view recent_goal_data as
   on maxids.id = gd.goal_data_id;
 ```
 
-This approach creates a subquery containing only the maximum goal_data_id for any given goal_id.
+This approach creates a subquery containing only the maximum goal_intent_data_id for any given goal_intent_id.
 We then inner join this table, thus selecting only the most recent rows.
 
 ## Database Tables
