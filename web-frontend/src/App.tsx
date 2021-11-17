@@ -1,8 +1,8 @@
 import React from 'react';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { ApiKey } from '@innexgo/frontend-auth-api';
-import { AuthenticatedRoute} from '@innexgo/auth-react-components';
+import { AuthenticatedComponentRenderer } from '@innexgo/auth-react-components';
 
 // public pages
 import Home from './pages/Home';
@@ -79,48 +79,22 @@ function App() {
   }
 
   return <BrowserRouter>
-    <Switch>
-      <Route path="/" exact >
-        <Home branding={branding} />
-      </Route>
-      <Route path="/instructions" >
-        <Instructions branding={branding} />
-      </Route>
-      <Route path="/about" >
-        <About branding={branding} />
-      </Route>
-      <Route path="/forgot_password" >
-        <ForgotPassword branding={branding} />
-      </Route>
-      <Route path="/reset_password" >
-        <ResetPassword branding={branding} />
-      </Route>
-      <Route path="/register" >
-        <Register branding={branding} />
-      </Route>
-      <Route path="/email_confirm" >
-        <EmailConfirm branding={branding} />
-      </Route>
-      <Route path="/parent_confirm" >
-        <ParentPermissionConfirm branding={branding} />
-      </Route>
-      <Route path="/calendar" >
-        <AuthenticatedRoute branding={branding} {...apiKeyGetSetter} component={Calendar} />
-      </Route>
-      <Route path="/dashboard" >
-        <AuthenticatedRoute branding={branding} {...apiKeyGetSetter} component={Dashboard} />
-      </Route>
-      <Route path="/settings" >
-        <AuthenticatedRoute branding={branding} {...apiKeyGetSetter} component={Settings} />
-      </Route >
-      <Route path="/account" >
-        <AuthenticatedRoute branding={branding} {...apiKeyGetSetter} component={Account} />
-      </Route >
-      <Route path="/search" >
-        <AuthenticatedRoute branding={branding} {...apiKeyGetSetter} component={Search} />
-      </Route >
-      <Route path="/" component={Error404} />
-    </Switch >
+    <Routes>
+      <Route path="/" element={<Home branding={branding} />} />
+      <Route path="/instructions" element={<Instructions branding={branding} />} />
+      <Route path="/about" element={<About branding={branding} />} />
+      <Route path="/forgot_password" element={<ForgotPassword branding={branding} />} />
+      <Route path="/reset_password" element={<ResetPassword branding={branding} />} />
+      <Route path="/register" element={<Register branding={branding} />} />
+      <Route path="/email_confirm" element={<EmailConfirm branding={branding} />} />
+      <Route path="/parent_confirm" element={<ParentPermissionConfirm branding={branding} />} />
+      <Route path="/calendar" element={<AuthenticatedComponentRenderer branding={branding} {...apiKeyGetSetter} component={Calendar} />} />
+      <Route path="/dashboard" element={<AuthenticatedComponentRenderer branding={branding} {...apiKeyGetSetter} component={Dashboard} />} />
+      <Route path="/settings" element={<AuthenticatedComponentRenderer branding={branding} {...apiKeyGetSetter} component={Settings} />} />
+      <Route path="/account" element={<AuthenticatedComponentRenderer branding={branding} {...apiKeyGetSetter} component={Account} />} />
+      <Route path="/search" element={<AuthenticatedComponentRenderer branding={branding} {...apiKeyGetSetter} component={Search} />} />
+      <Route path="*" element={<Error404 />} />
+    </Routes >
   </BrowserRouter >
 }
 
