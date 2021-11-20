@@ -58,7 +58,9 @@ function Home(props: BrandedComponentProps) {
     backgroundColor: "#F6F0E5"
   };
 
-  
+  // const paddingTest = {
+  //   padding-bottom: "30px"
+  // };
 
   const homeBody = {
     height: "50vh",
@@ -91,44 +93,20 @@ function Home(props: BrandedComponentProps) {
 
       <div style = {goldBack}> 
     
-      <Container>
-        <Section id="welcome" name={`Welcome to ${props.branding.name}`}>
-          <div>
-            Welcome to {props.branding.name}, an application built for a class project, but an application designed for the
-            busiest of people. As students at UCLA, we know how frustrating it is to schedule classes,
-            clubs, and homework so we made this application to help all kinds of people efficiently plan their schedule. We invite you to join us
-            and be prepared for what the day has in store.
-            <a href="/register">Register</a>
+      <Container style = {{paddingBottom: '30px'}}>
+        <Section id="welcome" name={`Welcome to ${props.branding.name}`} >
+          <div style = {{paddingBottom: '20px'}}>
+          As college students, we understand, firsthand, the difficulties of creating schedules. Whether it be planning out your classes, extracurriculars, 
+          or shifts, the time and effort one must put into schedule planning becomes quite significant. That's why we set out design an app that 
+          not only organizes your schedule, but also sorts your events by importance to ensure the most urgent of tasks are finished faster and 
+          more efficiently than ever. Meet {props.branding.name}, your one stop shop for simple, yet effective schedule planning. {props.branding.name} uses an advanced 
+          algorithm trained to ensure that your most urgent tasks are prioritized. That way, you can leave the schedule planning to us, confident that
+           your priorities will be met. {props.branding.name}, when your schedule feels like spam, it's time to make a plan. 
+          
           </div>
         </Section>
-        <Section id="why_us" name="Our Application">
-          <div>
-            A scheduling app shouldn't have to take more than a few minutes to arrange the multiple events of your day; therefore, we use an algorithm modeled after simulated
-            annealing to choose the best fit for certain events around your Commitments (immovable events such as classes, interviews, work, etc.).
-            <br />
-            With all your events in one place, our application gives you a simple TO-DO feed to see what is upcoming in your schedule, allowing you to take a quick glance and
-            go back to working efficiently.
-          </div>
-        </Section>
-        <Section id="aboutCreators" name="About the Creators">
-          <div>
-            Govind Pimpale: I am a 1st year Computer Science major who is interested in working for startup companies after school
-            <br />
-            Edmund Yim: I am a 3rd year Computer Science and Engineering major interested in working as a software engineer after UCLA.
-            <br />
-            Brandon Le: I am a 3rd year Computer Science major interested in working as a software engineer after graduating.
-            <br />
-            Edgar Hukassian: I am a 3rd Year Computer Science Major interested in working as a software engineer after school.
-            <br />
-            Warren Pagsuguiron: I am a 4th year Electrical Engineering major who is also passionate about Computer Science. After UCLA, I plan on working on robotics.
-          </div>
-        </Section>
-        <Section id="specialThanks" name="Special Thanks">
-          <div>
-            We want to thank Professor Eggert & the Language and Teaching Assistants of Winter 2021 CS 97 for their hard-work during the quarter.
-            <a href="/register">Register</a>
-          </div>
-        </Section>
+        
+        
       </Container>
 
       </div>
