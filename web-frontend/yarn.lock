@@ -1243,10 +1243,10 @@
   resolved "https://registry.yarnpkg.com/@innexgo/frontend-common/-/frontend-common-0.0.12.tgz#9036694c955d1a82c2f0f7ab8a836f8dfc4f2630"
   integrity sha512-GA8M1Eh43PfK6RNQb5Ke2jD4KRcF31iIG+JLHRDJjaQdIy7iP5f6MLgQXv2kwTZoBQCEJyRmuggsPW4SU0jGaQ==
 
-"@innexgo/frontend-todo-app-api@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@innexgo/frontend-todo-app-api/-/frontend-todo-app-api-0.0.6.tgz#ee54fecc2aedea737f5c7ef123a0f53778d94931"
-  integrity sha512-l8FzvMhdQkVcoStkySCYMUvPM9thn8CguxwQ9wz/c0XmAFrxf0IAFWImH0bfTIyX1hQg5cM5munmqb8Ur254ow==
+"@innexgo/frontend-todo-app-api@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@innexgo/frontend-todo-app-api/-/frontend-todo-app-api-0.0.7.tgz#34a2df3d98e9e1ff695fa48ce3fffefdde87e32a"
+  integrity sha512-uHuP7Z36ZsQ3FBMNjbmueiui2O4IogypLYP+VZWvg4S9re6E/0IYpTxjn/8JlmiF8OCCodGHTi5l0y8Nb47x/Q==
 
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
