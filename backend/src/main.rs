@@ -1,5 +1,3 @@
-#![feature(async_closure)]
-#![feature(never_type)]
 use clap::Parser;
 use std::error::Error;
 use std::sync::Arc;
