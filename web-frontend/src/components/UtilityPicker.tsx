@@ -1,16 +1,13 @@
+/*
 import React from 'react'
 import Select from 'react-select'
 import { Col, Row } from 'react-bootstrap';
-import { Line } from 'react-chartjs-2';
 import TimePicker from '../components/TimePicker';
 import { setHrMin } from '../utils/utils';
 import getHours from 'date-fns/getHours'
 import getMinutes from 'date-fns/getMinutes'
 import addHours from "date-fns/addHours";
 import format from 'date-fns/format';
-import DayPickerInput from 'react-day-picker/DayPickerInput';
-import 'react-day-picker/lib/style.css';
-import 'chartjs-plugin-dragdata';
 
 const scale = 100;
 
@@ -53,7 +50,6 @@ function UtilityPicker(props: UtilityPickerProps) {
   }, []);
 
   const lineOptions = {
-    line: 'scatter',
     responsive: true,
     animation: {
       duration: 0
@@ -97,15 +93,10 @@ function UtilityPicker(props: UtilityPickerProps) {
     },
     scales: {
       x: {
-        type: 'linear',
         min: start,
         max: end,
-        ticks: {
-          callback: (v: number) => format(v, "hh:mm a")
-        }
       },
       y: {
-        type: 'linear',
         beginAtZero: true,
         steps: 1,
         stepValue: 1,
@@ -197,9 +188,27 @@ function UtilityPicker(props: UtilityPickerProps) {
       </Col>
     </Row>
     <Line
-      options={lineOptions as any}
-      data={lineData} />
+      options={lineOptions}
+      data={lineData}
+    />
   </>
 }
 
 export default UtilityPicker;
+*/
+
+type Point = { x: number, y: number };
+
+type UtilityPickerProps = {
+  span?: [startTime: number, endTime: number];
+  mutable: boolean,
+  points: Point[],
+  setPoints: (points: Point[]) => void,
+}
+
+function UtilityPicker(props:UtilityPickerProps) {
+    return <div>TODO</div>
+}
+
+export default UtilityPicker;
+

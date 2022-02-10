@@ -48,7 +48,7 @@ function ManageGoalTable(props: ManageGoalTableProps) {
       <tbody>
         {activeGoalDataEvents.length === 0
           ? <tr><td className="text-center" colSpan={4}>No Goals Yet</td></tr>
-          : <> </>
+          : null
         }
         {activeGoalDataEvents
           // reverse in order to see newest first
