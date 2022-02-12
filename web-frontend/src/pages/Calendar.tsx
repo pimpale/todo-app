@@ -1,6 +1,6 @@
 import React from 'react'
 import update from 'immutability-helper';
-import { Loader } from '@innexgo/common-react-components';
+import { Loader, DisplayModal } from '@innexgo/common-react-components';
 import FullCalendar, { EventApi, DateSelectArg, EventClickArg } from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
@@ -26,7 +26,6 @@ import CreateGoal from '../components/CreateGoal';
 import ManageExternalEvent from '../components/ManageExternalEvent';
 import { ManageGoalData } from '../components/ManageGoal';
 import ManageGoalTable from '../components/ManageGoalTable';
-import DisplayModal from '../components/DisplayModal';
 import { namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, } from '@innexgo/frontend-todo-app-api';
 
 

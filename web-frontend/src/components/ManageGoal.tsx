@@ -1,8 +1,7 @@
 import React from 'react';
-import { Action } from '@innexgo/common-react-components';
+import { Action, DisplayModal } from '@innexgo/common-react-components';
 import update from 'immutability-helper';
 import { Col, Row, Card, Form, Button } from 'react-bootstrap';
-import DisplayModal from '../components/DisplayModal';
 import UtilityPicker from '../components/UtilityPicker';
 import { GoalData, GoalEvent, timeUtilityFunctionNew, goalDataNew } from '@innexgo/frontend-todo-app-api';
 import { isErr } from '@innexgo/frontend-common';

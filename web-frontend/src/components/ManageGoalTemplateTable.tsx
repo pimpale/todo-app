@@ -4,8 +4,7 @@ import update from 'immutability-helper';
 import CreateGoalTemplate from '../components/CreateGoalTemplate';
 import ManageGoalTemplate, { TemplateData } from '../components/ManageGoalTemplate';
 import { ApiKey } from '@innexgo/frontend-auth-api';
-import { AddButton } from '@innexgo/common-react-components';
-import DisplayModal from '../components/DisplayModal';
+import { AddButton, DisplayModal } from '@innexgo/common-react-components';
 
 
 type ManageGoalTemplateTableProps = {

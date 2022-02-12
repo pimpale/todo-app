@@ -69,11 +69,13 @@ function App() {
     }
   };
 
-  const branding = {
+  const branding= {
     name: "LifeSketch",
     tagline: "Optimize your day.",
     homeUrl: "/",
     tosUrl: "/terms_of_service",
+    forgotPasswordUrl: "/forgot_password",
+    dashboardUrl: "/dashboard",
     darkAdaptedIcon: DarkAdaptedIcon,
     lightAdaptedIcon: LightAdaptedIcon,
   }

@@ -1,9 +1,8 @@
 import React from 'react';
 import { Form, Button, Table } from 'react-bootstrap';
-import { Loader } from '@innexgo/common-react-components';
+import { Loader, DisplayModal } from '@innexgo/common-react-components';
 import { Async, AsyncProps } from 'react-async';
 import ErrorMessage from '../components/ErrorMessage';
-import DisplayModal from '../components/DisplayModal';
 import { ExternalEventData, externalEventDataNew, externalEventDataView } from '@innexgo/frontend-todo-app-api';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { Pencil as EditIcon, Trash as DeleteIcon, BoxArrowUp as RestoreIcon } from 'react-bootstrap-icons';

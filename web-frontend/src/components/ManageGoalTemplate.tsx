@@ -1,8 +1,7 @@
 import React from 'react';
 import update from 'immutability-helper';
-import { Action } from '@innexgo/common-react-components';
+import { Action, DisplayModal } from '@innexgo/common-react-components';
 import { Col, Row, Badge, Form, Button } from 'react-bootstrap';
-import DisplayModal from '../components/DisplayModal';
 import { GoalTemplateData, GoalTemplatePattern, goalTemplateDataNew, goalTemplatePatternNew } from '@innexgo/frontend-todo-app-api';
 import { isErr, unwrap } from '@innexgo/frontend-common';
 import { ApiKey } from '@innexgo/frontend-auth-api';
@@ -247,7 +246,7 @@ function EditGoalTemplate(props: EditGoalTemplateProps) {
           </Form.Group>
           <br />
           <Button type="submit">Submit</Button>
-          <br/>
+          <br />
           <Form.Text className="text-danger">{fprops.status.failureResult}</Form.Text>
           <Form.Text className="text-success">{fprops.status.successResult}</Form.Text>
         </Form>
@@ -374,7 +373,7 @@ const ManageGoalTemplate = (props: {
     </td>
     <td>
 
-     <div className="d-flex flex-wrap">
+      <div className="d-flex flex-wrap">
         <Action
           title="Edit"
           onClick={() => setShowEditGoalTemplate(true)}

@@ -1,41 +1,76 @@
 import React from 'react';
-import { Form, Container } from 'react-bootstrap'
+import { Async, AsyncProps } from 'react-async';
 
+import ErrorMessage from '../components/ErrorMessage';
+import update from 'immutability-helper';
+
+import { Row, Container, Col } from 'react-bootstrap';
 import DashboardLayout from '../components/DashboardLayout';
-import {WidgetWrapper} from '@innexgo/common-react-components';
+import { Loader, Section, WidgetWrapper } from '@innexgo/common-react-components';
 
-import {ManagePassword, ManageUserData, AuthenticatedComponentProps} from '@innexgo/auth-react-components';
+import { ApiKey, UserData, Email, userDataView, emailView} from '@innexgo/frontend-auth-api'
 
-function Account(props: AuthenticatedComponentProps) {
-  // TODO actually add backend components to handle changing the name properly
-  // Also, make the name and email and password changes into one box initially
-  // Then, when you click on them to change, a modal should pop up
-  // IMO this would look better than the tiny boxes we have now
+import { AuthenticatedComponentProps, ManageUserData } from '@innexgo/auth-react-components';
 
-  const [passwdSuccess, setPasswdSuccess] = React.useState(false);
-  const [nameSuccess, setNameSuccess] = React.useState(false);
+import { unwrap, getFirstOr } from '@innexgo/frontend-common';
+
+type AccountData = {
+  userData: UserData
+  ownEmail: Email
+}
+
+const loadAccountData = async (props: AsyncProps<AccountData>) => {
+  const userData = await userDataView({
+    creatorUserId: [props.apiKey.creatorUserId],
+    onlyRecent: true,
+    apiKey: props.apiKey.key,
+  })
+    .then(unwrap)
+    .then(x => getFirstOr(x, "NOT_FOUND"))
+    .then(unwrap);
+
+  const ownEmail = await emailView({
+    creatorUserId: [props.apiKey.creatorUserId],
+    toParent: false,
+    onlyRecent: true,
+    apiKey: props.apiKey.key,
+  })
+    .then(unwrap)
+    .then(x => getFirstOr(x, "NOT_FOUND"))
+    .then(unwrap);
+
+  return {
+    userData,
+    ownEmail
+  }
+}
+
+function AccountWrapper(props: AuthenticatedComponentProps) {
   return <DashboardLayout {...props}>
     <Container fluid className="py-4 px-4">
-      <div className="mx-3 my-3">
-        <WidgetWrapper title="Change Password">
-          <span>Change your password.</span>
-          {passwdSuccess
-            ? <Form.Text className="text-success">Password changed successfully</Form.Text>
-            : <ManagePassword apiKey={props.apiKey} onSuccess={() => setPasswdSuccess(true)} />
-          }
-        </WidgetWrapper>
-      </div>
-      <div className="mx-3 my-3">
-        <WidgetWrapper title="Change Name">
-          <span>Change your name.</span>
-          {nameSuccess
-            ? <Form.Text className="text-success">Name changed successfully</Form.Text>
-            : <ManageUserData apiKey={props.apiKey} onSuccess={() => setNameSuccess(true)} />
-          }
-        </WidgetWrapper>
-      </div>
+      <Async promiseFn={loadAccountData} apiKey={props.apiKey}>
+        {({ setData }) => <>
+          <Async.Pending><Loader /></Async.Pending>
+          <Async.Rejected>
+            {e => <ErrorMessage error={e} />}
+          </Async.Rejected>
+          <Async.Fulfilled<AccountData>>{ad => <>
+            <div className="mx-3 my-3">
+              <WidgetWrapper title="My account">
+                <span>Manage your account data</span>
+                <ManageUserData
+                  apiKey={props.apiKey}
+                  userData={ad.userData}
+                  email={ad.ownEmail}
+                  setUserData={ud => setData(update(ad, { userData: { $set: ud } }))} />
+              </WidgetWrapper>
+            </div>
+          </>}
+          </Async.Fulfilled>
+        </>}
+      </Async>
     </Container>
   </DashboardLayout>
 }
 
-export default Account;
+export default AccountWrapper;

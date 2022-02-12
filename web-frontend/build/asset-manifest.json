@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.4989db9a.css",
-    "main.js": "/static/js/main.2bce11ad.js",
+    "main.js": "/static/js/main.27564548.js",
     "static/media/lady_sit.png": "/static/media/lady_sit.2719e2ee40db6d6b5e37.png",
     "static/media/ubuntu-latin-300.woff": "/static/media/ubuntu-latin-300.8a517f2712bba8249913.woff",
     "static/media/ubuntu-latin-300italic.woff": "/static/media/ubuntu-latin-300italic.5b545d0e1cbcff11da01.woff",
@@ -21,10 +21,10 @@
     "static/media/ubuntu-latin-700.woff2": "/static/media/ubuntu-latin-700.7b253bf0370283d6ea62.woff2",
     "index.html": "/index.html",
     "main.4989db9a.css.map": "/static/css/main.4989db9a.css.map",
-    "main.2bce11ad.js.map": "/static/js/main.2bce11ad.js.map"
+    "main.27564548.js.map": "/static/js/main.27564548.js.map"
   },
   "entrypoints": [
     "static/css/main.4989db9a.css",
-    "static/js/main.2bce11ad.js"
+    "static/js/main.27564548.js"
   ]
 }
