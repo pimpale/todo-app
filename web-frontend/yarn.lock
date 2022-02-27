@@ -1335,20 +1335,20 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@innexgo/auth-react-components@0.1.24":
-  version "0.1.24"
-  resolved "https://registry.yarnpkg.com/@innexgo/auth-react-components/-/auth-react-components-0.1.24.tgz#785a5d0e094833ceeadd60e48cf5df62f9b70b2d"
-  integrity sha512-41aOJ+xqdTeu4eqXsZGA0SyfrbYnRU1ymU9nnRye1RH11+MQS+ZW25cdy8tGsWazjGfY6bGi/ypFmDEeZt0syA==
+"@innexgo/auth-react-components@0.1.28":
+  version "0.1.28"
+  resolved "https://registry.yarnpkg.com/@innexgo/auth-react-components/-/auth-react-components-0.1.28.tgz#b67da4d5cfebfb8af994855cadd58cad4e59dc9e"
+  integrity sha512-+qi5tPCiRDVU8BOvynahtPM+lMMU2Hsiqaribvlq0ZJkJTPtiUoSvhnoGAw66ueMy4pXCXaTCE2wfk72WJhkEw==
 
 "@innexgo/common-react-components@^0.1.12":
   version "0.1.12"
   resolved "https://registry.yarnpkg.com/@innexgo/common-react-components/-/common-react-components-0.1.12.tgz#276a3187bbfa15545ad6edab97ecd3ed08a4c933"
   integrity sha512-2jh9y+RVKdUYqIGcuYIT7OzLehlfhEJ1ooK9qwwbGPTuJVnGojcFfPxNUcb8CP+EvUm7VMo3iGkbvCCzc5e5wg==
 
-"@innexgo/frontend-auth-api@^0.2.37":
-  version "0.2.37"
-  resolved "https://registry.yarnpkg.com/@innexgo/frontend-auth-api/-/frontend-auth-api-0.2.37.tgz#607975b3056f0ea9ddec5a90ad115d22c8ab3d20"
-  integrity sha512-XQR8s4JbheAdIjBJRRFi8z5WCqiOnPeRtSKjikBfF06Rtdq2AMFFPCrLL53wBgRBM/qZBFtnyjNsFgG+ZEL6jw==
+"@innexgo/frontend-auth-api@^0.2.38":
+  version "0.2.38"
+  resolved "https://registry.yarnpkg.com/@innexgo/frontend-auth-api/-/frontend-auth-api-0.2.38.tgz#bf5f4193b3f942a644e71a04e17d5b9d8b03452d"
+  integrity sha512-6b6W/YHstluyEVcBBme97h4+qpRCWADiiiWRA6UhUotbiwC4suLya0MPQQ798IVNP7UIGtufxlqrU2eZJL9xAg==
 
 "@innexgo/frontend-common@^0.0.12":
   version "0.0.12"

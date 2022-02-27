@@ -69,7 +69,7 @@ function App() {
     }
   };
 
-  const branding= {
+  const branding = {
     name: "LifeSketch",
     tagline: "Optimize your day.",
     homeUrl: "/",
@@ -88,8 +88,8 @@ function App() {
       <Route path="/forgot_password" element={<ForgotPassword branding={branding} />} />
       <Route path="/reset_password" element={<ResetPassword branding={branding} />} />
       <Route path="/register" element={<Register {...apiKeyGetSetter} branding={branding} />} />
-      <Route path="/email_confirm" element={<EmailConfirm branding={branding} />} />
-      <Route path="/parent_confirm" element={<ParentPermissionConfirm branding={branding} />} />
+      <Route path="/email_confirm" element={<EmailConfirm {...apiKeyGetSetter} branding={branding} />} />
+      <Route path="/parent_permission_confirm" element={<ParentPermissionConfirm branding={branding} />} />
       <Route path="/calendar" element={<AuthenticatedComponentRenderer branding={branding} {...apiKeyGetSetter} component={Calendar} />} />
       <Route path="/dashboard" element={<AuthenticatedComponentRenderer branding={branding} {...apiKeyGetSetter} component={Dashboard} />} />
       <Route path="/settings" element={<AuthenticatedComponentRenderer branding={branding} {...apiKeyGetSetter} component={Settings} />} />
