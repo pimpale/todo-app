@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { ApiKey } from '@innexgo/frontend-auth-api';
-import { AuthenticatedComponentRenderer } from '@innexgo/auth-react-components';
+import AuthenticatedComponentRenderer from './components/AuthenticatedComponentRenderer';
 
 // public pages
 import Home from './pages/Home';
