@@ -24,8 +24,7 @@ import {WidgetWrapper} from '@innexgo/common-react-components';
 import CreateExternalEvent from '../components/CreateExternalEvent';
 import CreateGoal from '../components/CreateGoal';
 import ManageExternalEvent from '../components/ManageExternalEvent';
-import { ManageGoalData } from '../components/ManageGoal';
-import ManageGoalTable from '../components/ManageGoalTable';
+import ManageGoal, { ManageGoalData } from '../components/ManageGoal';
 import { namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, } from '@innexgo/frontend-todo-app-api';
 
 
@@ -357,15 +356,11 @@ function EventCalendar(props: EventCalendarProps) {
         show={selectedManageGoalData !== null}
         onClose={() => setSelectedManageGoalData(null)}
       >
-        <ManageGoalTable
-          data={[selectedManageGoalData]}
+        <ManageGoal
+          data={selectedManageGoalData}
           setData={() => setSelectedManageGoalData(null)}
           apiKey={props.apiKey}
-          tags={props.tags}
-          templates={props.templates}
           mutable
-          addable={false}
-          showInactive={false}
         />
       </DisplayModal>
     }
