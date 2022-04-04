@@ -7,11 +7,10 @@ edition = "2021"
 
 [dependencies]
 warp = "0.3.2"
-clap = { version = "3.0.14", features = ["derive"] }
-tokio = { version = "1.16.1", features = ["full"] }
+clap = { version = "3.1.8", features = ["derive"] }
+tokio = { version = "1.17.0", features = ["full"] }
 serde = { version = "1.0.136", features = ["derive"] }
 serde_json = "1.0.79"
-mail-service-api = {version = "*", git = "https://github.com/innexgo/mail-service-api", features=["client"]}
 auth-service-api = {version = "*", git = "https://github.com/innexgo/auth-service-api", features=["client"]}
 
 todo-app-service-api = {version = "*", git = "https://github.com/pimpale/todo-app-service-api"}
