@@ -1,5 +1,4 @@
 use super::db_types::*;
-use super::utils::current_time_millis;
 use std::convert::TryInto;
 use todo_app_service_api::request;
 use tokio_postgres::GenericClient;
@@ -30,13 +29,10 @@ pub async fn add(
   time_utility_function_id: i64,
   status: request::GoalDataStatusKind,
 ) -> Result<GoalData, tokio_postgres::Error> {
-  let creation_time = current_time_millis();
-
-  let goal_data_id = con
+  let row  = con
     .query_one(
       "INSERT INTO
        goal_data(
-           creation_time,
            creator_user_id,
            goal_id,
            name,
@@ -44,11 +40,10 @@ pub async fn add(
            time_utility_function_id,
            status
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING goal_data_id
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING goal_data_id, creation_time
       ",
       &[
-        &creation_time,
         &creator_user_id,
         &goal_id,
         &name,
@@ -57,13 +52,12 @@ pub async fn add(
         &(status.clone() as i64),
       ],
     )
-    .await?
-    .get(0);
+    .await?;
 
   // return goal_data
   Ok(GoalData {
-    goal_data_id,
-    creation_time,
+    goal_data_id: row.get(0),
+    creation_time: row.get(1),
     creator_user_id,
     goal_id,
     name,

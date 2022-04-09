@@ -10,14 +10,14 @@ CREATE DATABASE todo_app;
 drop table if exists goal cascade;
 create table goal(
   goal_id bigserial primary key,
-  creation_time bigint not null,
+  creation_time bigint not null default extract(epoch from now()) * 1000,
   creator_user_id bigint not null
 );
 
 drop table if exists time_utility_function cascade;
 create table time_utility_function(
   time_utility_function_id bigserial primary key,
-  creation_time bigint not null,
+  creation_time bigint not null default extract(epoch from now()) * 1000,
   creator_user_id bigint not null,
   -- invariant: There must be at least one number in start_times
   -- invariant: There must be the same number of elements in start_times and utils
@@ -29,7 +29,7 @@ create table time_utility_function(
 drop table if exists goal_data cascade;
 create table goal_data(
   goal_data_id bigserial primary key,
-  creation_time bigint not null,
+  creation_time bigint not null default extract(epoch from now()) * 1000,
   creator_user_id bigint not null,
   goal_id bigint not null references goal(goal_id),
   name text not null,
@@ -50,7 +50,7 @@ create view recent_goal_data as
 drop table if exists goal_event cascade;
 create table goal_event(
   goal_event_id bigserial primary key,
-  creation_time bigint not null,
+  creation_time bigint not null default extract(epoch from now()) * 1000,
   creator_user_id bigint not null,
   goal_id bigint not null references goal(goal_id),
   start_time bigint not null,
@@ -71,7 +71,7 @@ create view recent_goal_event as
 drop table if exists goal_dependency cascade;
 create table goal_dependency(
   goal_dependency_id bigserial primary key,
-  creation_time bigint not null,
+  creation_time bigint not null default extract(epoch from now()) * 1000,
   creator_user_id bigint not null,
   goal_id bigint not null references goal(goal_id),
   dependent_goal_id bigint not null references goal(goal_id), -- the goal waits for this goal to resolve before marking is allowed
@@ -92,7 +92,7 @@ create view recent_goal_dependency as
 drop table if exists user_generated_code cascade;
 create table user_generated_code(
   user_generated_code_id bigserial primary key,
-  creation_time bigint not null,
+  creation_time bigint not null default extract(epoch from now()) * 1000,
   creator_user_id bigint not null,
   source_code text not null,
   source_lang text not null,
@@ -104,14 +104,14 @@ create table user_generated_code(
 drop table if exists goal_template cascade;
 create table goal_template(
   goal_template_id bigserial primary key,
-  creation_time bigint not null,
+  creation_time bigint not null default extract(epoch from now()) * 1000,
   creator_user_id bigint not null
 );
 
 drop table if exists goal_template_data cascade;
 create table goal_template_data(
   goal_template_data_id bigserial primary key,
-  creation_time bigint not null,
+  creation_time bigint not null default extract(epoch from now()) * 1000,
   creator_user_id bigint not null,
   goal_template_id bigint not null references goal_template(goal_template_id),
   name text not null,
@@ -133,7 +133,7 @@ create view recent_goal_template_data as
 drop table if exists goal_template_pattern cascade;
 create table goal_template_pattern(
   goal_template_pattern_id bigserial primary key,
-  creation_time bigint not null,
+  creation_time bigint not null default extract(epoch from now()) * 1000,
   creator_user_id bigint not null,
   goal_template_id bigint not null references goal_template(goal_template_id),
   pattern text not null,
@@ -153,14 +153,14 @@ create view recent_goal_template_pattern as
 drop table if exists named_entity cascade;  
 create table named_entity(
   named_entity_id bigserial primary key,
-  creation_time bigint not null,
+  creation_time bigint not null default extract(epoch from now()) * 1000,
   creator_user_id bigint not null
 );
 
 drop table if exists named_entity_data cascade;
 create table named_entity_data(
   named_entity_data_id bigserial primary key,
-  creation_time bigint not null,
+  creation_time bigint not null default extract(epoch from now()) * 1000,
   creator_user_id bigint not null,
   named_entity_id bigint not null references named_entity(named_entity_id),
   name text not null, -- must be unique wrt to user
@@ -181,7 +181,7 @@ create view recent_named_entity_data as
 drop table if exists named_entity_pattern cascade;
 create table named_entity_pattern(
   named_entity_pattern_id bigserial primary key,
-  creation_time bigint not null,
+  creation_time bigint not null default extract(epoch from now()) * 1000,
   creator_user_id bigint not null,
   named_entity_id bigint not null references named_entity(named_entity_id),
   pattern text not null,
@@ -201,7 +201,7 @@ create view recent_named_entity_pattern as
 drop table if exists goal_entity_tag cascade;
 create table goal_entity_tag(
   goal_entity_tag_id bigserial primary key,
-  creation_time bigint not null,
+  creation_time bigint not null default extract(epoch from now()) * 1000,
   creator_user_id bigint not null,
   named_entity_id bigint not null references named_entity(named_entity_id),
   goal_id bigint not null references goal(goal_id),
@@ -221,14 +221,14 @@ create view recent_goal_entity_tag as
 drop table if exists external_event cascade;
 create table external_event(
   external_event_id bigserial primary key,
-  creation_time bigint not null,
+  creation_time bigint not null default extract(epoch from now()) * 1000,
   creator_user_id bigint not null
 );
 
 drop table if exists external_event_data cascade;
 create table external_event_data(
   external_event_data_id bigserial primary key,
-  creation_time bigint not null,
+  creation_time bigint not null default extract(epoch from now()) * 1000,
   creator_user_id bigint not null,
   external_event_id bigint not null references external_event(external_event_id),
   name text not null,

@@ -1,5 +1,4 @@
 use super::db_types::*;
-use super::utils::current_time_millis;
 use todo_app_service_api::request;
 use tokio_postgres::GenericClient;
 
@@ -18,27 +17,24 @@ pub async fn add(
   con: &mut impl GenericClient,
   creator_user_id: i64,
 ) -> Result<Goal, tokio_postgres::Error> {
-  let creation_time = current_time_millis();
 
-  let goal_id = con
+  let row = con
     .query_one(
       "INSERT INTO
        goal(
-           creation_time,
            creator_user_id
        )
-       VALUES($1, $2)
-       RETURNING goal_id
+       VALUES($1)
+       RETURNING goal_id, creation_time
       ",
-      &[&creation_time, &creator_user_id],
+      &[&creator_user_id],
     )
-    .await?
-    .get(0);
+    .await?;
 
   // return goal
   Ok(Goal {
-    goal_id,
-    creation_time,
+    goal_id: row.get(0),
+    creation_time: row.get(1),
     creator_user_id,
   })
 }

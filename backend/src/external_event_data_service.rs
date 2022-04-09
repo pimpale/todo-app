@@ -1,5 +1,4 @@
 use super::db_types::*;
-use super::utils::current_time_millis;
 use std::convert::From;
 use tokio_postgres::GenericClient;
 
@@ -29,13 +28,10 @@ pub async fn add(
   end_time: i64,
   active: bool,
 ) -> Result<ExternalEventData, tokio_postgres::Error> {
-  let creation_time = current_time_millis();
-
-  let external_event_data_id = con
+  let row = con
     .query_one(
       "INSERT INTO
        external_event_data(
-           creation_time,
            creator_user_id,
            external_event_id,
            name,
@@ -43,8 +39,8 @@ pub async fn add(
            end_time,
            active
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING external_event_data_id
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING external_event_data_id, creation_time
       ",
       &[
         &creation_time,
@@ -60,8 +56,8 @@ pub async fn add(
     .get(0);
 
   Ok(ExternalEventData {
-    external_event_data_id,
-    creation_time,
+    external_event_data_id: row.get(0),
+    creation_time: row.get(1),
     creator_user_id,
     external_event_id,
     name,
