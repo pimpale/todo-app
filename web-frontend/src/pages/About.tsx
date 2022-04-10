@@ -1,7 +1,8 @@
-import {SimpleLayout, BrandedComponentProps} from '@innexgo/common-react-components';
+import {BrandedComponentProps} from '@innexgo/common-react-components';
+import {DefaultSidebarLayout } from '@innexgo/auth-react-components';
 
 function About(props: BrandedComponentProps) {
-  return <SimpleLayout branding={props.branding}>
+  return <DefaultSidebarLayout  branding={props.branding}>
     <section>
       <h2>Our Product</h2>
       <p>
@@ -43,7 +44,7 @@ function About(props: BrandedComponentProps) {
         In building our application, we used various programming languages: TypeScript, Java, JavaScript, React, HTML, CSS, and SQL.
       </p>
     </section>
-  </SimpleLayout>
+  </DefaultSidebarLayout  >
 }
 
 export default About;

@@ -1,7 +1,8 @@
-import {SimpleLayout, BrandedComponentProps} from '@innexgo/common-react-components';
+import {BrandedComponentProps} from '@innexgo/common-react-components';
+import {DefaultSidebarLayout}from '@innexgo/auth-react-components';
 
 function Instructions(props: BrandedComponentProps) {
-  return <SimpleLayout branding={props.branding}>
+  return <DefaultSidebarLayout branding={props.branding}>
     <section>
       <h2>Registering & Logging In</h2>
       <p>
@@ -96,7 +97,7 @@ function Instructions(props: BrandedComponentProps) {
       The settings page allows you to change your password and is similar to other "change password" forms
     </p>
     </section>
-  </SimpleLayout>
+  </DefaultSidebarLayout >
 }
 
 export default Instructions;

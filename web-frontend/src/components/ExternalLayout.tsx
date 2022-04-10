@@ -98,6 +98,7 @@ interface ExternalLayoutProps {
   fixed: boolean;
   transparentTop: boolean;
   branding: Branding;
+  children: React.ReactNodeArray;
 }
 
 const ExternalLayout: React.FC<ExternalLayoutProps> = (props) =>

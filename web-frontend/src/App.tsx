@@ -11,13 +11,11 @@ import About from './pages/About';
 import Error404 from './pages/Error404';
 
 // register
-import { Register } from '@innexgo/auth-react-components';
-import { EmailConfirm } from '@innexgo/auth-react-components';
-import { ParentPermissionConfirm } from '@innexgo/auth-react-components';
-
-// When you forget password
-import { ForgotPassword } from '@innexgo/auth-react-components';
-import { ResetPassword } from '@innexgo/auth-react-components';
+import { DefaultRegisterPage } from '@innexgo/auth-react-components';
+import { DefaultEmailConfirmPage } from '@innexgo/auth-react-components';
+import { DefaultParentPermissionConfirmPage } from '@innexgo/auth-react-components';
+import { DefaultForgotPasswordPage } from '@innexgo/auth-react-components';
+import { DefaultResetPasswordPage } from '@innexgo/auth-react-components';
 
 // calendar
 import Calendar from './pages/Calendar';
@@ -74,6 +72,7 @@ function App() {
     tagline: "Optimize your day.",
     homeUrl: "/",
     tosUrl: "/terms_of_service",
+    registerUrl: "/register",
     forgotPasswordUrl: "/forgot_password",
     dashboardUrl: "/dashboard",
     darkAdaptedIcon: DarkAdaptedIcon,
@@ -85,11 +84,11 @@ function App() {
       <Route path="/" element={<Home branding={branding} />} />
       <Route path="/instructions" element={<Instructions branding={branding} />} />
       <Route path="/about" element={<About branding={branding} />} />
-      <Route path="/forgot_password" element={<ForgotPassword branding={branding} />} />
-      <Route path="/reset_password" element={<ResetPassword branding={branding} />} />
-      <Route path="/register" element={<Register {...apiKeyGetSetter} branding={branding} />} />
-      <Route path="/email_confirm" element={<EmailConfirm {...apiKeyGetSetter} branding={branding} />} />
-      <Route path="/parent_permission_confirm" element={<ParentPermissionConfirm branding={branding} />} />
+      <Route path="/forgot_password" element={<DefaultForgotPasswordPage branding={branding} />} />
+      <Route path="/reset_password" element={<DefaultResetPasswordPage branding={branding} />} />
+      <Route path="/register" element={<DefaultRegisterPage {...apiKeyGetSetter} branding={branding} />} />
+      <Route path="/email_confirm" element={<DefaultEmailConfirmPage {...apiKeyGetSetter} branding={branding} />} />
+      <Route path="/parent_permission_confirm" element={<DefaultParentPermissionConfirmPage branding={branding} />} />
       <Route path="/calendar" element={<AuthenticatedComponentRenderer branding={branding} {...apiKeyGetSetter} component={Calendar} />} />
       <Route path="/dashboard" element={<AuthenticatedComponentRenderer branding={branding} {...apiKeyGetSetter} component={Dashboard} />} />
       <Route path="/settings" element={<AuthenticatedComponentRenderer branding={branding} {...apiKeyGetSetter} component={Settings} />} />
