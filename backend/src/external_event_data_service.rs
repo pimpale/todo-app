@@ -43,7 +43,6 @@ pub async fn add(
        RETURNING external_event_data_id, creation_time
       ",
       &[
-        &creation_time,
         &creator_user_id,
         &external_event_id,
         &name,
@@ -52,8 +51,7 @@ pub async fn add(
         &active,
       ],
     )
-    .await?
-    .get(0);
+    .await?;
 
   Ok(ExternalEventData {
     external_event_data_id: row.get(0),
