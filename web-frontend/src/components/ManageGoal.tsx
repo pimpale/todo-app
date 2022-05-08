@@ -200,7 +200,11 @@ function EditGoal(props: EditGoalProps) {
                   />
                 </Card.Body>
               </Card>
-              <Form.Text className="text-danger">{fprops.errors.points}</Form.Text>
+              <Form.Text className="text-danger">{
+                fprops.errors.points instanceof Array
+                  ? null
+                  : fprops.errors.points
+              }</Form.Text>
             </Form.Group>
             <Button type="submit">Submit</Button>
             <br />

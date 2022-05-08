@@ -2,6 +2,7 @@ import React from 'react';
 
 interface ErrorBoundaryProps {
   handler:(error:Error) => React.ReactElement
+  children: React.ReactNode
 }
 
 interface ErrorBoundaryState {

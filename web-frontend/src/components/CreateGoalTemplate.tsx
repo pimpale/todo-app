@@ -36,7 +36,7 @@ function CreateGoalTemplate(props: CreateGoalTemplateProps) {
       hasError = true;
     }
 
-    if (parseInt(values.utility) === NaN) {
+    if (isNaN(parseInt(values.utility))) {
       errors.name = "Couldn't parse Utility";
       hasError = true;
     }

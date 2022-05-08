@@ -12,7 +12,7 @@ import { isErr } from '@innexgo/frontend-common';
 type CreateGoalProps = {
   span?: [startTime: number, endTime: number];
   apiKey: ApiKey;
-  postSubmit: (gd:GoalData) => void;
+  postSubmit: (gd: GoalData) => void;
 }
 
 function CreateGoal(props: CreateGoalProps) {
@@ -158,7 +158,11 @@ function CreateGoal(props: CreateGoalProps) {
                   />
                 </Card.Body>
               </Card>
-              <Form.Text className="text-danger">{fprops.errors.points}</Form.Text>
+              <Form.Text className="text-danger">{
+                fprops.errors.points instanceof Array
+                  ? null
+                  : fprops.errors.points
+              }</Form.Text>
             </Form.Group>
             <Row>
               <Form.Group as={Col}>
