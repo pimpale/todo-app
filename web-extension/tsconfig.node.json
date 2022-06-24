@@ -4,7 +4,8 @@
     "module": "esnext",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "types": ["node"]
   },
   "include": ["vite.config.ts", "manifest.json"]
 }

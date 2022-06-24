@@ -1,12 +1,17 @@
-import { useState } from 'react'
-import logo from './logo.svg'
-import './App.css'
+import React  from 'react'
+import ReactDOM from 'react-dom/client'
+
+import logo from '/resources/logo.svg'
+
+const appStyle = {
+  textAlign: "center" as const,
+  minWidth: "350px",
+}
 
 function App() {
-  const [count, setCount] = useState(0)
-
+  const [count, setCount] = React.useState(0)
   return (
-    <div className="App">
+    <div style={appStyle}>
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>Hello Vite + React!</p>
@@ -16,7 +21,7 @@ function App() {
           </button>
         </p>
         <p>
-          Edit <code>App.tsx</code> and save to test HMR updates.
+          Edit <code>Popup.tsx</code> and save to test HMR updates.
         </p>
         <p>
           <a
@@ -42,4 +47,8 @@ function App() {
   )
 }
 
-export default App
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+)
