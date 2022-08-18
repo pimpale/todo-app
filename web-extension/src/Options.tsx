@@ -24,6 +24,8 @@ function App() {
           Edit <code>Options.tsx</code> and save to test HMR updates.
         </p>
         <p>
+        </p>
+        <p>
           <a
             className="App-link"
             href="https://reactjs.org"

@@ -9,14 +9,25 @@ const appStyle = {
 }
 
 function App() {
-  const [count, setCount] = React.useState(0)
+
+  const [count_raw, setCount_raw] = React.useState<number|null>(null)
+
+  function setCount(n:number) {
+      window.localStorage.setItem("count", ""+ n);
+      setCount_raw(n);
+  }
+
+  let count = count_raw === null
+   ? parseInt(window.localStorage.getItem("count") ?? "0")
+   : count_raw;
+
   return (
     <div style={appStyle}>
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>Hello Vite + React!</p>
         <p>
-          <button type="button" onClick={() => setCount((count) => count + 1)}>
+          <button type="button" onClick={() => setCount(count + 1)}>
             count is: {count}
           </button>
         </p>
