@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.928ffd32.css",
-    "main.js": "/static/js/main.33fbda6a.js",
+    "main.css": "/static/css/main.47e8a87a.css",
+    "main.js": "/static/js/main.1e0312a2.js",
     "static/media/lady_sit.png": "/static/media/lady_sit.2719e2ee40db6d6b5e37.png",
     "static/media/ubuntu-latin-300.woff": "/static/media/ubuntu-latin-300.8a517f2712bba8249913.woff",
     "static/media/ubuntu-latin-300italic.woff": "/static/media/ubuntu-latin-300italic.5b545d0e1cbcff11da01.woff",
@@ -20,11 +20,11 @@
     "static/media/ubuntu-latin-500.woff2": "/static/media/ubuntu-latin-500.111af58d9e269f61589f.woff2",
     "static/media/ubuntu-latin-700.woff2": "/static/media/ubuntu-latin-700.7b253bf0370283d6ea62.woff2",
     "index.html": "/index.html",
-    "main.928ffd32.css.map": "/static/css/main.928ffd32.css.map",
-    "main.33fbda6a.js.map": "/static/js/main.33fbda6a.js.map"
+    "main.47e8a87a.css.map": "/static/css/main.47e8a87a.css.map",
+    "main.1e0312a2.js.map": "/static/js/main.1e0312a2.js.map"
   },
   "entrypoints": [
-    "static/css/main.928ffd32.css",
-    "static/js/main.33fbda6a.js"
+    "static/css/main.47e8a87a.css",
+    "static/js/main.1e0312a2.js"
   ]
 }
