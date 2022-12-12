@@ -1,6 +1,6 @@
 import React from 'react'
 import update from 'immutability-helper';
-import { Loader, DisplayModal } from '@innexgo/common-react-components';
+import { DisplayModal } from '@innexgo/common-react-components';
 import FullCalendar, { EventApi, DateSelectArg, EventClickArg } from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
@@ -10,7 +10,7 @@ import CalendarCard, { goalDataToEvent, externalEventDataToEvent } from '../comp
 import ErrorMessage from '../components/ErrorMessage';
 
 import { Async, AsyncProps } from 'react-async';
-import { Card, Row, Col, Tab, Tabs, Container, } from 'react-bootstrap';
+import { Card, Row, Col, Tab, Tabs, Container, Spinner, } from 'react-bootstrap';
 import { GoalEvent, ExternalEvent, goalEventNew, goalEventView, GoalData, ExternalEventData, externalEventDataNew, goalDataNew, externalEventView, externalEventDataView, goalDataView } from '@innexgo/frontend-todo-app-api';
 import { ApiKey, } from '@innexgo/frontend-auth-api';
 import { AuthenticatedComponentProps } from '@innexgo/auth-react-components';
@@ -19,7 +19,7 @@ import { TagData } from '../components/ManageNamedEntity';
 
 import { unwrap, isErr } from '@innexgo/frontend-common';
 
-import {WidgetWrapper} from '@innexgo/common-react-components';
+import { WidgetWrapper } from '@innexgo/common-react-components';
 
 import CreateExternalEvent from '../components/CreateExternalEvent';
 import CreateGoal from '../components/CreateGoal';
@@ -181,7 +181,7 @@ function EventCalendar(props: EventCalendarProps) {
   const changeHandler = async (event: EventApi, oldEventProps: Record<string, any>, revert: () => void) => {
     switch (event.id.split(':')[0]) {
       case "ExternalEventData": {
-        const oped:ExternalEventData = oldEventProps.externalEventData;
+        const oped: ExternalEventData = oldEventProps.externalEventData;
         const maybeExternalEventData = await externalEventDataNew({
           externalEventId: oped.externalEvent.externalEventId,
           name: oped.name,
@@ -198,7 +198,7 @@ function EventCalendar(props: EventCalendarProps) {
         break;
       }
       case "GoalData": {
-        const ode:GoalData = oldEventProps.goalData;
+        const ode: GoalData = oldEventProps.goalData;
         const maybeGoalEvent = await goalEventNew({
           goalId: ode.goal.goalId,
           startTime: event.start!.valueOf(),
@@ -233,7 +233,11 @@ function EventCalendar(props: EventCalendarProps) {
         promiseFn={loadUnscheduledGoalData}
         apiKey={props.apiKey} >
         {({ setData }) => <>
-          <Async.Pending><Loader /></Async.Pending>
+          <Async.Pending>
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+          </Async.Pending>
           <Async.Rejected>
             {e => <ErrorMessage error={e} />}
           </Async.Rejected>
@@ -432,7 +436,11 @@ function CalendarWidget(props: AuthenticatedComponentProps) {
       or click an existing appointment to delete it.
     </span>
     <Async promiseFn={loadCalendarData} apiKey={props.apiKey}>
-      <Async.Pending><Loader /></Async.Pending>
+      <Async.Pending>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </Async.Pending>
       <Async.Rejected>
         {e => <ErrorMessage error={e} />}
       </Async.Rejected>

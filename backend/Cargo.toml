@@ -6,12 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-warp = "0.3.2"
-clap = { version = "3.1.18", features = ["derive"] }
-tokio = { version = "1.18.2", features = ["full"] }
-serde = { version = "1.0.137", features = ["derive"] }
-serde_json = "1.0.81"
+warp = "0.3.3"
+clap = { version = "4.0.29", features = ["derive"] }
+tokio = { version = "1.23.0", features = ["full"] }
+serde = { version = "1.0.150", features = ["derive"] }
+serde_json = "1.0.89"
 auth-service-api = {version = "*", git = "https://github.com/innexgo/auth-service-api", features=["client"]}
 
 todo-app-service-api = {version = "*", git = "https://github.com/pimpale/todo-app-service-api"}
-tokio-postgres = "0.7.6"
+tokio-postgres = "0.7.7"

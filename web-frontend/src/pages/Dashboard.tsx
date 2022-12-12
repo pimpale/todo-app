@@ -1,7 +1,7 @@
-import { Row, Container, Col } from 'react-bootstrap';
+import { Row, Container, Col, Spinner } from 'react-bootstrap';
 import { Async, AsyncProps } from 'react-async';
 import update from 'immutability-helper';
-import { Loader, Section } from '@innexgo/common-react-components';
+import { Section } from '@innexgo/common-react-components';
 import ErrorMessage from '../components/ErrorMessage';
 import DashboardLayout from '../components/DashboardLayout';
 import { TemplateData } from '../components/ManageGoalTemplate';
@@ -11,7 +11,7 @@ import { ManageGoalData } from '../components/ManageGoal';
 import { goalDataView, goalEventView, namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, } from '@innexgo/frontend-todo-app-api';
 import { unwrap } from '@innexgo/frontend-common';
 
-import {AuthenticatedComponentProps} from '@innexgo/auth-react-components';
+import { AuthenticatedComponentProps } from '@innexgo/auth-react-components';
 
 type DashboardData = {
   data: ManageGoalData[],
@@ -103,7 +103,11 @@ function Dashboard(props: AuthenticatedComponentProps) {
           <Section id="goalIntents" name="My Goals">
             <Async promiseFn={loadDashboardData} apiKey={props.apiKey}>
               {({ setData }) => <>
-                <Async.Pending><Loader /></Async.Pending>
+                <Async.Pending>
+                  <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                </Async.Pending>
                 <Async.Rejected>
                   {e => <ErrorMessage error={e} />}
                 </Async.Rejected>

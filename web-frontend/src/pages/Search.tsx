@@ -1,8 +1,7 @@
 import React from 'react'
 import { TemplateData } from '../components/ManageGoalTemplate';
 import { TagData } from '../components/ManageNamedEntity';
-import { Loader } from '@innexgo/common-react-components';
-import { Button, Container, Form, Row, Col } from 'react-bootstrap';
+import { Button, Container, Form, Row, Col, Spinner } from 'react-bootstrap';
 import DashboardLayout from '../components/DashboardLayout';
 import { ManageGoalData } from '../components/ManageGoal';
 import ManageGoalTable from '../components/ManageGoalTable';
@@ -196,7 +195,11 @@ function Search(props: AuthenticatedComponentProps) {
       <Row className="justify-content-md-center">
         <Col md={8}>
           <Async promiseFn={loadSearchData} apiKey={props.apiKey}>
-            <Async.Pending><Loader /></Async.Pending>
+            <Async.Pending>
+              <Spinner role="status">
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+            </Async.Pending>
             <Async.Rejected>
               {e => <ErrorMessage error={e} />}
             </Async.Rejected>

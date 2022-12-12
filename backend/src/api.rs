@@ -27,7 +27,7 @@ pub fn api(
     config: Config,
     db: Db,
     auth_service: AuthService,
-) -> impl Filter<Extract = impl warp::Reply, Error = Infallible> + Clone {
+) -> impl Filter<Extract = (impl warp::Reply,), Error = Infallible> + Clone {
     // public API
     combine!(
         api_info(),

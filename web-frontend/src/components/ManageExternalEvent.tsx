@@ -1,6 +1,6 @@
 import React from 'react';
-import { Form, Button, Table } from 'react-bootstrap';
-import { Loader, DisplayModal } from '@innexgo/common-react-components';
+import { Form, Button, Table, Spinner } from 'react-bootstrap';
+import { DisplayModal } from '@innexgo/common-react-components';
 import { Async, AsyncProps } from 'react-async';
 import ErrorMessage from '../components/ErrorMessage';
 import { ExternalEventData, externalEventDataNew, externalEventDataView } from '@innexgo/frontend-todo-app-api';
@@ -229,7 +229,11 @@ const ManageExternalEventData = (props: {
     apiKey={props.apiKey}
     externalEventId={props.externalEventId}>
     {({ reload }) => <>
-      <Async.Pending><Loader /></Async.Pending>
+      <Async.Pending>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </Async.Pending>
       <Async.Rejected>
         {e => <ErrorMessage error={e} />}
       </Async.Rejected>

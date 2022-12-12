@@ -1,5 +1,4 @@
 import React from 'react'
-import { Loader } from '@innexgo/common-react-components';
 import { Async, AsyncProps } from 'react-async';
 import ErrorMessage from '../components/ErrorMessage';
 import FullCalendar from '@fullcalendar/react'
@@ -8,13 +7,14 @@ import interactionPlugin from '@fullcalendar/interaction'
 import CalendarCard from '../components/CalendarCard';
 import { ApiKey } from '@innexgo/frontend-auth-api';
 import { GoalData, goalDataView, goalEventView, goalEventNew, } from '@innexgo/frontend-todo-app-api';
-import {INT_MAX} from '../utils/utils';
+import { INT_MAX } from '../utils/utils';
 
 import { unwrap } from '@innexgo/frontend-common';
 
 
 import { findFirstIndex, findLastIndex } from '@innexgo/frontend-common';
 import assert from 'assert';
+import Spinner from 'react-bootstrap/esm/Spinner';
 
 type SolverDataPoint = {
   startTime: number,
@@ -244,7 +244,11 @@ function CalendarSolver(props: CalendarSolverProps) {
     promiseFn={loadSolverData}
     apiKey={props.apiKey}
   >
-    <Async.Pending><Loader /></Async.Pending>
+    <Async.Pending>
+      <Spinner animation="border" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </Spinner>
+    </Async.Pending>
     <Async.Rejected>
       {e => <ErrorMessage error={e} />}
     </Async.Rejected>

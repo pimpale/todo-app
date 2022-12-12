@@ -4,11 +4,11 @@ import { Async, AsyncProps } from 'react-async';
 import ErrorMessage from '../components/ErrorMessage';
 import update from 'immutability-helper';
 
-import { Row, Container, Col } from 'react-bootstrap';
+import { Row, Container, Col, Spinner } from 'react-bootstrap';
 import DashboardLayout from '../components/DashboardLayout';
-import { Loader, Section, WidgetWrapper } from '@innexgo/common-react-components';
+import { Section, WidgetWrapper } from '@innexgo/common-react-components';
 
-import { ApiKey, UserData, Email, userDataView, emailView} from '@innexgo/frontend-auth-api'
+import { ApiKey, UserData, Email, userDataView, emailView } from '@innexgo/frontend-auth-api'
 
 import { AuthenticatedComponentProps, ManageUserData } from '@innexgo/auth-react-components';
 
@@ -50,7 +50,11 @@ function AccountWrapper(props: AuthenticatedComponentProps) {
     <Container fluid className="py-4 px-4">
       <Async promiseFn={loadAccountData} apiKey={props.apiKey}>
         {({ setData }) => <>
-          <Async.Pending><Loader /></Async.Pending>
+          <Async.Pending>
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+          </Async.Pending>
           <Async.Rejected>
             {e => <ErrorMessage error={e} />}
           </Async.Rejected>
