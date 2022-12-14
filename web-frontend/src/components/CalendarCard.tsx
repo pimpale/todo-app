@@ -1,5 +1,5 @@
 import { Card } from "react-bootstrap";
-import { EventContentArg, EventInput } from "@fullcalendar/react"
+import { EventContentArg, EventInput } from "@fullcalendar/core"
 import { GoalData, GoalEvent, ExternalEventData } from '@innexgo/frontend-todo-app-api';
 
 export function externalEventDataToEvent(eed: ExternalEventData): EventInput {

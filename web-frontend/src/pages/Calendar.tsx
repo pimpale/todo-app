@@ -1,7 +1,8 @@
 import React from 'react'
 import update from 'immutability-helper';
 import { DisplayModal } from '@innexgo/common-react-components';
-import FullCalendar, { EventApi, DateSelectArg, EventClickArg } from '@fullcalendar/react'
+import FullCalendar from '@fullcalendar/react';
+import { EventApi, DateSelectArg, EventClickArg } from '@fullcalendar/core';
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction'
 import DashboardLayout from '../components/DashboardLayout';
