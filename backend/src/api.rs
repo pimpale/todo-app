@@ -30,7 +30,13 @@ pub fn api(
 ) -> impl Filter<Extract = (impl warp::Reply,), Error = Infallible> + Clone {
     // public API
     combine!(
-        api_info(),
+        info_adapter(
+            config.clone(),
+            db.clone(),
+            auth_service.clone(),
+            warp::path!("public" / "info"),
+            handlers::api_info,
+        ),
         adapter(
             config.clone(),
             db.clone(),
@@ -245,14 +251,9 @@ pub fn api(
     .recover(handle_rejection)
 }
 
-fn api_info() -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone {
-    let info = response::Info {
-        service: SERVICE_NAME.to_owned(),
-        version_major: 1,
-        version_minor: 0,
-        version_rev: 0,
-    };
-    warp::path!("public" / "info").map(move || warp::reply::json(&info))
+// lets you pass in an arbitrary parameter
+fn with_helper<T: Clone + Send>(t: T) -> impl Filter<Extract = (T,), Error = Infallible> + Clone {
+    warp::any().map(move || t.clone())
 }
 
 // this function adapts a handler function to a warp filter
@@ -269,18 +270,38 @@ where
     PropsType: Send + serde::de::DeserializeOwned,
     ResponseType: Send + serde::ser::Serialize,
 {
-    // lets you pass in an arbitrary parameter
-    fn with<T: Clone + Send>(t: T) -> impl Filter<Extract = (T,), Error = Infallible> + Clone {
-        warp::any().map(move || t.clone())
-    }
-
     filter
-        .and(with(config))
-        .and(with(db))
-        .and(with(auth_service))
+        .and(with_helper(config))
+        .and(with_helper(db))
+        .and(with_helper(auth_service))
         .and(warp::body::json())
         .and_then(move |config, db, auth_service, props| async move {
             handler(config, db, auth_service, props)
+                .await
+                .map_err(todo_app_error)
+        })
+        .map(|x| warp::reply::json(&x))
+}
+
+// this function adapts a handler function to a warp filter
+// it accepts an initial path filter
+fn info_adapter<ResponseType, F>(
+    config: Config,
+    db: Db,
+    auth_service: AuthService,
+    filter: impl Filter<Extract = (), Error = warp::Rejection> + Clone,
+    handler: fn(Config, Db, AuthService) -> F,
+) -> impl Filter<Extract = (impl warp::Reply,), Error = warp::Rejection> + Clone
+where
+    F: Future<Output = Result<ResponseType, TodoAppError>> + Send,
+    ResponseType: Send + serde::ser::Serialize,
+{
+    filter
+        .and(with_helper(config))
+        .and(with_helper(db))
+        .and(with_helper(auth_service))
+        .and_then(move |config, db, auth_service| async move {
+            handler(config, db, auth_service)
                 .await
                 .map_err(todo_app_error)
         })
