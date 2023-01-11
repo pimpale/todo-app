@@ -10,13 +10,6 @@ import Instructions from './pages/Instructions';
 import About from './pages/About';
 import Error404 from './pages/Error404';
 
-// register
-import { DefaultRegisterPage } from '@innexgo/auth-react-components';
-import { DefaultEmailConfirmPage } from '@innexgo/auth-react-components';
-import { DefaultParentPermissionConfirmPage } from '@innexgo/auth-react-components';
-import { DefaultForgotPasswordPage } from '@innexgo/auth-react-components';
-import { DefaultResetPasswordPage } from '@innexgo/auth-react-components';
-
 // calendar
 import Calendar from './pages/Calendar';
 
@@ -25,9 +18,6 @@ import Dashboard from './pages/Dashboard';
 
 // settings
 import Settings from './pages/Settings';
-
-// account
-import Account from './pages/Account';
 
 // search
 import Search from './pages/Search';
@@ -71,29 +61,22 @@ function App() {
     name: "LifeSketch",
     tagline: "Optimize your day.",
     homeUrl: "/",
-    tosUrl: "/terms_of_service",
-    registerUrl: "/register",
-    forgotPasswordUrl: "/forgot_password",
     dashboardUrl: "/dashboard",
     darkAdaptedIcon: DarkAdaptedIcon,
     lightAdaptedIcon: LightAdaptedIcon,
   }
+
+  const authServerUrl ="http://localhost:2999";
 
   return <BrowserRouter>
     <Routes>
       <Route path="/" element={<Home branding={branding} />} />
       <Route path="/instructions" element={<Instructions branding={branding} />} />
       <Route path="/about" element={<About branding={branding} />} />
-      <Route path="/forgot_password" element={<DefaultForgotPasswordPage branding={branding} />} />
-      <Route path="/reset_password" element={<DefaultResetPasswordPage branding={branding} />} />
-      <Route path="/register" element={<DefaultRegisterPage {...apiKeyGetSetter} branding={branding} />} />
-      <Route path="/email_confirm" element={<DefaultEmailConfirmPage {...apiKeyGetSetter} branding={branding} />} />
-      <Route path="/parent_permission_confirm" element={<DefaultParentPermissionConfirmPage branding={branding} />} />
-      <Route path="/calendar" element={<AuthenticatedComponentRenderer branding={branding} {...apiKeyGetSetter} component={Calendar} />} />
-      <Route path="/dashboard" element={<AuthenticatedComponentRenderer branding={branding} {...apiKeyGetSetter} component={Dashboard} />} />
-      <Route path="/settings" element={<AuthenticatedComponentRenderer branding={branding} {...apiKeyGetSetter} component={Settings} />} />
-      <Route path="/account" element={<AuthenticatedComponentRenderer branding={branding} {...apiKeyGetSetter} component={Account} />} />
-      <Route path="/search" element={<AuthenticatedComponentRenderer branding={branding} {...apiKeyGetSetter} component={Search} />} />
+      <Route path="/calendar" element={<AuthenticatedComponentRenderer authServerUrl={authServerUrl} branding={branding} {...apiKeyGetSetter} component={Calendar} />} />
+      <Route path="/dashboard" element={<AuthenticatedComponentRenderer authServerUrl={authServerUrl} branding={branding} {...apiKeyGetSetter} component={Dashboard} />} />
+      <Route path="/settings" element={<AuthenticatedComponentRenderer authServerUrl={authServerUrl} branding={branding} {...apiKeyGetSetter} component={Settings} />} />
+      <Route path="/search" element={<AuthenticatedComponentRenderer authServerUrl={authServerUrl} branding={branding} {...apiKeyGetSetter} component={Search} />} />
       <Route path="*" element={<Error404 />} />
     </Routes >
   </BrowserRouter >

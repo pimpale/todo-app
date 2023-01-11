@@ -86,7 +86,7 @@ async fn main() {
   let db: Db = Arc::new(Mutex::new(client));
 
   // open connection to auth service
-  let auth_service = AuthService::new(&auth_service_url).await;
+  let auth_service = AuthService::new(&auth_service_url);
 
   let log = warp::log::custom(|info| {
     // Use a log macro, or slog, or println, or whatever!

@@ -52,8 +52,8 @@ fn report_auth_err(e: AuthError) -> response::TodoAppError {
       };
 
       utils::log(utils::Event {
-        msg: ae.as_ref().to_owned(),
-        source: Some(format!("auth service: {}", c.as_ref())),
+        msg: ae.to_string(),
+        source: Some(format!("auth service: {}", c)),
         severity: utils::SeverityKind::Error,
       });
 
