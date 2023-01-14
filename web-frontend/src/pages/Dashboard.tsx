@@ -8,18 +8,24 @@ import { TemplateData } from '../components/ManageGoalTemplate';
 import { TagData } from '../components/ManageNamedEntity';
 import ManageGoalTable from '../components/ManageGoalTable';
 import { ManageGoalData } from '../components/ManageGoal';
-import { goalDataView, goalEventView, namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, } from '@innexgo/frontend-todo-app-api';
+import { goalDataView, goalEventView, namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, info, } from '@innexgo/frontend-todo-app-api';
 import { unwrap } from '@innexgo/frontend-common';
 
 import { AuthenticatedComponentProps } from '@innexgo/auth-react-components';
+import WaitingPage from '@innexgo/common-react-components/lib/components/SimplePage';
 
 type DashboardData = {
+  authServerUrl: string,
   data: ManageGoalData[],
   tags: TagData[],
   templates: TemplateData[],
 }
 
 const loadDashboardData = async (props: AsyncProps<DashboardData>) => {
+
+  const authServerUrl = await info()
+    .then(unwrap)
+    .then(x => x.authServiceExternalUrl);
 
   const goalData =
     await goalDataView({
@@ -89,6 +95,7 @@ const loadDashboardData = async (props: AsyncProps<DashboardData>) => {
   }));
 
   return {
+    authServerUrl,
     data,
     tags,
     templates,
@@ -96,22 +103,26 @@ const loadDashboardData = async (props: AsyncProps<DashboardData>) => {
 }
 
 function Dashboard(props: AuthenticatedComponentProps) {
-  return <DashboardLayout {...props}>
-    <Container fluid className="py-4 px-4">
-      <Row className="justify-content-md-center">
-        <Col md={8}>
-          <Section id="goalIntents" name="My Goals">
-            <Async promiseFn={loadDashboardData} apiKey={props.apiKey}>
-              {({ setData }) => <>
-                <Async.Pending>
-                  <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </Spinner>
-                </Async.Pending>
-                <Async.Rejected>
-                  {e => <ErrorMessage error={e} />}
-                </Async.Rejected>
-                <Async.Fulfilled<DashboardData>>{dd =>
+  return <Async promiseFn={loadDashboardData} apiKey={props.apiKey}>{
+    ({ setData }) => <>
+      <Async.Pending>
+        <WaitingPage>
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        </WaitingPage>
+      </Async.Pending>
+      <Async.Rejected>{e =>
+        <WaitingPage>
+          <ErrorMessage error={e} />
+        </WaitingPage>
+      }</Async.Rejected>
+      <Async.Fulfilled<DashboardData>>{dd =>
+        <DashboardLayout {...props} authServerUrl={dd.authServerUrl}>
+          <Container fluid className="py-4 px-4">
+            <Row className="justify-content-md-center">
+              <Col md={8}>
+                <Section id="goalIntents" name="My Goals">
                   <ManageGoalTable
                     data={dd.data}
                     setData={(d) => setData(update(dd, { data: { $set: d } }))}
@@ -122,14 +133,14 @@ function Dashboard(props: AuthenticatedComponentProps) {
                     addable
                     showInactive={false}
                   />
-                }</Async.Fulfilled>
-              </>}
-            </Async>
-          </Section>
-        </Col>
-      </Row>
-    </Container>
-  </DashboardLayout>
+                </Section>
+              </Col>
+            </Row>
+          </Container>
+        </DashboardLayout>
+      }</Async.Fulfilled>
+    </>
+  }</Async>
 }
 
 export default Dashboard;

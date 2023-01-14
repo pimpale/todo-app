@@ -12,7 +12,7 @@ import ErrorMessage from '../components/ErrorMessage';
 
 import { Async, AsyncProps } from 'react-async';
 import { Card, Row, Col, Tab, Tabs, Container, Spinner, } from 'react-bootstrap';
-import { GoalEvent, ExternalEvent, goalEventNew, goalEventView, GoalData, ExternalEventData, externalEventDataNew, goalDataNew, externalEventView, externalEventDataView, goalDataView } from '@innexgo/frontend-todo-app-api';
+import { GoalEvent, ExternalEvent, goalEventNew, goalEventView, GoalData, ExternalEventData, externalEventDataNew, goalDataNew, externalEventView, externalEventDataView, goalDataView, info } from '@innexgo/frontend-todo-app-api';
 import { ApiKey, } from '@innexgo/frontend-auth-api';
 import { AuthenticatedComponentProps } from '@innexgo/auth-react-components';
 import { TemplateData } from '../components/ManageGoalTemplate';
@@ -27,6 +27,7 @@ import CreateGoal from '../components/CreateGoal';
 import ManageExternalEvent from '../components/ManageExternalEvent';
 import ManageGoal, { ManageGoalData } from '../components/ManageGoal';
 import { namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, } from '@innexgo/frontend-todo-app-api';
+import WaitingPage from '@innexgo/common-react-components/lib/components/SimplePage';
 
 
 type UnscheduledGoalCardProps = {
@@ -374,11 +375,16 @@ function EventCalendar(props: EventCalendarProps) {
 
 
 type CalendarData = {
+  authServerUrl: string,
   tags: TagData[],
   templates: TemplateData[],
 }
 
 const loadCalendarData = async (props: AsyncProps<CalendarData>) => {
+  const authServerUrl = await info()
+    .then(unwrap)
+    .then(x => x.authServiceExternalUrl);
+
   const goalTemplateData = await goalTemplateDataView({
     creatorUserId: [props.apiKey.creatorUserId],
     active: true,
@@ -424,40 +430,42 @@ const loadCalendarData = async (props: AsyncProps<CalendarData>) => {
   }));
 
   return {
+    authServerUrl,
     tags,
     templates,
   }
 }
 
-function CalendarWidget(props: AuthenticatedComponentProps) {
-  return <WidgetWrapper title="Upcoming Appointments">
-    <span>
-      This screen shows all future appointments.
-      You can click any date to add an appointment on that date,
-      or click an existing appointment to delete it.
-    </span>
-    <Async promiseFn={loadCalendarData} apiKey={props.apiKey}>
-      <Async.Pending>
+function Calendar(props: AuthenticatedComponentProps) {
+  return <Async promiseFn={loadCalendarData} apiKey={props.apiKey}>
+    <Async.Pending>
+      <WaitingPage>
         <Spinner animation="border" role="status">
           <span className="visually-hidden">Loading...</span>
         </Spinner>
-      </Async.Pending>
-      <Async.Rejected>
-        {e => <ErrorMessage error={e} />}
-      </Async.Rejected>
-      <Async.Fulfilled<CalendarData>>{cd =>
-        <EventCalendar apiKey={props.apiKey} tags={cd.tags} templates={cd.templates} />
-      }</Async.Fulfilled>
-    </Async>
-  </WidgetWrapper>
-};
+      </WaitingPage>
+    </Async.Pending>
+    <Async.Rejected>{e =>
+      <WaitingPage>
+        <ErrorMessage error={e} />
+      </WaitingPage>
+    }</Async.Rejected>
+    <Async.Fulfilled<CalendarData>>{cd =>
+      <DashboardLayout {...props} authServerUrl={cd.authServerUrl}>
+        <Container fluid className="py-4 px-4">
+          <WidgetWrapper title="Upcoming Appointments">
+            <span>
+              This screen shows all future appointments.
+              You can click any date to add an appointment on that date,
+              or click an existing appointment to delete it.
+            </span>
+            <EventCalendar apiKey={props.apiKey} tags={cd.tags} templates={cd.templates} />
+          </WidgetWrapper>
+        </Container>
+      </DashboardLayout>
+    }</Async.Fulfilled>
+  </Async>
 
-function Calendar(props: AuthenticatedComponentProps) {
-  return <DashboardLayout {...props} >
-    <Container fluid className="py-3 px-3">
-      <CalendarWidget {...props} />
-    </Container>
-  </DashboardLayout>
 }
 
 export default Calendar;

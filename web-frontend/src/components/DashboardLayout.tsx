@@ -5,10 +5,10 @@ import {
   Gear as SettingsIcon,
   Search as SearchIcon,
 } from 'react-bootstrap-icons';
-import { InnerLayout, AuthenticatedComponentProps } from '@innexgo/auth-react-components';
+import { AuthenticatedComponentProps, InnerLayout  } from '@innexgo/auth-react-components';
 
-export default function DashboardLayout(props: React.PropsWithChildren<AuthenticatedComponentProps>) {
-  return <InnerLayout apiKey={props.apiKey} logoutCallback={() => props.setApiKey(null)} >
+export default function DashboardLayout(props: React.PropsWithChildren<AuthenticatedComponentProps & { authServerUrl: string }>) {
+  return <InnerLayout apiKey={props.apiKey} logoutCallback={() => props.setApiKey(null)} authServerApiUrl={`${props.authServerUrl}/api/`}>
     <InnerLayout.SidebarEntry label="Dashboard" icon={DashboardIcon} href="/dashboard" />
     <InnerLayout.SidebarEntry label="Calendar" icon={CalendarIcon} href="/calendar" />
     <InnerLayout.SidebarEntry label="Search" icon={SearchIcon} href="/search" />

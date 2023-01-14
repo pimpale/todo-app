@@ -6,7 +6,7 @@ import DashboardLayout from '../components/DashboardLayout';
 import { ManageGoalData } from '../components/ManageGoal';
 import ManageGoalTable from '../components/ManageGoalTable';
 import { Async, AsyncProps } from 'react-async';
-import { GoalData, goalDataView, GoalEvent, goalEventView } from '@innexgo/frontend-todo-app-api';
+import { GoalData, goalDataView, GoalEvent, goalEventView, info } from '@innexgo/frontend-todo-app-api';
 import { isErr, unwrap } from '@innexgo/frontend-common';
 import ErrorMessage from '../components/ErrorMessage';
 
@@ -15,6 +15,8 @@ import { AuthenticatedComponentProps } from '@innexgo/auth-react-components';
 
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { namedEntityDataView, namedEntityPatternView, goalTemplateDataView, goalTemplatePatternView, } from '@innexgo/frontend-todo-app-api';
+import WaitingPage from '@innexgo/common-react-components/lib/components/SimplePage';
+import { Section } from '@innexgo/common-react-components';
 
 type SearchProps = {
   apiKey: ApiKey;
@@ -102,7 +104,7 @@ function SearchForm(props: SearchProps) {
         <Form
           noValidate
           onSubmit={fprops.handleSubmit} >
-          <Form.Group >
+          <Form.Group className='mb-3'>
             <h4>Search by Name</h4>
             <Form.Control
               name="search"
@@ -125,11 +127,16 @@ function SearchForm(props: SearchProps) {
 }
 
 type SearchData = {
+  authServerUrl: string,
   tags: TagData[],
   templates: TemplateData[],
 }
 
 const loadSearchData = async (props: AsyncProps<SearchData>) => {
+  const authServerUrl = await info()
+    .then(unwrap)
+    .then(x => x.authServiceExternalUrl);
+
   const goalTemplateData = await goalTemplateDataView({
     creatorUserId: [props.apiKey.creatorUserId],
     active: true,
@@ -175,35 +182,36 @@ const loadSearchData = async (props: AsyncProps<SearchData>) => {
   }));
 
   return {
+    authServerUrl,
     tags,
     templates,
   }
 }
 
-
-
-
-
 function Search(props: AuthenticatedComponentProps) {
   const [searchResults, setSearchResults] = React.useState<ManageGoalData[]>([]);
-  return <DashboardLayout {...props}>
-    <Container fluid className="py-4 px-4">
-      <SearchForm
-        apiKey={props.apiKey}
-        postSubmit={setSearchResults}
-      />
-      <Row className="justify-content-md-center">
-        <Col md={8}>
-          <Async promiseFn={loadSearchData} apiKey={props.apiKey}>
-            <Async.Pending>
-              <Spinner role="status">
-                <span className="visually-hidden">Loading...</span>
-              </Spinner>
-            </Async.Pending>
-            <Async.Rejected>
-              {e => <ErrorMessage error={e} />}
-            </Async.Rejected>
-            <Async.Fulfilled<SearchData>>{sd =>
+  return <Async promiseFn={loadSearchData} apiKey={props.apiKey}>
+    <Async.Pending>
+      <WaitingPage>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </WaitingPage>
+    </Async.Pending>
+    <Async.Rejected>{e =>
+      <WaitingPage>
+        <ErrorMessage error={e} />
+      </WaitingPage>
+    }</Async.Rejected>
+    <Async.Fulfilled<SearchData>>{sd =>
+      <DashboardLayout {...props} authServerUrl={sd.authServerUrl}>
+        <Container fluid className="py-4 px-4">
+          <SearchForm
+            apiKey={props.apiKey}
+            postSubmit={setSearchResults}
+          />
+          <Row className="justify-content-md-center">
+            <Col md={8}>
               <ManageGoalTable
                 data={searchResults}
                 setData={setSearchResults}
@@ -214,12 +222,12 @@ function Search(props: AuthenticatedComponentProps) {
                 mutable
                 showInactive={false}
               />
-            }</Async.Fulfilled>
-          </Async>
-        </Col>
-      </Row>
-    </Container>
-  </DashboardLayout>
+            </Col>
+          </Row>
+        </Container>
+      </DashboardLayout>
+    }</Async.Fulfilled>
+  </Async>
 }
 
 export default Search;
