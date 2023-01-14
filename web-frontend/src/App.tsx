@@ -1,8 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
+import AuthComponentRenderer from './components/AuthComponentRenderer';
+
 import { ApiKey } from '@innexgo/frontend-auth-api';
-import { AuthenticatedComponentRenderer } from '@innexgo/auth-react-components';
 
 // public pages
 import Home from './pages/Home';
@@ -48,13 +49,20 @@ function getPreexistingApiKey() {
 }
 
 function App() {
-  const [apiKey, setApiKeyState] = React.useState(getPreexistingApiKey());
-  const apiKeyGetSetter = {
-    apiKey: apiKey,
-    setApiKey: (data: ApiKey | null) => {
-      localStorage.setItem("apiKey", JSON.stringify(data));
-      setApiKeyState(data);
-    }
+  const [apiKey, setApiKey_raw] = React.useState(getPreexistingApiKey());
+
+  const setApiKey = (data: ApiKey | null) => {
+    localStorage.setItem("apiKey", JSON.stringify(data));
+    setApiKey_raw(data);
+  };
+
+  const [authServerUrlPromise, setAuthServerUrlPromise] = React.useState<Promise<string> | null>(null);
+
+  const commonProps = {
+    apiKey,
+    setApiKey,
+    authServerUrlPromise,
+    setAuthServerUrlPromise,
   };
 
   const branding = {
@@ -66,17 +74,15 @@ function App() {
     lightAdaptedIcon: LightAdaptedIcon,
   }
 
-  const authServerUrl ="http://localhost:2999";
-
   return <BrowserRouter>
     <Routes>
       <Route path="/" element={<Home branding={branding} />} />
       <Route path="/instructions" element={<Instructions branding={branding} />} />
       <Route path="/about" element={<About branding={branding} />} />
-      <Route path="/calendar" element={<AuthenticatedComponentRenderer authServerUrl={authServerUrl} branding={branding} {...apiKeyGetSetter} component={Calendar} />} />
-      <Route path="/dashboard" element={<AuthenticatedComponentRenderer authServerUrl={authServerUrl} branding={branding} {...apiKeyGetSetter} component={Dashboard} />} />
-      <Route path="/settings" element={<AuthenticatedComponentRenderer authServerUrl={authServerUrl} branding={branding} {...apiKeyGetSetter} component={Settings} />} />
-      <Route path="/search" element={<AuthenticatedComponentRenderer authServerUrl={authServerUrl} branding={branding} {...apiKeyGetSetter} component={Search} />} />
+      <Route path="/calendar" element={<AuthComponentRenderer component={Calendar} branding={branding} {...commonProps} />} />
+      <Route path="/dashboard" element={<AuthComponentRenderer component={Dashboard} branding={branding} {...commonProps} />} />
+      <Route path="/settings" element={<AuthComponentRenderer component={Settings} branding={branding} {...commonProps} />} />
+      <Route path="/search" element={<AuthComponentRenderer component={Search} branding={branding} {...commonProps} />} />
       <Route path="*" element={<Error404 />} />
     </Routes >
   </BrowserRouter >

@@ -1,10 +1,9 @@
 import React from 'react';
 import {
-    ColumnsGap as DashboardIcon,
-    CalendarEvent as  CalendarIcon,
-    Gear as SettingsIcon,
-    Search as SearchIcon,
-    Person as AccountIcon
+  ColumnsGap as DashboardIcon,
+  CalendarEvent as CalendarIcon,
+  Gear as SettingsIcon,
+  Search as SearchIcon,
 } from 'react-bootstrap-icons';
 import { InnerLayout, AuthenticatedComponentProps } from '@innexgo/auth-react-components';
 
@@ -14,7 +13,6 @@ export default function DashboardLayout(props: React.PropsWithChildren<Authentic
     <InnerLayout.SidebarEntry label="Calendar" icon={CalendarIcon} href="/calendar" />
     <InnerLayout.SidebarEntry label="Search" icon={SearchIcon} href="/search" />
     <InnerLayout.SidebarEntry label="Settings" icon={SettingsIcon} href="/settings" />
-    <InnerLayout.SidebarEntry label="Account" icon={AccountIcon} href="/account" />
     <InnerLayout.Body>
       {props.children}
     </InnerLayout.Body>
