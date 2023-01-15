@@ -51,7 +51,7 @@ function getPreexistingApiKey() {
   }
 }
 
-const authServerUrlFn = () => info().then(unwrap).then(x => x.authServiceExternalUrl);
+const authAuthenticatorHrefFn = () => info().then(unwrap).then(x => x.authAuthenticatorHref);
 
 function App() {
   const [apiKey, setApiKey_raw] = React.useState(getPreexistingApiKey());
@@ -74,7 +74,7 @@ function App() {
     branding,
     apiKey,
     setApiKey,
-    authServerUrlFn,
+    authAuthenticatorHrefFn,
   };
 
   return <BrowserRouter>

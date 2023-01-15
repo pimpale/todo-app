@@ -15,7 +15,7 @@ import { AuthenticatedComponentProps } from '@innexgo/auth-react-components';
 import WaitingPage from '@innexgo/common-react-components/lib/components/SimplePage';
 
 type DashboardData = {
-  authServerUrl: string,
+  authPubApiHref: string,
   data: ManageGoalData[],
   tags: TagData[],
   templates: TemplateData[],
@@ -23,9 +23,9 @@ type DashboardData = {
 
 const loadDashboardData = async (props: AsyncProps<DashboardData>) => {
 
-  const authServerUrl = await info()
+  const authPubApiHref = await info()
     .then(unwrap)
-    .then(x => x.authServiceExternalUrl);
+    .then(x => x.authPubApiHref);
 
   const goalData =
     await goalDataView({
@@ -95,7 +95,7 @@ const loadDashboardData = async (props: AsyncProps<DashboardData>) => {
   }));
 
   return {
-    authServerUrl,
+    authPubApiHref,
     data,
     tags,
     templates,
@@ -118,7 +118,7 @@ function Dashboard(props: AuthenticatedComponentProps) {
         </WaitingPage>
       }</Async.Rejected>
       <Async.Fulfilled<DashboardData>>{dd =>
-        <DashboardLayout {...props} authServerUrl={dd.authServerUrl}>
+        <DashboardLayout {...props} authPubApiHref={dd.authPubApiHref}>
           <Container fluid className="py-4 px-4">
             <Row className="justify-content-md-center">
               <Col md={8}>

@@ -375,15 +375,15 @@ function EventCalendar(props: EventCalendarProps) {
 
 
 type CalendarData = {
-  authServerUrl: string,
+  authPubApiHref: string,
   tags: TagData[],
   templates: TemplateData[],
 }
 
 const loadCalendarData = async (props: AsyncProps<CalendarData>) => {
-  const authServerUrl = await info()
+  const authPubApiHref = await info()
     .then(unwrap)
-    .then(x => x.authServiceExternalUrl);
+    .then(x => x.authPubApiHref);
 
   const goalTemplateData = await goalTemplateDataView({
     creatorUserId: [props.apiKey.creatorUserId],
@@ -430,7 +430,7 @@ const loadCalendarData = async (props: AsyncProps<CalendarData>) => {
   }));
 
   return {
-    authServerUrl,
+    authPubApiHref,
     tags,
     templates,
   }
@@ -451,7 +451,7 @@ function Calendar(props: AuthenticatedComponentProps) {
       </WaitingPage>
     }</Async.Rejected>
     <Async.Fulfilled<CalendarData>>{cd =>
-      <DashboardLayout {...props} authServerUrl={cd.authServerUrl}>
+      <DashboardLayout {...props} authPubApiHref={cd.authPubApiHref}>
         <Container fluid className="py-4 px-4">
           <WidgetWrapper title="Upcoming Appointments">
             <span>

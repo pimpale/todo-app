@@ -14,16 +14,16 @@ import { AuthenticatedComponentProps } from '@innexgo/auth-react-components';
 import WaitingPage from '@innexgo/common-react-components/lib/components/SimplePage';
 
 type SettingsData = {
-  authServerUrl: string,
+  authPubApiHref: string,
   tags: TagData[],
   templates: TemplateData[],
 }
 
 const loadSettingsData = async (props: AsyncProps<SettingsData>) => {
 
-  const authServerUrl = await info()
+  const authPubApiHref = await info()
     .then(unwrap)
-    .then(x => x.authServiceExternalUrl);
+    .then(x => x.authPubApiHref);
 
   const goalTemplateData = await goalTemplateDataView({
     creatorUserId: [props.apiKey.creatorUserId],
@@ -70,7 +70,7 @@ const loadSettingsData = async (props: AsyncProps<SettingsData>) => {
   }));
 
   return {
-    authServerUrl,
+    authPubApiHref,
     tags,
     templates,
   }
@@ -92,7 +92,7 @@ function Settings(props: AuthenticatedComponentProps) {
         </WaitingPage>
       }</Async.Rejected>
       <Async.Fulfilled<SettingsData>>{dd =>
-        <DashboardLayout {...props} authServerUrl={dd.authServerUrl}>
+        <DashboardLayout {...props} authPubApiHref={dd.authPubApiHref}>
           <Container fluid className="py-4 px-4">
             <Row className="justify-content-md-center">
               <Col md={8}>

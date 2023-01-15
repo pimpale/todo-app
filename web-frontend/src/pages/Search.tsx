@@ -127,15 +127,15 @@ function SearchForm(props: SearchProps) {
 }
 
 type SearchData = {
-  authServerUrl: string,
+  authPubApiHref: string,
   tags: TagData[],
   templates: TemplateData[],
 }
 
 const loadSearchData = async (props: AsyncProps<SearchData>) => {
-  const authServerUrl = await info()
+  const authPubApiHref = await info()
     .then(unwrap)
-    .then(x => x.authServiceExternalUrl);
+    .then(x => x.authPubApiHref);
 
   const goalTemplateData = await goalTemplateDataView({
     creatorUserId: [props.apiKey.creatorUserId],
@@ -182,7 +182,7 @@ const loadSearchData = async (props: AsyncProps<SearchData>) => {
   }));
 
   return {
-    authServerUrl,
+    authPubApiHref,
     tags,
     templates,
   }
@@ -204,7 +204,7 @@ function Search(props: AuthenticatedComponentProps) {
       </WaitingPage>
     }</Async.Rejected>
     <Async.Fulfilled<SearchData>>{sd =>
-      <DashboardLayout {...props} authServerUrl={sd.authServerUrl}>
+      <DashboardLayout {...props} authPubApiHref={sd.authPubApiHref}>
         <Container fluid className="py-4 px-4">
           <SearchForm
             apiKey={props.apiKey}

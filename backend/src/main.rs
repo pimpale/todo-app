@@ -35,19 +35,19 @@ static SERVICE_NAME: &str = "todo-app-service";
 
 #[derive(Parser, Clone)]
 struct Opts {
-  #[clap(short, long)]
-  site_external_url: String,
-  #[clap(short, long)]
+  #[clap(long)]
+  app_pub_origin: String,
+  #[clap(long)]
   database_url: String,
-  #[clap(short, long)]
+  #[clap(long)]
   auth_service_url: String,
-  #[clap(short, long)]
+  #[clap(long)]
   port: u16,
 }
 
 #[derive(Clone)]
 pub struct Config {
-  pub site_external_url: String,
+  pub app_pub_origin: String,
 }
 
 pub type Db = Arc<Mutex<Client>>;
@@ -56,7 +56,7 @@ pub type Db = Arc<Mutex<Client>>;
 async fn main() {
   let Opts {
     database_url,
-    site_external_url,
+    app_pub_origin,
     auth_service_url,
     port,
   } = Opts::parse();
@@ -97,7 +97,7 @@ async fn main() {
     });
   });
 
-  let api = api::api(Config { site_external_url }, db, auth_service);
+  let api = api::api(Config { app_pub_origin}, db, auth_service);
 
   warp::serve(api.with(log)).run(([0, 0, 0, 0], port)).await;
 }

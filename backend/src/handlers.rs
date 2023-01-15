@@ -368,8 +368,9 @@ pub async fn api_info(
         version_major: 0,
         version_minor: 0,
         version_rev: 1,
-        site_external_url: config.site_external_url,
-        auth_service_external_url: auth_info.site_external_url,
+        app_pub_origin: config.app_pub_origin,
+        auth_pub_api_href: auth_info.app_pub_api_href,
+        auth_authenticator_href: auth_info.app_authenticator_href,
     })
 }
 
